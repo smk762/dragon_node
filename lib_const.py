@@ -109,7 +109,7 @@ def load_MM2_json():
             error_print(f"Invalid option, try again. Options: {valid_options}")
             q = color_input(msg)
 
-        if new_seed in ["E", "e"]:
+        if q in ["E", "e"]:
             passphrase = color_input("Enter a seed phrase: ")
         else:        
             m = mnemonic.Mnemonic('english')
