@@ -104,7 +104,10 @@ def load_MM2_json():
 
         msg = "[E]nter seed manually or [G]enerate one? [E/G]: "
         valid_options = ["G", "g", "E", "e"]
-        q = get_valid_input(msg, valid_options)
+        q = color_input(msg)
+        while q.lower() not in valid_options:
+            error_print(f"Invalid option, try again. Options: {valid_options}")
+            q = color_input(msg)
 
         if new_seed in ["E", "e"]:
             passphrase = color_input("Enter a seed phrase: ")
