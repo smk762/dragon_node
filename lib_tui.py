@@ -21,7 +21,7 @@ def view_stats():
 
 def show_launch_params():
     msg = "Enter coin: "
-    print(f"Options: {DPOW_MAIN_COINS}")
+    option_print(f"Options: {DPOW_MAIN_COINS}")
     coin = get_valid_coin(msg, DPOW_MAIN_COINS)
     success_print(' '.join(lib_rpc.get_launch_params(coin)))
 
@@ -57,7 +57,7 @@ def refresh_wallet():
             ts = int(time.time())
             data_dir = lib_rpc.get_data_dir(coin)
             os.popen(f'mv {data_dir}/wallet.dat {data_dir}/wallet_{ts}.dat' )
-            time.sleep(5)
+            time.sleep(30)
 
             # restart chain
             launch_params = lib_rpc.get_launch_params(coin)
