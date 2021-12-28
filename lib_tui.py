@@ -51,7 +51,7 @@ def refresh_wallet():
             # stop chain
             print(lib_rpc.stop(coin))
 
-            wait_for_stop(coin)
+            lib_rpc.wait_for_stop(coin)
 
             # backup wallet.dat
             ts = int(time.time())
