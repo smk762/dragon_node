@@ -159,7 +159,10 @@ def wait_for_stop(coin):
             print(f"Waiting for {coin} daemon to stop...")
             time.sleep(10)
             block_height = lib_rpc.getblockcount(coin)
+            print(block_height)
             if not block_height:
                 break
         except:
+            print(block_height)
             break
+    time.sleep(10)
