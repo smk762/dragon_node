@@ -164,13 +164,19 @@ def load_config():
             if addr not in config["whitelist"]:
                 config["whitelist"].append(addr)
 
+
         pubkey = color_input("Enter your pubkey: ")
         config["pubkey"] = pubkey
+
+
+        sweep_address = color_input("Enter your sweep address: ")
+        config["sweep_address"] = sweep_address
 
 
         with open("config.json", "w+") as f:
             json.dump(config, f, indent=4)
             status_print("config.json file created.")
+
 
     with open("config.json", "r") as f:
         config = json.load(f)

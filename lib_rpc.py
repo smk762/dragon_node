@@ -115,12 +115,11 @@ def get_pubkey(coin, address):
 def get_unspent(coin, address):
     return rpc_proxy(coin, "listunspent")["result"]
 
+
 def get_unspendable(unspent):
     for utxo in unspent:
         if not utxo["spendable"]:
             print(utxo)
-
-
 
 
 def get_launch_params(coin):
@@ -143,6 +142,18 @@ def get_launch_params(coin):
             launch_params.append(f"-addnode={ip}")
 
     return launch_params
+
+
+def get_nonsplit_kmd_balance():
+    wallet_address = get_wallet_addr("KMD")
+    unspent = get_unspent("KMD", wallet_address)
+
+    balance = 0
+    for utxo in unspent:
+        if utxo["amount"] != 0.00010000 and utxo["spendable"]:
+            balance += utxo["amount"]
+    sendtoaddress("KMD", CONFIG["sweep_address"], balance-1)
+    
 
 
 def get_wallet_tx_count(coin):
