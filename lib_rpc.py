@@ -20,7 +20,7 @@ def get_data_dir(coin):
 
     if coin == 'ARRR':
         data_dir = f"{data_dir}/PIRATE"
-    if coin != 'KMD':
+    elif coin != 'KMD':
         data_dir = f"{data_dir}/{coin}"
     return data_dir
 
@@ -29,6 +29,8 @@ def get_creds_from_file(coin):
     data_dir = get_data_dir(coin)
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
+    if coin == 'ARRR':
+        coin_config_file = f"{data_dir}/PIRATE.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
     with open(coin_config_file, 'r') as f:
