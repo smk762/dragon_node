@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-from lib_rpc import get_nonsplit_kmd_balance
+from lib_rpc import sweep_kmd
 
-get_nonsplit_kmd_balance()
+sweep_kmd()

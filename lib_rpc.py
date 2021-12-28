@@ -144,15 +144,16 @@ def get_launch_params(coin):
     return launch_params
 
 
-def get_nonsplit_kmd_balance():
+def sweep_kmd():
     wallet_address = get_wallet_addr("KMD")
     unspent = get_unspent("KMD", wallet_address)
-
+    print(f"{len(unspent)} unspent utxos detected")
     balance = 0
     for utxo in unspent:
         if utxo["amount"] != 0.00010000 and utxo["spendable"]:
             balance += utxo["amount"]
-    sendtoaddress("KMD", CONFIG["sweep_address"], balance-1)
+    print(f"{balance} KMD in non-split UTXOs")
+    print(sendtoaddress("KMD", CONFIG["sweep_address"], balance-1))
     
 
 
