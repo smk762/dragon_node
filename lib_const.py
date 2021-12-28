@@ -63,6 +63,10 @@ def success_print(msg):
   print(colorize(msg, "green"))
 
 
+def option_print(msg):
+  print(colorize(msg, "darkgrey"))
+
+
 def error_print(msg):
   print(colorize(msg, "error"))
 
@@ -99,6 +103,7 @@ def load_MM2_json():
             "netid": 7777,
             "i_am_seed":False,
             "rpc_password": rpc_password,
+            "rpcport": 7762,
             "userhome": "/${HOME#\"/\"}"
         }
 
@@ -132,6 +137,46 @@ def load_MM2_json():
     return MM2_JSON
 
 
+# Load or Create config.json
+def load_config():
+    if os.path.exists("config.json"):
+        with open("config.json", "r") as f:
+            config = json.load(f)
+    else:
+        table_print("Looks like you dont have an config.json file, lets create one now...")
+        config = {
+            "whitelist": [
+                "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN"
+            ],
+            "pubkey": "",
+            "addnode": [
+                "seed.komodostats.com",
+                "seed.webworker.sh",
+                "209.222.101.247",
+                "199.127.60.142",
+                "104.238.221.61",
+                "103.195.100.32"
+            ]
+        }
+
+        whitelist_addresses = color_input("Enter addresses to whitelist, separated by space: \n")
+        for addr in whitelist_addresses.split(" "):
+            config.append(addr)
+
+        pubkey = color_input("Enter your pubkey: ")
+        config["pubkey"] = pubkey
+
+
+        with open("config.json", "w+") as f:
+            json.dump(config, f, indent=4)
+            status_print("config.json file created.")
+
+    with open("config.json", "r") as f:
+        config = json.load(f)
+
+    return config
+
+
 # Download coins if not existing
 def get_coins_file():
     if not os.path.exists("coins"):
@@ -147,9 +192,12 @@ HOME = expanduser("~")
 SCRIPT_PATH = sys.path[0]
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
 ACTIVATE_COMMANDS = requests.get("http://stats.kmd.io/api/atomicdex/activation_commands/").json()["commands"]
+LAUNCH_PARAMS = requests.get("http://stats.kmd.io/api/info/launch_params/").json()["results"]
 DPOW_MAIN_COINS = requests.get("https://stats.kmd.io/api/info/dpow_server_coins/?server=Main&season=Season_5").json()["results"]
 DPOW_MAIN_COINS.append("KMD")
 DPOW_MAIN_COINS.sort()
+
+
 
 ERROR_EVENTS = [
   "StartFailed", "NegotiateFailed", "TakerFeeValidateFailed", "MakerPaymentTransactionFailed",
@@ -173,7 +221,9 @@ if OP_SYS == "Windows":
 # Load or create MM2.json
 MM2_JSON = load_MM2_json()
 MM2_USERPASS = MM2_JSON["rpc_password"]
-MM2_IP = "http://127.0.0.1:7783"
+MM2_IP = "http://127.0.0.1:7762"
 
 # Get coins file if needed
 get_coins_file()
+
+CONFIG = load_config()

@@ -46,7 +46,7 @@ def scan_electrums_for_balances(seed_phrase, seed_phrases):
                     print("---------------------------")
 
     if balance_found:
-        with open('seed_phrases', 'w', encoding='utf-8') as f:
+        with open('seed_phrases.json', 'w', encoding='utf-8') as f:
             json.dump(seed_phrases, f, ensure_ascii=False, indent=4)
 
 
@@ -56,7 +56,6 @@ if __name__ == '__main__':
         seed_phrases = json.load(f)["seed_phrases"]
 
     seed_phrases_list = list(seed_phrases.keys())
-    seed_phrases_list.reverse()
 
     for seed_phrase in seed_phrases_list:
         print(f"Scanning Seed: {seed_phrase}")

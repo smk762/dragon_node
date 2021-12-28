@@ -4,26 +4,31 @@ import re
 import json
 import platform
 import requests
+import subprocess
 from requests.auth import HTTPBasicAuth
+from lib_helper import *
 
 
-def def_data_dir():
+def get_data_dir(coin):
     operating_system = platform.system()
     if operating_system == 'Darwin':
-        ac_dir = os.environ['HOME'] + '/Library/Application Support/Komodo'
+        data_dir = os.environ['HOME'] + '/Library/Application Support/Komodo'
     elif operating_system == 'Linux':
-        ac_dir = os.environ['HOME'] + '/.komodo'
+        data_dir = os.environ['HOME'] + '/.komodo'
     elif operating_system == 'Windows':
-        ac_dir = '%s/komodo/' % os.environ['APPDATA']
-    return(ac_dir)
+        data_dir = f"/komodo/{os.environ['APPDATA']}"
+
+    if coin != 'KMD':
+        data_dir = f"{data_dir}/{coin}"
+    return data_dir
 
 
 def get_creds_from_file(coin):
-    ac_dir = def_data_dir()
+    data_dir = get_data_dir(coin)
     if coin == 'KMD':
-        coin_config_file = str(ac_dir + '/komodo.conf')
+        coin_config_file = f"{data_dir}/komodo.conf"
     else:
-        coin_config_file = str(ac_dir + '/' + coin + '/' + coin + '.conf')
+        coin_config_file = f"{data_dir}/{coin}.conf"
     with open(coin_config_file, 'r') as f:
         for line in f:
             l = line.rstrip()
@@ -67,13 +72,86 @@ def rpc_proxy(coin, method, method_params=None):
     return resp
 
 
-def getinfo():
-    print(rpc_proxy("KMD", "getinfo"))
+def getinfo(coin):
+    print(rpc_proxy(coin, "getinfo"))['result']
 
 
-def getblockcount():
-    print(rpc_proxy("KMD", "getblockcount"))
+def getblockcount(coin):
+    resp = rpc_proxy(coin, "getblockcount")
+    print(resp)
+    return resp['result']
 
 
-def stop():
-    print(rpc_proxy("KMD", "getinfo"))
+def getbalance(coin):
+    return rpc_proxy(coin, "getbalance")['result']
+
+
+def dumpprivkey(coin, address):
+    return rpc_proxy(coin, "dumpprivkey", [address])['result']
+
+
+def sendtoaddress(coin, address, amount):
+    return rpc_proxy(coin, "sendtoaddress", [address, amount, "", "", True])['result']
+
+
+def importprivkey(coin, pk, height):
+    return rpc_proxy(coin, "importprivkey", [pk, "", True, height])['result']
+
+
+def stop(coin):
+    return rpc_proxy(coin, "stop")['result']
+
+
+def get_wallet_addr(coin):
+    resp = rpc_proxy(coin, "listaddressgroupings")['result']
+    addr = None
+    if len(resp) > 0:
+        addr = resp[0][0][0]
+    return addr
+
+
+def get_pubkey(coin, address):
+    return rpc_proxy(coin, "validateaddress", [address])['result']["pubkey"]
+
+
+def get_unspent(coin, address):
+    return rpc_proxy(coin, "listunspent")["result"]
+
+def get_unspendable(unspent):
+    for utxo in unspent:
+        if not utxo["spendable"]:
+            print(utxo)
+
+
+
+
+def get_launch_params(coin):
+    launch_params = LAUNCH_PARAMS[coin].replace("~", os.environ['HOME'])
+    launch_params = launch_params.split(" ")
+    if CONFIG['pubkey'] != "":
+        launch_params.append(f"-pubkey={CONFIG['pubkey']}")    
+
+    if coin == "KMD":
+        launch_params.append(f"-notary=.litecoin/litecoin.conf")
+        launch_params.append(f"-minrelaytxfee=0.000035")
+        launch_params.append(f"-opretmintxfee=0.004")
+
+    if 'whitelist' in CONFIG:
+        for addr in CONFIG["whitelist"]:
+            launch_params.append(f"-whitelistaddress={addr}")
+
+    if 'addnode' in CONFIG:
+        for ip in CONFIG["addnode"]:
+            launch_params.append(f"-addnode={ip}")
+
+    return launch_params
+
+
+def start_chain(coin):
+    launch_params = get_launch_params(coin)
+    print(' '.join(launch_params))
+    log_output = open(f"{coin}_daemon.log",'w+')
+    subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
+    time.sleep(3)
+    success_print('{:^60}'.format( f"{coin} daemon starting."))
+    success_print('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))

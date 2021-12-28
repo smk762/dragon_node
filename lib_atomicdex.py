@@ -31,12 +31,23 @@ def mm2_proxy(params):
     return resp
 
 
-def activate_coins(coins_list):
+def activate_coins(coins_list, merge_utxo=False):
+
     for coin in coins_list:
         activated = False
         for protocol in ACTIVATE_COMMANDS:
             if coin in ACTIVATE_COMMANDS[protocol]:
-                resp = mm2_proxy(ACTIVATE_COMMANDS[protocol][coin])
+                activation_command = ACTIVATE_COMMANDS[protocol][coin]
+                if merge_utxo:
+                    activation_command.update({
+                        "utxo_merge_params":{
+                            "merge_at":100,
+                            "check_every":120,
+                            "max_merge_at_once":200
+                        }
+                    })
+
+                resp = mm2_proxy(activation_command)
                 if "result" in resp:
                     status_print(f"{resp['coin']} activated. Balance: {resp['balance']}")
                 elif "error" in resp:
@@ -46,7 +57,7 @@ def activate_coins(coins_list):
                         error_print(resp)
                 activated = True
         if not activated:
-            error_print(f"Launch params not found for {coin}!")
+            error_print(f"Activation params not found for {coin}!")
 
 
 def get_stats_table(coins_list=None):
@@ -140,22 +151,6 @@ def activate_bot_coins(enabled_coins=False):
         activate_coins(DPOW_MAIN_COINS)
 
 
-def loop_views():
-    coins_list = get_enabled_coins_list()
-    makerbot_params = load_makerbot_params()
-    msg = "\nEnter Ctrl-C to exit\n"
-    while True:
-        try:
-            view_makerbot_params(makerbot_params)
-            sleep_message(msg, 20)
-            get_balances_table(coins_list)
-            sleep_message(msg, 20)
-            get_orders_table()
-            sleep_message(msg, 20)
-            get_swaps_summary_table()
-            sleep_message(msg, 20)
-        except KeyboardInterrupt:
-            break
 
 
 def get_status():
@@ -225,4 +220,20 @@ def validate_withdraw_amount(amount):
         except:
             return False
     
+
+def send_withdraw(coin, amount, address):
+    resp = withdraw(coin, amount, address)
+    if "error" in resp:
+        error_print(resp)
+    elif "result" in resp:
+        if "tx_hex" in resp["result"]:
+            send_resp = send_raw_tx(coin, resp["result"]["tx_hex"])
+            if 'tx_hash' in send_resp:
+                success_print(f"{amount} {coin} sent to {address}. TXID: {send_resp['tx_hash']}")
+            else:
+                error_print(send_resp)
+        else:
+            error_print(resp)
+    else:
+        error_print(resp)
 
