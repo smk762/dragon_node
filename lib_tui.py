@@ -31,20 +31,15 @@ def refresh_wallet():
     # query coin
     msg = "Enter coin to reset: "
     coin = get_valid_coin(msg, DPOW_MAIN_COINS)
-    print(coin)
     if coin in LAUNCH_PARAMS:
-        print(coin)
         
         # getblockcount
         last_block = int(lib_rpc.getblockcount(coin)) - 1
-        print(last_block)
 
         # get privkey
         address = lib_rpc.get_wallet_addr(coin)
         if address:
-            print(address)
             pk = lib_rpc.dumpprivkey(coin,address)
-            print(pk)
 
             # send to self
             #lib_rpc.sendtoaddress(coin, address, amount)
@@ -57,6 +52,8 @@ def refresh_wallet():
             print(lib_rpc.stop(coin))
             time.sleep(20)
 
+            wait_for_stop(coin)
+
             # backup wallet.dat
             ts = int(time.time())
             data_dir = lib_rpc.get_data_dir(coin)
@@ -64,9 +61,11 @@ def refresh_wallet():
 
 
             # restart chain
-            lib_rpc.start_chain(coin)
+            launch_params = get_launch_params(coin)
+            lib_rpc.start_chain(launch_params)
 
             while True:
+                i = 0
                 try:
                     print(f"Waiting for {coin} daemon to restart...")
                     time.sleep(10)
@@ -74,6 +73,10 @@ def refresh_wallet():
                     print(block_height)
                     if block_height:
                         break
+                    i += 1
+                    if i > 12:
+                        print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
+                        print(launch_params)
                 except:
                     pass
             time.sleep(20)

@@ -77,9 +77,7 @@ def getinfo(coin):
 
 
 def getblockcount(coin):
-    resp = rpc_proxy(coin, "getblockcount")
-    print(resp)
-    return resp['result']
+    return rpc_proxy(coin, "getblockcount")
 
 
 def getbalance(coin):
@@ -147,11 +145,21 @@ def get_launch_params(coin):
     return launch_params
 
 
-def start_chain(coin):
-    launch_params = get_launch_params(coin)
-    print(' '.join(launch_params))
+def start_chain(launch_params):
     log_output = open(f"{coin}_daemon.log",'w+')
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
     time.sleep(3)
     success_print('{:^60}'.format( f"{coin} daemon starting."))
     success_print('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
+
+
+def wait_for_stop(coin):
+    while True:
+        try:
+            print(f"Waiting for {coin} daemon to stop...")
+            time.sleep(10)
+            block_height = lib_rpc.getblockcount(coin)
+            if not block_height:
+                break
+        except:
+            pass
