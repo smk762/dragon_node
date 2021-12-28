@@ -18,6 +18,8 @@ def get_data_dir(coin):
     elif operating_system == 'Windows':
         data_dir = f"/komodo/{os.environ['APPDATA']}"
 
+    if coin == 'ARRR':
+        data_dir = f"{data_dir}/{PIRATE}"
     if coin != 'KMD':
         data_dir = f"{data_dir}/{coin}"
     return data_dir
