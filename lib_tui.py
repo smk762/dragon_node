@@ -57,7 +57,7 @@ def refresh_wallet():
             ts = int(time.time())
             data_dir = lib_rpc.get_data_dir(coin)
             os.popen(f'mv {data_dir}/wallet.dat {data_dir}/wallet_{ts}.dat' )
-
+            time.sleep(5)
 
             # restart chain
             launch_params = lib_rpc.get_launch_params(coin)
