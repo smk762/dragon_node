@@ -146,7 +146,7 @@ def get_launch_params(coin):
 
 
 def get_wallet_tx_count(coin):
-    return len(rpc_proxy(coin, "listtransactions", "*", 99999999)['result'])
+    return len(rpc_proxy(coin, ["listtransactions", "*", 99999999])['result'])
 
 
 def start_chain(coin, launch_params):
