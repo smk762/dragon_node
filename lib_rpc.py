@@ -162,4 +162,4 @@ def wait_for_stop(coin):
             if not block_height:
                 break
         except:
-            pass
+            break
