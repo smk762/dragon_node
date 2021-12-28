@@ -77,7 +77,7 @@ def getinfo(coin):
 
 
 def getblockcount(coin):
-    return rpc_proxy(coin, "getblockcount")
+    return rpc_proxy(coin, "getblockcount")['result']
 
 
 def getbalance(coin):

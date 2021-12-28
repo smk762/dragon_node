@@ -50,7 +50,6 @@ def refresh_wallet():
 
             # stop chain
             print(lib_rpc.stop(coin))
-            time.sleep(20)
 
             wait_for_stop(coin)
 
