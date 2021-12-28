@@ -29,11 +29,12 @@ def show_launch_params():
 def refresh_wallets():
     max_tx_count = 2000
     for coin in DPOW_MAIN_COINS:
-        tx_count = lib_rpc.get_wallet_tx_count(coin)
-        if tx_count > max_tx_count:
-            refresh_wallet(coin)
-        else:
-            print(f"Skipping {coin}, less than {max_tx_count}")
+        if coin not in ["ARRR"]:
+            tx_count = lib_rpc.get_wallet_tx_count(coin)
+            if tx_count > max_tx_count:
+                refresh_wallet(coin)
+            else:
+                print(f"Skipping {coin}, less than {max_tx_count}")
 
 
 def refresh_wallet(coin=None):
