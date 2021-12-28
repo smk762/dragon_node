@@ -66,16 +66,16 @@ def refresh_wallet():
             while True:
                 i = 0
                 try:
+                    i += 1
+                    if i > 12:
+                        print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
+                        print(launch_params)
                     print(f"Waiting for {coin} daemon to restart...")
                     time.sleep(10)
                     block_height = lib_rpc.getblockcount(coin)
                     print(block_height)
                     if block_height:
                         break
-                    i += 1
-                    if i > 12:
-                        print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
-                        print(launch_params)
                 except:
                     pass
             time.sleep(20)
