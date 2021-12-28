@@ -25,6 +25,8 @@ def get_valid_coin(msg, valid_options):
     while q not in valid_options:
         error_print(f"Invalid option, try again. Options: {valid_options}")
         q = color_input(msg)
+    if q == "ARRR":
+        q = 'PIRATE'
     return q
 
 

@@ -197,7 +197,8 @@ LAUNCH_PARAMS = requests.get("http://stats.kmd.io/api/info/launch_params/").json
 DPOW_MAIN_COINS = requests.get("https://stats.kmd.io/api/info/dpow_server_coins/?server=Main&season=Season_5").json()["results"]
 DPOW_MAIN_COINS.append("KMD")
 DPOW_MAIN_COINS.sort()
-
+ACTIVATE_COMMANDS["PIRATE"] = ACTIVATE_COMMANDS["ARRR"]
+LAUNCH_PARAMS["ARR"] = LAUNCH_PARAMS["PIRATE"]
 
 
 ERROR_EVENTS = [
