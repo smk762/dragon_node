@@ -161,7 +161,7 @@ def load_config():
 
         whitelist_addresses = color_input("Enter addresses to whitelist, separated by space: \n")
         for addr in whitelist_addresses.split(" "):
-            config.append(addr)
+            config["whitelist"].append(addr)
 
         pubkey = color_input("Enter your pubkey: ")
         config["pubkey"] = pubkey
