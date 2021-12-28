@@ -92,7 +92,7 @@ def refresh_wallet():
 
 def withdraw_funds():
     enabled_coins = lib_atomicdex.get_enabled_coins_list()
-    lib_rpc.get_balances_table(enabled_coins)
+    lib_atomicdex.get_balances_table(enabled_coins)
     if len(enabled_coins) > 0:
         coin = color_input("Enter the ticker of the coin you want to withdraw: ")
         while coin not in enabled_coins:
