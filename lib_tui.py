@@ -26,11 +26,22 @@ def show_launch_params():
     success_print(' '.join(lib_rpc.get_launch_params(coin)))
 
 
-def refresh_wallet():
+def refresh_wallets():
+    max_tx_count = 2000
+    for coin in DPOW_MAIN_COINS:
+        tx_count = lib_rpc.get_wallet_tx_count(coin)
+        if tx_count > max_tx_count:
+            refresh_wallet(coin)
+        else:
+            print(f"Skipping {coin}, less than {max_tx_count}")
 
-    # query coin
-    msg = "Enter coin to reset: "
-    coin = get_valid_coin(msg, DPOW_MAIN_COINS)
+
+def refresh_wallet(coin=None):
+    if not coin:
+        # query coin
+        msg = "Enter coin to reset: "
+        coin = get_valid_coin(msg, DPOW_MAIN_COINS)
+
     if coin in LAUNCH_PARAMS:
         
         # getblockcount
