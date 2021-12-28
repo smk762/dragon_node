@@ -145,7 +145,7 @@ def get_launch_params(coin):
     return launch_params
 
 
-def start_chain(launch_params):
+def start_chain(coin, launch_params):
     log_output = open(f"{coin}_daemon.log",'w+')
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
     time.sleep(3)

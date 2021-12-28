@@ -61,7 +61,7 @@ def refresh_wallet():
 
             # restart chain
             launch_params = lib_rpc.get_launch_params(coin)
-            lib_rpc.start_chain(launch_params)
+            lib_rpc.start_chain(coin, launch_params)
 
             while True:
                 i = 0
