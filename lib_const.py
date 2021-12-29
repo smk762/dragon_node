@@ -173,9 +173,14 @@ def load_config():
         sweep_address = color_input("Enter your sweep address: ")
         config["sweep_address"] = sweep_address
 
+
         msg = "[M]ain server or [3]rd Party?: "
-        server = get_valid_input(msg, ["m", "3"])
-        if server == "m":
+        q = color_input(msg)
+        while q.lower() not in ["m", "3"]:
+            error_print(f"Invalid option, try again. Options: {valid_options}")
+            q = color_input(msg)
+
+        if server.lower() == "m":
             config["server"] = "Main"
         elif server == "3":
             config["server"] = "Third_Party"

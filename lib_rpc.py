@@ -133,13 +133,14 @@ def get_launch_params(coin):
         launch_params.append(f"-minrelaytxfee=0.000035")
         launch_params.append(f"-opretmintxfee=0.004")
 
-    if 'whitelist' in CONFIG:
-        for addr in CONFIG["whitelist"]:
-            launch_params.append(f"-whitelistaddress={addr}")
+    if coin == "KMD" or CONFIG['server'] == "Main":
+        if 'whitelist' in CONFIG:
+            for addr in CONFIG["whitelist"]:
+                launch_params.append(f"-whitelistaddress={addr}")
 
-    if 'addnode' in CONFIG:
-        for ip in CONFIG["addnode"]:
-            launch_params.append(f"-addnode={ip}")
+        if 'addnode' in CONFIG:
+            for ip in CONFIG["addnode"]:
+                launch_params.append(f"-addnode={ip}")
 
     return launch_params
 
