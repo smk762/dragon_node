@@ -21,14 +21,14 @@ def view_stats():
 
 def show_launch_params():
     msg = "Enter coin: "
-    option_print(f"Options: {DPOW_MAIN_COINS}")
-    coin = get_valid_coin(msg, DPOW_MAIN_COINS)
+    option_print(f"Options: {DPOW_COINS}")
+    coin = get_valid_coin(msg, DPOW_COINS)
     success_print(' '.join(lib_rpc.get_launch_params(coin)))
 
 
 def refresh_wallets():
     max_tx_count = 2000
-    for coin in DPOW_MAIN_COINS:
+    for coin in DPOW_COINS:
         if coin not in ["ARRR"]:
             try:
                 tx_count = lib_rpc.get_wallet_tx_count(coin)
@@ -44,7 +44,7 @@ def refresh_wallet(coin=None):
     if not coin:
         # query coin
         msg = "Enter coin to reset: "
-        coin = get_valid_coin(msg, DPOW_MAIN_COINS)
+        coin = get_valid_coin(msg, DPOW_COINS)
 
     if coin in LAUNCH_PARAMS:
         
@@ -130,8 +130,8 @@ def withdraw_funds():
 
 def merge_utxos():
     msg = "Enter coin: "
-    option_print(f"Options: {DPOW_MAIN_COINS}")
-    coin = get_valid_coin(msg, DPOW_MAIN_COINS)
+    option_print(f"Options: {DPOW_COINS}")
+    coin = get_valid_coin(msg, DPOW_COINS)
     enabled_coins = lib_atomicdex.get_enabled_coins_list()
     if coin in enabled_coins:
         lib_atomicdex.disable_coin(coin)

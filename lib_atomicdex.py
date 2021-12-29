@@ -145,16 +145,13 @@ def activate_bot_coins(enabled_coins=False):
     if not enabled_coins:
         enabled_coins = get_enabled_coins_list()
     makerbot_settings = load_makerbot_settings()
-    coins_list = list(set(DPOW_MAIN_COINS) - set(enabled_coins))
+    coins_list = list(set(DPOW_COINS) - set(enabled_coins))
     if len(coins_list) > 0:
         success_print("Activating Makerbot coins...")
-        activate_coins(DPOW_MAIN_COINS)
-
-
+        activate_coins(DPOW_COINS)
 
 
 def get_status():
-
     status_print('{:^80}'.format(
             f"MM2 Version: {get_version()['result']}"
         )

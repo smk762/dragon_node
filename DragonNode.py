@@ -74,5 +74,5 @@ if __name__ == "__main__":
 
         print("\n")
         break
-    activate_coins(DPOW_MAIN_COINS)
+    activate_coins(DPOW_COINS)
     main()

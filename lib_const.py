@@ -149,6 +149,7 @@ def load_config():
                 "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN"
             ],
             "pubkey": "",
+            "server": "",
             "addnode": [
                 "seed.komodostats.com",
                 "seed.webworker.sh",
@@ -172,6 +173,13 @@ def load_config():
         sweep_address = color_input("Enter your sweep address: ")
         config["sweep_address"] = sweep_address
 
+        msg = "[M]ain server or [3]rd Party?: "
+        server = get_valid_input(msg, ["m", "3"])
+        if server == "m":
+            config["server"] = "Main"
+        elif server == "3":
+            config["server"] = "Third_Party"
+
 
         with open("config.json", "w+") as f:
             json.dump(config, f, indent=4)
@@ -194,15 +202,16 @@ def get_coins_file():
         with open('coins', 'w', encoding='utf-8') as f:
             json.dump(coins, f, ensure_ascii=False, indent=4)
 
+CONFIG = load_config()
 
 HOME = expanduser("~")
 SCRIPT_PATH = sys.path[0]
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
 ACTIVATE_COMMANDS = requests.get("http://stats.kmd.io/api/atomicdex/activation_commands/").json()["commands"]
 LAUNCH_PARAMS = requests.get("http://stats.kmd.io/api/info/launch_params/").json()["results"]
-DPOW_MAIN_COINS = requests.get("https://stats.kmd.io/api/info/dpow_server_coins/?server=Main&season=Season_5").json()["results"]
-DPOW_MAIN_COINS.append("KMD")
-DPOW_MAIN_COINS.sort()
+DPOW_COINS = requests.get(f"https://stats.kmd.io/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
+DPOW_COINS.append("KMD")
+DPOW_COINS.sort()
 
 
 ERROR_EVENTS = [
@@ -231,5 +240,3 @@ MM2_IP = "http://127.0.0.1:7762"
 
 # Get coins file if needed
 get_coins_file()
-
-CONFIG = load_config()
