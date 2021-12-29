@@ -153,7 +153,7 @@ def sweep_kmd():
         if utxo["amount"] != 0.00010000 and utxo["spendable"]:
             balance += utxo["amount"]
     print(f"{balance} KMD in non-split UTXOs")
-    print(sendtoaddress("KMD", CONFIG["sweep_address"], balance-1))
+    print(sendtoaddress("KMD", CONFIG["sweep_address"], round(balance-5, 4)))
     
 
 
