@@ -175,10 +175,10 @@ def load_config():
 
 
         msg = "[M]ain server or [3]rd Party?: "
-        q = color_input(msg)
-        while q.lower() not in ["m", "3"]:
+        server = color_input(msg)
+        while server.lower() not in ["m", "3"]:
             error_print(f"Invalid option, try again. Options: {valid_options}")
-            q = color_input(msg)
+            server = color_input(msg)
 
         if server.lower() == "m":
             config["server"] = "Main"
