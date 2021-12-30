@@ -29,7 +29,7 @@ def show_launch_params():
 def refresh_wallets():
     max_tx_count = 2000
     for coin in DPOW_COINS:
-        if coin not in ["ARRR"]:
+        if coin not in ["ARRR", "LTC"]:
             try:
                 tx_count = lib_rpc.get_wallet_tx_count(coin)
                 if tx_count > max_tx_count:

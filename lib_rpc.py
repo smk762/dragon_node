@@ -10,16 +10,21 @@ from lib_helper import *
 
 
 def get_data_dir(coin):
-    operating_system = platform.system()
-    if operating_system == 'Darwin':
-        data_dir = os.environ['HOME'] + '/Library/Application Support/Komodo'
-    elif operating_system == 'Linux':
-        data_dir = os.environ['HOME'] + '/.komodo'
-    elif operating_system == 'Windows':
-        data_dir = f"/komodo/{os.environ['APPDATA']}"
+    if coin == 'KMD':
+        data_dir = f"{os.environ['HOME']}/.komodo"
+    elif coin == 'AYA':
+        data_dir = f"{os.environ['HOME']}/.aryacoin"
+    elif coin == 'CHIPS':
+        data_dir = f"{os.environ['HOME']}/.chips"
+    elif coin == 'EMC2':
+        data_dir = f"{os.environ['HOME']}/.einsteinium"
+    elif coin == 'SFUSD':
+        data_dir = f"{os.environ['HOME']}/.smartusd"
+    elif coin == 'GLEEC-OLD':
+        data_dir = f"{os.environ['HOME']}/.gleecbtc"
+    else:
+        data_dir = f"{os.environ['HOME']}/{coin}"
 
-    if coin != 'KMD':
-        data_dir = f"{data_dir}/{coin}"
     return data_dir
 
 
@@ -28,17 +33,15 @@ def get_creds_from_file(coin):
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
     elif coin == 'AYA':
-        coin_config_file = f"{os.environ['HOME']}/.aryacoin/aryacoin.conf"
+        coin_config_file = f"{data_dir}/.aryacoin/aryacoin.conf"
     elif coin == 'CHIPS':
-        coin_config_file = f"{os.environ['HOME']}/.chips/chips.conf"
+        coin_config_file = f"{data_dir}/.chips/chips.conf"
     elif coin == 'EMC2':
-        coin_config_file = f"{os.environ['HOME']}/.einsteinium/einsteinium.conf"
+        coin_config_file = f"{data_dir}/.einsteinium/einsteinium.conf"
     elif coin == 'SFUSD':
-        coin_config_file = f"{os.environ['HOME']}/.smartusd/smartusd.conf"
-    elif coin == 'TOKEL':
-        coin_config_file = f"{os.environ['HOME']}/.komodo/TOKEL/TOKEL.conf"
+        coin_config_file = f"{data_dir}/.smartusd/smartusd.conf"
     elif coin == 'GLEEC-OLD':
-        coin_config_file = f"{os.environ['HOME']}/.gleecbtc/gleecbtc.conf"
+        coin_config_file = f"{data_dir}/.gleecbtc/gleecbtc.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
     with open(coin_config_file, 'r') as f:
