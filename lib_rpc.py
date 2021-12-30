@@ -33,15 +33,15 @@ def get_creds_from_file(coin):
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
     elif coin == 'AYA':
-        coin_config_file = f"{data_dir}/.aryacoin/aryacoin.conf"
+        coin_config_file = f"{data_dir}/aryacoin.conf"
     elif coin == 'CHIPS':
-        coin_config_file = f"{data_dir}/.chips/chips.conf"
+        coin_config_file = f"{data_dir}/chips.conf"
     elif coin == 'EMC2':
-        coin_config_file = f"{data_dir}/.einsteinium/einsteinium.conf"
+        coin_config_file = f"{data_dir}/einsteinium.conf"
     elif coin == 'SFUSD':
-        coin_config_file = f"{data_dir}/.smartusd/smartusd.conf"
+        coin_config_file = f"{data_dir}/smartusd.conf"
     elif coin == 'GLEEC-OLD':
-        coin_config_file = f"{data_dir}/.gleecbtc/gleecbtc.conf"
+        coin_config_file = f"{data_dir}/gleecbtc.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
     with open(coin_config_file, 'r') as f:
