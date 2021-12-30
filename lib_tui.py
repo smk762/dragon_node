@@ -25,11 +25,16 @@ def show_launch_params():
     coin = get_valid_coin(msg, DPOW_COINS)
     success_print(' '.join(lib_rpc.get_launch_params(coin)))
 
+def show_privkey():
+    msg = "Enter coin: "
+    option_print(f"Options: {DPOW_COINS}")
+    coin = get_valid_coin(msg, DPOW_COINS)
+    success_print(get_privkey(coin))
 
 def refresh_wallets():
     max_tx_count = 2000
     for coin in DPOW_COINS:
-        if coin not in ["ARRR", "LTC", "AYA"]:
+        if coin not in ["ARRR", "LTC", "AYA", "EMC2", "GLEEC-OLD", "SFUSD"]:
             try:
                 tx_count = lib_rpc.get_wallet_tx_count(coin)
                 if tx_count > max_tx_count:
@@ -55,12 +60,19 @@ def refresh_wallet(coin=None):
         address = lib_rpc.get_wallet_addr(coin)
         if address:
             pk = lib_rpc.dumpprivkey(coin,address)
-
-            # send to self
-            #lib_rpc.sendtoaddress(coin, address, amount)
             unspent = lib_rpc.get_unspent(coin, address)
             lib_rpc.get_unspendable(unspent)
-            lib_atomicdex.send_withdraw(coin, 'MAX', address)
+
+            # send to self (use daemon rpc or electrum for non-antara compatible?)
+            if coin in ["AYA", "EMC2", "GLEEC-OLD", "SFUSD", "TOKEL"]:
+                print(f"Skipping {coin}")
+                return
+                # lib_rpc.sendtoaddress(coin, address, amount)
+            else:
+                funds_sent = lib_atomicdex.send_withdraw(coin, 'MAX', address)
+                if not funds_sent:
+                    return
+
             time.sleep(10)
 
             # stop chain
@@ -78,15 +90,15 @@ def refresh_wallet(coin=None):
             launch_params = lib_rpc.get_launch_params(coin)
             lib_rpc.start_chain(coin, launch_params)
 
+            i = 0
             while True:
-                i = 0
                 try:
                     i += 1
                     if i > 12:
                         print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
                         print(launch_params)
                     print(f"Waiting for {coin} daemon to restart...")
-                    time.sleep(10)
+                    time.sleep(30)
                     block_height = lib_rpc.getblockcount(coin)
                     print(block_height)
                     if block_height:
@@ -97,7 +109,13 @@ def refresh_wallet(coin=None):
             while last_block == block_height:
                 sleep_message("Waiting for next block...")
                 block_height = lib_rpc.getblockcount(coin)
-            print(lib_rpc.importprivkey(coin, pk, last_block))
+
+            #Import using a label and without rescan
+            # > einsteinium-cli importprivkey "mykey" "testing" false
+            if coin in ["EMC2", "CHIPS", "VRSC", "AYA", "GLEEC-OLD", "SFUSD"]:
+                print(lib_rpc.importprivkey(coin, pk))
+            else:
+                print(lib_rpc.importprivkey(coin, pk, last_block))
 
         else:
             print(f"{coin} has no address!, can't reset")

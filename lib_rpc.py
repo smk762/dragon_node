@@ -107,8 +107,10 @@ def sendtoaddress(coin, address, amount):
     return rpc_proxy(coin, "sendtoaddress", [address, amount, "", "", True])['result']
 
 
-def importprivkey(coin, pk, height):
-    return rpc_proxy(coin, "importprivkey", [pk, "", True, height])['result']
+def importprivkey(coin, pk, height=None):
+    if height: 
+        return rpc_proxy(coin, "importprivkey", [pk, "", True, height])['result']
+    return rpc_proxy(coin, "importprivkey", [pk, "", False])['result']
 
 
 def stop(coin):

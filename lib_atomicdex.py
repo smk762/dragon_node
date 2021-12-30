@@ -223,6 +223,11 @@ def is_address_valid(coin, address):
     return validate_address(coin, address)["result"]["is_valid"]
 
 
+# https://developers.komodoplatform.com/basic-docs/atomicdex-api-legacy/show_priv_key.html
+def get_privkey(coin):
+    return mm2_proxy({"method":"show_priv_key","coin":coin})
+
+
 # https://developers.komodoplatform.com/basic-docs/atomicdex-api-legacy/validateaddress.html
 def validate_withdraw_amount(amount):
     if amount in ["MAX", "max"]:
@@ -243,10 +248,12 @@ def send_withdraw(coin, amount, address):
             send_resp = send_raw_tx(coin, resp["result"]["tx_hex"])
             if 'tx_hash' in send_resp:
                 success_print(f"{amount} {coin} sent to {address}. TXID: {send_resp['tx_hash']}")
+                return True
             else:
                 error_print(send_resp)
         else:
             error_print(resp)
     else:
         error_print(resp)
+    return False
 
