@@ -16,34 +16,30 @@ def scan_electrums_for_balances(seed_phrase, seed_phrases):
 
     ignore_coins = ["tBLK", "GIN", "LYNX", "PGT", "CIPHS", "VOTE2021", "HUSH3"]
     balance_found = False
+        activation_command = get_activation_command(coin)
 
-    for protocol in ACTIVATE_COMMANDS:
+        if activation_command:
+            try:
+                resp = mm2_proxy(ACTIVATE_COMMANDS[protocol][coin])
+                print(resp)
+                if "balance" in resp:
+                    if float(resp["balance"]) > 0:
+                        balance_found = True
+                        seed_phrases[seed_phrase].update({
+                            coin: {
+                                "address":resp["address"],
+                                "balance":resp["balance"],
+                            }
 
-        for coin in ACTIVATE_COMMANDS[protocol]:
+                        })
+                    else:
+                        time.sleep(0.1)
+                        print(disable_coin(coin))
 
-            if coin not in ignore_coins:
-
-                try:
-                    resp = mm2_proxy(ACTIVATE_COMMANDS[protocol][coin])
-                    print(resp)
-                    if "balance" in resp:
-                        if float(resp["balance"]) > 0:
-                            balance_found = True
-                            seed_phrases[seed_phrase].update({
-                                coin: {
-                                    "address":resp["address"],
-                                    "balance":resp["balance"],
-                                }
-
-                            })
-                        else:
-                            time.sleep(0.1)
-                            print(disable_coin(coin))
-
-                except Exception as e:
-                    print("---------------------------")
-                    print(f"{coin}: {e}")
-                    print("---------------------------")
+            except Exception as e:
+                print("---------------------------")
+                print(f"{coin}: {e}")
+                print("---------------------------")
 
     if balance_found:
         with open('seed_phrases.json', 'w', encoding='utf-8') as f:

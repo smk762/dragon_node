@@ -31,31 +31,47 @@ def mm2_proxy(params):
     return resp
 
 
+def get_activation_command(coin):
+    activation_command = None
+    if coin == "TOKEL":
+        coin = "TKL"
+    for protocol in ACTIVATE_COMMANDS:
+        if coin in ACTIVATE_COMMANDS[protocol]:
+            activation_command = ACTIVATE_COMMANDS[protocol][coin]
+    return activation_command
+
+
+
 def activate_coins(coins_list, merge_utxo=False):
 
     for coin in coins_list:
         activated = False
-        for protocol in ACTIVATE_COMMANDS:
-            if coin in ACTIVATE_COMMANDS[protocol]:
-                activation_command = ACTIVATE_COMMANDS[protocol][coin]
-                if merge_utxo:
-                    activation_command.update({
-                        "utxo_merge_params":{
-                            "merge_at":100,
-                            "check_every":120,
-                            "max_merge_at_once":200
-                        }
-                    })
+        activation_command = get_activation_command(coin)
 
-                resp = mm2_proxy(activation_command)
-                if "result" in resp:
-                    status_print(f"{resp['coin']} activated. Balance: {resp['balance']}")
-                elif "error" in resp:
-                    if resp["error"].find("already initialized") >= 0:
-                        status_print(f"{coin} was already activated.")
-                    else:
-                        error_print(resp)
-                activated = True
+        if activation_command:
+            if merge_utxo:
+                activation_command.update({
+                    "utxo_merge_params":{
+                        "merge_at":100,
+                        "check_every":120,
+                        "max_merge_at_once":200
+                    }
+                })
+
+            resp = mm2_proxy(activation_command)
+
+            if "result" in resp:
+                status_print(f"{resp['coin']} activated. Balance: {resp['balance']}")
+
+            elif "error" in resp:
+
+                if resp["error"].find("already initialized") >= 0:
+                    status_print(f"{coin} was already activated.")
+                else:
+                    error_print(resp)
+
+            activated = True
+
         if not activated:
             error_print(f"Activation params not found for {coin}!")
 
