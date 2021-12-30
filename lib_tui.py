@@ -34,15 +34,14 @@ def show_privkey():
 def refresh_wallets():
     max_tx_count = 2000
     for coin in DPOW_COINS:
-        if coin not in ["ARRR", "LTC", "AYA", "EMC2", "GLEEC-OLD", "SFUSD"]:
-            try:
-                tx_count = lib_rpc.get_wallet_tx_count(coin)
-                if tx_count > max_tx_count:
-                    refresh_wallet(coin)
-                else:
-                    print(f"Skipping {coin}, less than {max_tx_count}")
-            except requests.exceptions.RequestException as e:
-                print(f"{coin} not responding, skipping...")
+        try:
+            tx_count = lib_rpc.get_wallet_tx_count(coin)
+            if tx_count > max_tx_count:
+                refresh_wallet(coin)
+            else:
+                print(f"Skipping {coin}, less than {max_tx_count}")
+        except requests.exceptions.RequestException as e:
+            print(f"{coin} not responding, skipping...")
 
 
 def refresh_wallet(coin=None):
@@ -62,9 +61,9 @@ def refresh_wallet(coin=None):
             pk = lib_rpc.dumpprivkey(coin,address)
             unspent = lib_rpc.get_unspent(coin, address)
             lib_rpc.get_unspendable(unspent)
-
+ 
             # send to self (use daemon rpc or electrum for non-antara compatible?)
-            if coin in ["AYA", "EMC2", "GLEEC-OLD", "SFUSD", "TOKEL"]:
+            if coin in ["LTC", "ARRR", "AYA", "CHIPS", "EMC2", "GLEEC-OLD", "MCL", "SFUSD", "TOKEL", "VRSC"]:
                 print(f"Skipping {coin}")
                 return
                 # lib_rpc.sendtoaddress(coin, address, amount)
