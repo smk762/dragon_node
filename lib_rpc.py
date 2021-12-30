@@ -27,6 +27,18 @@ def get_creds_from_file(coin):
     data_dir = get_data_dir(coin)
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
+    if coin == 'AYA':
+        coin_config_file = f"{os.environ['HOME']}/.aryacoin/aryacoin.conf"
+    if coin == 'CHIPS':
+        coin_config_file = f"{os.environ['HOME']}/.chips/chips.conf"
+    if coin == 'EMC2':
+        coin_config_file = f"{os.environ['HOME']}/.einsteinium/einsteinium.conf"
+    if coin == 'SFUSD':
+        coin_config_file = f"{os.environ['HOME']}/.smartusd/smartusd.conf"
+    if coin == 'TOKEL':
+        coin_config_file = f"{os.environ['HOME']}/.komodo/TOKEL/TOKEL.conf"
+    if coin == 'GLEEC-OLD':
+        coin_config_file = f"{os.environ['HOME']}/.gleecbtc/gleecbtc.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
     with open(coin_config_file, 'r') as f:
