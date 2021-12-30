@@ -23,7 +23,7 @@ def get_data_dir(coin):
     elif coin == 'GLEEC-OLD':
         data_dir = f"{os.environ['HOME']}/.gleecbtc"
     else:
-        data_dir = f"{os.environ['HOME']}/{coin}"
+        data_dir = f"{os.environ['HOME']}/.komodo/{coin}"
 
     return data_dir
 
