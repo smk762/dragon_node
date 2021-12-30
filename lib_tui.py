@@ -25,11 +25,13 @@ def show_launch_params():
     coin = get_valid_coin(msg, DPOW_COINS)
     success_print(' '.join(lib_rpc.get_launch_params(coin)))
 
+
 def show_privkey():
     msg = "Enter coin: "
     option_print(f"Options: {DPOW_COINS}")
     coin = get_valid_coin(msg, DPOW_COINS)
     success_print(get_privkey(coin))
+
 
 def refresh_wallets():
     max_tx_count = 2000
@@ -42,6 +44,49 @@ def refresh_wallets():
                 print(f"Skipping {coin}, less than {max_tx_count}")
         except requests.exceptions.RequestException as e:
             print(f"{coin} not responding, skipping...")
+
+
+def get_min_unspent_conf(unspent):
+    minconf = 99999999
+    for utxo in unspent:
+        if utxo[""] < minconf:
+            minconf = utxo["confirmations"]
+    return minconf
+
+
+
+def refresh_non_antara_wallets(coin):
+
+    if coin in ["CHIPS", "EMC2", "AYA", "GLEEC-OLD", "SFUSD"]:
+        if coin in LAUNCH_PARAMS:
+            if coin in CONFIG["non_antara_addresses"]:
+                address = CONFIG["non_antara_addresses"][coin]
+                pk = lib_rpc.dumpprivkey(coin,address)
+                unspent = lib_rpc.get_unspent(coin)
+                balance = lib_rpc.getbalance(coin)
+                print(balance)
+                txid = lib_rpc.sendtoaddress(coin, address, balance)
+                print(txid)
+                if txid:
+                    # wait for block
+                    txoutproof = lib_rpc.gettxoutproof(coin, txid)
+                    while not txoutproof:
+                        print("Waiting for tx to confirm")
+                        time.sleep(20)
+                        txoutproof = lib_rpc.gettxoutproof(coin, txid)
+                    print(txoutproof)
+                    raw_tx = lib_rpc.getrawtransaction(coin, txid)
+                    print(raw_tx)
+            else:
+                print(f"{coin} not in config")
+        else:
+            print(f"{coin} not in launch_params")
+    else:
+        print(f"{coin} does not support importprunedfunds")
+
+
+
+
 
 
 def refresh_wallet(coin=None):
@@ -59,10 +104,11 @@ def refresh_wallet(coin=None):
         address = lib_rpc.get_wallet_addr(coin)
         if address:
             pk = lib_rpc.dumpprivkey(coin,address)
-            unspent = lib_rpc.get_unspent(coin, address)
+            unspent = lib_rpc.get_unspent(coin)
             lib_rpc.get_unspendable(unspent)
  
             # send to self (use daemon rpc or electrum for non-antara compatible?)
+            # create a raw transaction, send after pk without recan import
             if coin in ["LTC", "ARRR", "AYA", "CHIPS", "EMC2", "GLEEC-OLD", "MCL", "SFUSD", "TOKEL", "VRSC"]:
                 print(f"Skipping {coin}")
                 return

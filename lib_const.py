@@ -157,7 +157,17 @@ def load_config():
                 "199.127.60.142",
                 "104.238.221.61",
                 "103.195.100.32"
-            ]
+            ],
+            "non_antara_addresses": {
+                "AYA":"",
+                "CHIPS":"",
+                "EMC2":"",
+                "GLEEC-OLD":"",
+                "MCL":"",
+                "SFUSD":"",
+                "TOKEL":"",
+                "VRSC":""
+            }
         }
 
         whitelist_addresses = color_input("Enter addresses to whitelist, separated by space: \n")
@@ -184,6 +194,10 @@ def load_config():
             config["server"] = "Main"
         elif server == "3":
             config["server"] = "Third_Party"
+
+            for coin in config["non_antara_addresses"]:
+                non_antara_address = color_input(f"Enter your {coin} address: ")
+                config["non_antara_addresses"][coin] = non_antara_address
 
 
         with open("config.json", "w+") as f:

@@ -107,6 +107,14 @@ def sendtoaddress(coin, address, amount):
     return rpc_proxy(coin, "sendtoaddress", [address, amount, "", "", True])['result']
 
 
+def gettxoutproof(coin, txid):
+    return rpc_proxy(coin, "gettxoutproof", [[txid]])['result']
+
+
+def getrawtransaction(coin, txid):
+    return rpc_proxy(coin, "getrawtransaction", [txid])['result']
+
+
 def importprivkey(coin, pk, height=None):
     if height: 
         return rpc_proxy(coin, "importprivkey", [pk, "", True, height])['result']
@@ -129,7 +137,7 @@ def get_pubkey(coin, address):
     return rpc_proxy(coin, "validateaddress", [address])['result']["pubkey"]
 
 
-def get_unspent(coin, address):
+def get_unspent(coin):
     return rpc_proxy(coin, "listunspent")["result"]
 
 
@@ -163,8 +171,7 @@ def get_launch_params(coin):
 
 
 def sweep_kmd():
-    wallet_address = get_wallet_addr("KMD")
-    unspent = get_unspent("KMD", wallet_address)
+    unspent = get_unspent("KMD")
     print(f"{len(unspent)} unspent utxos detected")
     balance = 0
     for utxo in unspent:
