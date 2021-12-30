@@ -75,17 +75,60 @@ def refresh_non_antara_wallets(coin):
                         time.sleep(20)
                         txoutproof = lib_rpc.gettxoutproof(coin, txid)
                     print(txoutproof)
+                    last_block = int(lib_rpc.getblockcount(coin))
                     raw_tx = lib_rpc.getrawtransaction(coin, txid)
                     print(raw_tx)
+                    # stop daemon, import pk, import tx
+                    print(lib_rpc.stop(coin))
+
+                    lib_rpc.wait_for_stop(coin)
+
+                    # backup wallet.dat
+                    ts = int(time.time())
+                    data_dir = lib_rpc.get_data_dir(coin)
+                    os.popen(f'mv {data_dir}/wallet.dat {data_dir}/wallet_{ts}.dat' )
+                    time.sleep(30)
+
+                    # restart chain
+                    launch_params = lib_rpc.get_launch_params(coin)
+                    lib_rpc.start_chain(coin, launch_params)
+
+                    i = 0
+                    while True:
+                        try:
+                            i += 1
+                            if i > 12:
+                                print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
+                                print(launch_params)
+                            print(f"Waiting for {coin} daemon to restart...")
+                            time.sleep(30)
+                            block_height = lib_rpc.getblockcount(coin)
+                            print(block_height)
+                            if block_height:
+                                break
+                        except:
+                            pass
+                    time.sleep(20)
+                    while last_block == block_height:
+                        sleep_message("Waiting for next block...")
+                        block_height = lib_rpc.getblockcount(coin)
+
+                    # Import without rescan
+                    print(lib_rpc.importprivkey(coin, pk))
+
+                    # Import pruned funds
+                    resp = lib_rpc.importprunedfunds(coin, raw_tx, txoutproof)
+                    print(resp)
+
+
+                else:
+                    print(f"{coin} did not returna sent txid")
             else:
                 print(f"{coin} not in config")
         else:
             print(f"{coin} not in launch_params")
     else:
         print(f"{coin} does not support importprunedfunds")
-
-
-
 
 
 
@@ -98,7 +141,7 @@ def refresh_wallet(coin=None):
     if coin in LAUNCH_PARAMS:
         
         # getblockcount
-        last_block = int(lib_rpc.getblockcount(coin)) - 1
+        last_block = int(lib_rpc.getblockcount(coin))
 
         # get privkey
         address = lib_rpc.get_wallet_addr(coin)
@@ -160,7 +203,7 @@ def refresh_wallet(coin=None):
             if coin in ["EMC2", "CHIPS", "VRSC", "AYA", "GLEEC-OLD", "SFUSD"]:
                 print(lib_rpc.importprivkey(coin, pk))
             else:
-                print(lib_rpc.importprivkey(coin, pk, last_block))
+                print(lib_rpc.importprivkey(coin, pk, last_block-1))
 
         else:
             print(f"{coin} has no address!, can't reset")

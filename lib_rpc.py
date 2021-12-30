@@ -111,6 +111,10 @@ def gettxoutproof(coin, txid):
     return rpc_proxy(coin, "gettxoutproof", [[txid]])['result']
 
 
+def importprunedfunds(coin, raw_tx, txoutproof):
+    return rpc_proxy(coin, "importprunedfunds", [raw_tx, txoutproof])['result']
+
+
 def getrawtransaction(coin, txid):
     return rpc_proxy(coin, "getrawtransaction", [txid])['result']
 
