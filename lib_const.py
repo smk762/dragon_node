@@ -212,9 +212,9 @@ CONFIG = load_config()
 HOME = expanduser("~")
 SCRIPT_PATH = sys.path[0]
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
-ACTIVATE_COMMANDS = requests.get("http://stats.kmd.io/api/atomicdex/activation_commands/").json()["commands"]
-LAUNCH_PARAMS = requests.get("http://stats.kmd.io/api/info/launch_params/").json()["results"]
-DPOW_COINS = requests.get(f"https://stats.kmd.io/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
+ACTIVATE_COMMANDS = requests.get("http://116.203.120.91:8762/api/atomicdex/activation_commands/").json()["commands"]
+LAUNCH_PARAMS = requests.get("http://116.203.120.91:8762/api/info/launch_params/").json()["results"]
+DPOW_COINS = requests.get(f"https://116.203.120.91:8762/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
 DPOW_COINS.append("KMD")
 DPOW_COINS.sort()
 
