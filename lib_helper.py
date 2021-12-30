@@ -10,7 +10,7 @@ def sec_to_hms(sec):
 
 
 def get_activate_command(coin):
-  return requests.get(f"https://116.203.120.91:8762/api/atomicdex/activation_commands/?coin={coin}").json()
+  return requests.get(f"http://116.203.120.91:8762/api/atomicdex/activation_commands/?coin={coin}").json()
 
 
 def get_valid_input(msg, valid_options):

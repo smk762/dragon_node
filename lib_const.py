@@ -214,7 +214,7 @@ SCRIPT_PATH = sys.path[0]
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
 ACTIVATE_COMMANDS = requests.get("http://116.203.120.91:8762/api/atomicdex/activation_commands/").json()["commands"]
 LAUNCH_PARAMS = requests.get("http://116.203.120.91:8762/api/info/launch_params/").json()["results"]
-DPOW_COINS = requests.get(f"https://116.203.120.91:8762/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
+DPOW_COINS = requests.get(f"http://116.203.120.91:8762/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
 DPOW_COINS.append("KMD")
 DPOW_COINS.sort()
 
