@@ -44,7 +44,7 @@ def get_creds_from_file(coin):
         coin_config_file = f"{data_dir}/gleecbtc.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
-    rpc_port = None
+    rpc_port = -1
     with open(coin_config_file, 'r') as f:
         for line in f:
             l = line.rstrip()
@@ -54,7 +54,7 @@ def get_creds_from_file(coin):
                 rpc_pass = l.replace('rpcpassword=', '')
             elif re.search('rpcport', l):
                 rpc_port = l.replace('rpcport=', '')
-    if len(rpc_port) == 0:
+    if rpc_port == -1:
         if coin == 'KMD':
             rpc_port = 7771
         else:
