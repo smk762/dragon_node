@@ -44,6 +44,7 @@ def get_creds_from_file(coin):
         coin_config_file = f"{data_dir}/gleecbtc.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
+    rpc_port = None
     with open(coin_config_file, 'r') as f:
         for line in f:
             l = line.rstrip()
@@ -158,9 +159,10 @@ def get_launch_params(coin):
         launch_params.append(f"-pubkey={CONFIG['pubkey']}")    
 
     if coin == "KMD":
-        launch_params.append(f"-notary=.litecoin/litecoin.conf")
         launch_params.append(f"-minrelaytxfee=0.000035")
         launch_params.append(f"-opretmintxfee=0.004")
+        if server == "Main":
+            launch_params.append(f"-notary=.litecoin/litecoin.conf")
 
     if coin == "KMD" or CONFIG['server'] == "Main":
         if 'whitelist' in CONFIG:

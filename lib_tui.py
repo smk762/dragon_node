@@ -53,10 +53,11 @@ def get_min_unspent_conf(unspent):
             minconf = utxo["confirmations"]
     return minconf
 
+# AYA did not returna sent txid
 
 
-def refresh_non_antara_wallets(coin):
-
+def refresh_non_antara_wallet(coin):
+    print(f"Resetting {coin}...")
     if coin in ["CHIPS", "EMC2", "AYA", "GLEEC-OLD", "SFUSD"]:
         if coin in LAUNCH_PARAMS:
             if coin in CONFIG["non_antara_addresses"]:
@@ -122,7 +123,7 @@ def refresh_non_antara_wallets(coin):
 
 
                 else:
-                    print(f"{coin} did not returna sent txid")
+                    print(f"{coin} did not return a sent txid")
             else:
                 print(f"{coin} not in config")
         else:

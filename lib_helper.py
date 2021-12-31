@@ -116,7 +116,7 @@ def get_mm2(branch=None):
         status_print('Done!')
 
 
-def sleep_message(msg, sec):
+def sleep_message(msg, sec=30):
     status_print(msg)
     time.sleep(sec)
 
