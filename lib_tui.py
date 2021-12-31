@@ -43,7 +43,7 @@ def get_min_unspent_conf(unspent):
 def refresh_wallets():
     for coin in DPOW_COINS:
         try:
-            refresh_wallet(coin)
+            print(refresh_wallet(coin))
         except requests.exceptions.RequestException as e:
             print(f"{coin} not responding, skipping...")
 
@@ -60,12 +60,12 @@ def refresh_wallet(coin=None):
     max_tx_count = 2000
     tx_count = lib_rpc.get_wallet_tx_count(coin)
     if tx_count < max_tx_count:
-        print(f"Skipping {coin}, less than {max_tx_count}")
+        option_print(f"Skipping {coin}, less than {max_tx_count}")
         return False
 
     launch_params = lib_rpc.get_launch_params(coin)
     if not launch_params:
-        print(f"unable to launch_params")
+        option_print(f"unable to launch_params")
         return False
 
     # get address 
@@ -75,28 +75,28 @@ def refresh_wallet(coin=None):
         address = lib_helper.addr_from_pubkey(coin, CONFIG["pubkey"])
 
     if not address:            
-        print(f"unable to get address")
+        option_print(f"unable to get address")
         return
 
     # getblockcount
     data_dir = lib_rpc.get_data_dir(coin)
-    print(f"data_dir: {data_dir}")
+    option_print(f"data_dir: {data_dir}")
     last_block = int(lib_rpc.getblockcount(coin))
-    print(f"last_block: {last_block}")
+    option_print(f"last_block: {last_block}")
     pk = lib_rpc.dumpprivkey(coin,address)
     balance = lib_rpc.getbalance(coin)
-    print(f"balance: {balance}")
+    option_print(f"balance: {balance}")
 
     txid = lib_rpc.sendtoaddress(coin, address, balance)
     if not txid:
-        print(f"unable to get txid")
+        option_print(f"unable to get txid")
         return False
-    print(f"txid: {txid}")
+    option_print(f"txid: {txid}")
     
     if coin in IMPORT_PRUNED_COINS:
         txoutproof, raw_tx = get_tx_import_info(coin, txid)
         if not txoutproof or not raw_tx:
-            print(f"unable to get txoutproof and/or raw_tx")
+            option_print(f"unable to get txoutproof and/or raw_tx")
             return False
 
     time.sleep(10)
@@ -113,27 +113,29 @@ def refresh_wallet(coin=None):
     # restart chain
     lib_rpc.start_chain(coin, launch_params)
     block_height = lib_rpc.wait_for_start(coin, launch_params)
-    print(f"block_height: {block_height}")
+    option_print(f"block_height: {block_height}")
     time.sleep(20)
 
     while last_block == block_height:
         sleep_message("Waiting for next block...")
         block_height = lib_rpc.getblockcount(coin)
-        print(f"block_height: {block_height}")
+        option_print(f"block_height: {block_height}")
 
 
     if CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
-        print(lib_rpc.importprivkey(coin, pk, last_block-1))
+        lib_rpc.importprivkey(coin, pk, last_block-1)
         time.sleep(1)
     else:
-        print(lib_rpc.importprivkey(coin, pk))
+        lib_rpc.importprivkey(coin, pk)
         time.sleep(1)
-        print(lib_rpc.importprunedfunds(coin, raw_tx, txoutproof))
+        # VRSC does not support import from height or importprunedfunds
+        if coin in ["VRSC"]:
+            lib_atomicdex.send_withdraw(coin, amount, 'MAX')
+        else:
+            option_print(lib_rpc.importprunedfunds(coin, raw_tx, txoutproof))
         time.sleep(1)
 
-    # does not support import from height or importprunedfunds
-    if coin in ["VRSC"]:
-        lib_atomicdex.send_withdraw(coin, amount, 'MAX')
+    
 
     return lib_rpc.getbalance(coin)
         
