@@ -55,9 +55,6 @@ def refresh_wallet(coin=None):
         msg = "Enter coin to reset: "
         coin = get_valid_coin(msg, DPOW_COINS)
 
-    if coin in ["VRSC"]:
-        print(f"{coin} does not support import privkey from height or importprunedfunds")
-
     print(f"Refreshing {coin} wallet")
 
     max_tx_count = 2000
@@ -133,6 +130,10 @@ def refresh_wallet(coin=None):
         time.sleep(1)
         print(lib_rpc.importprunedfunds(coin, raw_tx, txoutproof))
         time.sleep(1)
+
+    # does not support import from height or importprunedfunds
+    if coin in ["VRSC"]:
+        lib_atomicdex.send_withdraw(coin, amount, 'MAX')
 
     return lib_rpc.getbalance(coin)
         
