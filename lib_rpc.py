@@ -37,7 +37,7 @@ def get_creds_from_file(coin):
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
     elif coin == 'LTC':
-        data_dir = f"{os.environ['HOME']}/litecoin.conf"
+        coin_config_file = f"{data_dir}/litecoin.conf"
     elif coin == 'AYA':
         coin_config_file = f"{data_dir}/aryacoin.conf"
     elif coin == 'CHIPS':
