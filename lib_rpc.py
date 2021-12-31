@@ -22,6 +22,8 @@ def get_data_dir(coin):
         data_dir = f"{os.environ['HOME']}/.smartusd"
     elif coin == 'GLEEC-OLD':
         data_dir = f"{os.environ['HOME']}/.gleecbtc"
+    elif coin == 'ARRR':
+        data_dir = f"{os.environ['HOME']}/.komodo/PIRATE"
     else:
         data_dir = f"{os.environ['HOME']}/.komodo/{coin}"
 
@@ -42,6 +44,8 @@ def get_creds_from_file(coin):
         coin_config_file = f"{data_dir}/smartusd.conf"
     elif coin == 'GLEEC-OLD':
         coin_config_file = f"{data_dir}/gleecbtc.conf"
+    elif coin == 'ARRR':
+        coin_config_file = f"{data_dir}/PIRATE.conf"
     else:
         coin_config_file = f"{data_dir}/{coin}.conf"
     rpc_port = -1
