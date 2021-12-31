@@ -125,7 +125,7 @@ def refresh_wallet(coin=None):
         print(f"block_height: {block_height}")
 
 
-    elif CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
+    else if CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
         print(lib_rpc.importprivkey(coin, pk, last_block-1))
         time.sleep(1)
     else:
