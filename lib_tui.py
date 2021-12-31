@@ -33,19 +33,6 @@ def show_privkey():
     success_print(get_privkey(coin))
 
 
-def refresh_wallets():
-    max_tx_count = 2000
-    for coin in DPOW_COINS:
-        try:
-            tx_count = lib_rpc.get_wallet_tx_count(coin)
-            if tx_count > max_tx_count:
-                refresh_wallet(coin)
-            else:
-                print(f"Skipping {coin}, less than {max_tx_count}")
-        except requests.exceptions.RequestException as e:
-            print(f"{coin} not responding, skipping...")
-
-
 def get_min_unspent_conf(unspent):
     minconf = 99999999
     for utxo in unspent:
@@ -53,169 +40,119 @@ def get_min_unspent_conf(unspent):
             minconf = utxo["confirmations"]
     return minconf
 
-# AYA did not returna sent txid
 
-
-def refresh_non_antara_wallet(coin):
-    print(f"Resetting {coin}...")
-    if coin in ["CHIPS", "EMC2", "AYA", "GLEEC-OLD", "SFUSD"]:
-        if coin in LAUNCH_PARAMS:
-            if coin in CONFIG["non_antara_addresses"]:
-                address = CONFIG["non_antara_addresses"][coin]
-                pk = lib_rpc.dumpprivkey(coin,address)
-                unspent = lib_rpc.get_unspent(coin)
-                balance = lib_rpc.getbalance(coin)
-                print(balance)
-                txid = lib_rpc.sendtoaddress(coin, address, balance)
-                print(txid)
-                if txid:
-                    # wait for block
-                    txoutproof = lib_rpc.gettxoutproof(coin, txid)
-                    while not txoutproof:
-                        print("Waiting for tx to confirm")
-                        time.sleep(20)
-                        txoutproof = lib_rpc.gettxoutproof(coin, txid)
-                    print(txoutproof)
-                    last_block = int(lib_rpc.getblockcount(coin))
-                    raw_tx = lib_rpc.getrawtransaction(coin, txid)
-                    print(raw_tx)
-                    # stop daemon, import pk, import tx
-                    print(lib_rpc.stop(coin))
-
-                    lib_rpc.wait_for_stop(coin)
-
-                    # backup wallet.dat
-                    ts = int(time.time())
-                    data_dir = lib_rpc.get_data_dir(coin)
-                    os.popen(f'mv {data_dir}/wallet.dat {data_dir}/wallet_{ts}.dat' )
-                    time.sleep(30)
-
-                    # restart chain
-                    launch_params = lib_rpc.get_launch_params(coin)
-                    lib_rpc.start_chain(coin, launch_params)
-
-                    i = 0
-                    while True:
-                        try:
-                            i += 1
-                            if i > 12:
-                                print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
-                                print(launch_params)
-                            print(f"Waiting for {coin} daemon to restart...")
-                            time.sleep(30)
-                            block_height = lib_rpc.getblockcount(coin)
-                            print(block_height)
-                            if block_height:
-                                break
-                        except:
-                            pass
-                    time.sleep(20)
-                    while last_block == block_height:
-                        sleep_message("Waiting for next block...")
-                        block_height = lib_rpc.getblockcount(coin)
-
-                    # Import without rescan
-                    print(lib_rpc.importprivkey(coin, pk))
-
-                    # Import pruned funds
-                    resp = lib_rpc.importprunedfunds(coin, raw_tx, txoutproof)
-                    print(resp)
-
-
-                else:
-                    print(f"{coin} did not return a sent txid")
-            else:
-                print(f"{coin} not in config")
-        else:
-            print(f"{coin} not in launch_params")
-    else:
-        print(f"{coin} does not support importprunedfunds")
-
+def refresh_wallets():
+    for coin in DPOW_COINS:
+        try:
+            refresh_wallet(coin)
+        except requests.exceptions.RequestException as e:
+            print(f"{coin} not responding, skipping...")
 
 
 def refresh_wallet(coin=None):
+        
     if not coin:
         # query coin
         msg = "Enter coin to reset: "
         coin = get_valid_coin(msg, DPOW_COINS)
 
-    if coin in LAUNCH_PARAMS:
-        
-        # getblockcount
-        last_block = int(lib_rpc.getblockcount(coin))
-
-        # get privkey
-        address = lib_rpc.get_wallet_addr(coin)
-        if address:
-            pk = lib_rpc.dumpprivkey(coin,address)
-            unspent = lib_rpc.get_unspent(coin)
-            lib_rpc.get_unspendable(unspent)
- 
-            # send to self (use daemon rpc or electrum for non-antara compatible?)
-            # create a raw transaction, send after pk without recan import
-            if coin in ["LTC", "ARRR", "AYA", "CHIPS", "EMC2", "GLEEC-OLD", "MCL", "SFUSD", "VRSC"]:
-                print(f"Skipping {coin}")
-                return
-                # lib_rpc.sendtoaddress(coin, address, amount)
-            elif coin in ["TOKEL"]:
-                balance = lib_rpc.getbalance(coin)
-                funds_sent = lib_rpc.sendtoaddress(coin, address, balance)
-                if not funds_sent:
-                    return                
-            else:
-                funds_sent = lib_atomicdex.send_withdraw(coin, 'MAX', address)
-                if not funds_sent:
-                    return
-
-            time.sleep(10)
-
-            # stop chain
-            print(lib_rpc.stop(coin))
-
-            lib_rpc.wait_for_stop(coin)
-            time.sleep(10)
-
-            # backup wallet.dat
-            ts = int(time.time())
-            data_dir = lib_rpc.get_data_dir(coin)
-            os.popen(f'mv {data_dir}/wallet.dat {data_dir}/wallet_{ts}.dat' )
-            time.sleep(30)
-
-            # restart chain
-            launch_params = lib_rpc.get_launch_params(coin)
-            lib_rpc.start_chain(coin, launch_params)
-
-            i = 0
-            while True:
-                try:
-                    i += 1
-                    if i > 12:
-                        print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
-                        print(launch_params)
-                    print(f"Waiting for {coin} daemon to restart...")
-                    time.sleep(30)
-                    block_height = lib_rpc.getblockcount(coin)
-                    print(block_height)
-                    if block_height:
-                        break
-                except:
-                    pass
-            time.sleep(20)
-            while last_block == block_height:
-                sleep_message("Waiting for next block...")
-                block_height = lib_rpc.getblockcount(coin)
-
-            #Import using a label and without rescan
-            # > einsteinium-cli importprivkey "mykey" "testing" false
-            if coin in ["EMC2", "CHIPS", "VRSC", "AYA", "GLEEC-OLD", "SFUSD"]:
-                print(lib_rpc.importprivkey(coin, pk))
-            else:
-                print(lib_rpc.importprivkey(coin, pk, last_block-1))
-
-        else:
-            print(f"{coin} has no address!, can't reset")
+    max_tx_count = 2000
+    tx_count = lib_rpc.get_wallet_tx_count(coin)
+    if tx_count > max_tx_count:
+        refresh_wallet(coin)
     else:
-        print(f"{coin} not in launch params, can't reset")
+        print(f"Skipping {coin}, less than {max_tx_count}")
+        return False
+
+    launch_params = lib_rpc.get_launch_params(coin)
+    if not launch_params:
+        print(f"unable to launch_params")
+        return False
+
+    # get address 
+    if coin in CONFIG["non_antara_addresses"]:
+        address = CONFIG["non_antara_addresses"][coin]
+    else:
+        address = lib_helper.addr_from_pubkey(coin, CONFIG["pubkey"])
+
+    if not address:            
+        print(f"unable to get address")
+        return
+
+    # getblockcount
+    data_dir = lib_rpc.get_data_dir(coin)
+    last_block = int(lib_rpc.getblockcount(coin))
+    pk = lib_rpc.dumpprivkey(coin,address)
+    balance = lib_rpc.getbalance(coin)
+    txid = lib_rpc.sendtoaddress(coin, address, balance)
+
+    if not txid:
+        print(f"unable to get txid")
+        return False
+    
+    if coin in IMPORT_PRUNED_COINS:
+        txoutproof, raw_tx = get_tx_import_info(coin, txid)
+        if not txoutproof or not raw_tx:
+            print(f"unable to get txoutproof and/or raw_tx")
+            return False
+
+    time.sleep(10)
+
+    # stop chain
+    print(lib_rpc.stop(coin))
+    lib_rpc.wait_for_stop(coin)
+    time.sleep(10)
+
+    #backup wallet
+    backup_wallet_dat(data_dir)
+    time.sleep(30)
+
+    # restart chain
+    lib_rpc.start_chain(coin, launch_params)
+    block_height = lib_rpc.wait_for_start(coin, launch_params)
+    time.sleep(20)
+
+    while last_block == block_height:
+        sleep_message("Waiting for next block...")
+        block_height = lib_rpc.getblockcount(coin)
+
+    if coin in ["VRSC"]:
+        print(f"{coin} does not support import privkey from height or importprunedfunds")
+
+    else CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
+        print(lib_rpc.importprivkey(coin, pk, last_block-1))
+        time.sleep(1)
+    else:
+        print(lib_rpc.importprivkey(coin, pk))
+        time.sleep(1)
+        print(lib_rpc.importprunedfunds(coin, raw_tx, txoutproof))
+        time.sleep(1)
+
+    return lib_rpc.getbalance(coin)
+        
+
+def backup_wallet_dat(data_dir):
+    # backup wallet.dat
+    ts = int(time.time())
+    backup_wallet = f"{data_dir}/wallet_{ts}.dat"
+    os.popen(f'mv {data_dir}/wallet.dat {backup_wallet}')
+    print(f"Backup wallet saved as {backup_wallet}")
+
+
+
+
+def get_tx_import_info(coin, txid):
+    txoutproof = lib_rpc.gettxoutproof(coin, txid)
+    i = 0
+    while not txoutproof:
+        print("Waiting for tx to confirm")
+        time.sleep(20)
+        txoutproof = lib_rpc.gettxoutproof(coin, txid)
+        i += 1
+        if i > 15:
+            return False, False
+    raw_tx = lib_rpc.getrawtransaction(coin, txid)
+    return txoutproof, raw_tx
 
 
 def withdraw_funds():

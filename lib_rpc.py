@@ -153,6 +153,9 @@ def get_unspendable(unspent):
 
 
 def get_launch_params(coin):
+    if coin not in LAUNCH_PARAMS:
+        return False
+
     launch_params = LAUNCH_PARAMS[coin].replace("~", os.environ['HOME'])
     launch_params = launch_params.split(" ")
     if CONFIG['pubkey'] != "":
@@ -209,3 +212,21 @@ def wait_for_stop(coin):
         except requests.exceptions.RequestException as e:
             break
     time.sleep(10)
+
+
+def wait_for_start(coin, launch_params):
+    i = 0
+    while True:
+        try:
+            i += 1
+            if i > 12:
+                print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
+                print(launch_params)
+            print(f"Waiting for {coin} daemon to restart...")
+            time.sleep(30)
+            block_height = lib_rpc.getblockcount(coin)
+            print(block_height)
+            if block_height:
+                return block_height
+        except:
+            pass

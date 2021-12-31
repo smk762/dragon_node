@@ -1,4 +1,4 @@
 #!/usr/bin/env python3
-from lib_tui import refresh_wallets
+import lib_tui 
 
 refresh_wallets()

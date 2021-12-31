@@ -124,3 +124,9 @@ def sleep_message(msg, sec=30):
 def preexec(): # Don't forward signals.
     os.setpgrp()
 
+
+def addr_from_pubkey(coin, pubkey):
+    resp = requests.get(f"http://116.203.120.91:8762/api/tools/address_from_pubkey/?coin={coin}&pubkey={pubkey}").json()
+    if "error" not in resp:
+        return resp["address"]
+    return False

@@ -232,6 +232,8 @@ DPOW_COINS = requests.get(f"http://116.203.120.91:8762/api/info/dpow_server_coin
 DPOW_COINS.append("KMD")
 DPOW_COINS.sort()
 
+IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "GLEEC-OLD", "SFUSD", "LTC"]
+
 
 ERROR_EVENTS = [
   "StartFailed", "NegotiateFailed", "TakerFeeValidateFailed", "MakerPaymentTransactionFailed",
