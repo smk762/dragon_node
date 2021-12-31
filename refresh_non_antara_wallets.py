@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import requests
 from lib_tui import refresh_non_antara_wallet
 
 max_tx_count = 2000

@@ -161,7 +161,7 @@ def get_launch_params(coin):
     if coin == "KMD":
         launch_params.append(f"-minrelaytxfee=0.000035")
         launch_params.append(f"-opretmintxfee=0.004")
-        if server == "Main":
+        if CONFIG['server'] == "Main":
             launch_params.append(f"-notary=.litecoin/litecoin.conf")
 
     if coin == "KMD" or CONFIG['server'] == "Main":
