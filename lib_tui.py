@@ -29,7 +29,7 @@ def show_privkey():
     msg = "Enter coin: "
     option_print(f"Options: {DPOW_COINS}")
     coin = get_valid_coin(msg, DPOW_COINS)
-    success_print(get_privkey(coin))
+    success_print(lib_atomicdex.get_privkey(coin))
 
 
 def get_min_unspent_conf(unspent):
