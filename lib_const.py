@@ -230,7 +230,7 @@ ACTIVATE_COMMANDS = requests.get("http://116.203.120.91:8762/api/atomicdex/activ
 LAUNCH_PARAMS = requests.get("http://116.203.120.91:8762/api/info/launch_params/").json()["results"]
 DPOW_COINS = requests.get(f"http://116.203.120.91:8762/api/info/dpow_server_coins/?server={CONFIG['server']}&season=Season_5").json()["results"]
 DPOW_COINS.append("KMD")
-if server == "Main":
+if CONFIG["server"] == "Main":
     DPOW_COINS.append("LTC")
 DPOW_COINS.sort()
 
