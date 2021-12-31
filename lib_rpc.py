@@ -12,6 +12,8 @@ from lib_helper import *
 def get_data_dir(coin):
     if coin == 'KMD':
         data_dir = f"{os.environ['HOME']}/.komodo"
+    elif coin == 'LTC':
+        data_dir = f"{os.environ['HOME']}/.litecoin"
     elif coin == 'AYA':
         data_dir = f"{os.environ['HOME']}/.aryacoin"
     elif coin == 'CHIPS':
@@ -34,6 +36,8 @@ def get_creds_from_file(coin):
     data_dir = get_data_dir(coin)
     if coin == 'KMD':
         coin_config_file = f"{data_dir}/komodo.conf"
+    elif coin == 'LTC':
+        data_dir = f"{os.environ['HOME']}/litecoin.conf"
     elif coin == 'AYA':
         coin_config_file = f"{data_dir}/aryacoin.conf"
     elif coin == 'CHIPS':
