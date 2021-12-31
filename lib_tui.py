@@ -54,7 +54,7 @@ def refresh_wallet(coin=None):
         # query coin
         msg = "Enter coin to reset: "
         coin = get_valid_coin(msg, DPOW_COINS)
-    
+
     print(f"Refreshing {coin} wallet")
 
     max_tx_count = 2000
@@ -72,7 +72,7 @@ def refresh_wallet(coin=None):
     if coin in CONFIG["non_antara_addresses"]:
         address = CONFIG["non_antara_addresses"][coin]
     else:
-        address = lib_helper.addr_from_pubkey(coin, CONFIG["pubkey"])
+        address = addr_from_pubkey(coin, CONFIG["pubkey"])
 
     if not address:            
         option_print(f"unable to get address")
