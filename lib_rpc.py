@@ -224,7 +224,7 @@ def wait_for_start(coin, launch_params):
                 print(launch_params)
             print(f"Waiting for {coin} daemon to restart...")
             time.sleep(30)
-            block_height = lib_rpc.getblockcount(coin)
+            block_height = getblockcount(coin)
             print(block_height)
             if block_height:
                 return block_height
