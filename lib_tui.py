@@ -153,10 +153,15 @@ def refresh_wallet(coin=None):
  
             # send to self (use daemon rpc or electrum for non-antara compatible?)
             # create a raw transaction, send after pk without recan import
-            if coin in ["LTC", "ARRR", "AYA", "CHIPS", "EMC2", "GLEEC-OLD", "MCL", "SFUSD", "TOKEL", "VRSC"]:
+            if coin in ["LTC", "ARRR", "AYA", "CHIPS", "EMC2", "GLEEC-OLD", "MCL", "SFUSD", "VRSC"]:
                 print(f"Skipping {coin}")
                 return
                 # lib_rpc.sendtoaddress(coin, address, amount)
+            elif coin in ["TOKEL"]:
+                balance = lib_rpc.getbalance(coin)
+                funds_sent = lib_rpc.sendtoaddress(coin, address, balance)
+                if not funds_sent:
+                    return                
             else:
                 funds_sent = lib_atomicdex.send_withdraw(coin, 'MAX', address)
                 if not funds_sent:
@@ -168,6 +173,7 @@ def refresh_wallet(coin=None):
             print(lib_rpc.stop(coin))
 
             lib_rpc.wait_for_stop(coin)
+            time.sleep(10)
 
             # backup wallet.dat
             ts = int(time.time())
