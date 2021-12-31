@@ -21,6 +21,7 @@ def get_valid_input(msg, valid_options):
     return q
 
 def get_valid_coin(msg, valid_options):
+    option_print(f"Options: {DPOW_COINS}")
     q = color_input(msg)
     while q not in valid_options:
         error_print(f"Invalid option, try again. Options: {valid_options}")
