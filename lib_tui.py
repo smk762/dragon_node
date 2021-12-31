@@ -55,6 +55,9 @@ def refresh_wallet(coin=None):
         msg = "Enter coin to reset: "
         coin = get_valid_coin(msg, DPOW_COINS)
 
+    if coin in ["VRSC"]:
+        print(f"{coin} does not support import privkey from height or importprunedfunds")
+
     print(f"Refreshing {coin} wallet")
 
     max_tx_count = 2000
@@ -121,8 +124,6 @@ def refresh_wallet(coin=None):
         block_height = lib_rpc.getblockcount(coin)
         print(f"block_height: {block_height}")
 
-    if coin in ["VRSC"]:
-        print(f"{coin} does not support import privkey from height or importprunedfunds")
 
     elif CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
         print(lib_rpc.importprivkey(coin, pk, last_block-1))
@@ -180,7 +181,7 @@ def withdraw_funds():
         while not lib_atomicdex.is_address_valid(coin, address):
             error_print(f"{address} is not a valid {coin} address, try again.")
             address = color_input(f"Enter the destination address: ")
-        send_withdraw(coin, amount, address)
+        lib_atomicdex.send_withdraw(coin, amount, address)
 
 
 def merge_utxos():
