@@ -119,7 +119,7 @@ def refresh_wallet(coin=None):
     if coin in ["VRSC"]:
         print(f"{coin} does not support import privkey from height or importprunedfunds")
 
-    else CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
+    elif CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]:
         print(lib_rpc.importprivkey(coin, pk, last_block-1))
         time.sleep(1)
     else:
