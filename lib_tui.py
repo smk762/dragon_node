@@ -54,7 +54,7 @@ def refresh_wallet(coin=None):
         # query coin
         msg = "Enter coin to reset: "
         coin = get_valid_coin(msg, DPOW_COINS)
-
+    
     print(f"Refreshing {coin} wallet")
 
     max_tx_count = 2000
