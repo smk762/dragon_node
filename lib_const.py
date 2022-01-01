@@ -92,8 +92,8 @@ def generate_rpc_pass(length):
 # Load or Create MM2.json
 # Documentation: https://developers.komodoplatform.com/basic-docs/atomicdex/atomicdex-setup/configure-mm2-json.html#mm2-json
 def load_MM2_json():
-    if os.path.exists("MM2.json"):
-        with open("MM2.json", "r") as f:
+    if os.path.exists(f"{SCRIPT_PATH}/MM2.json"):
+        with open(f"{SCRIPT_PATH}/MM2.json", "r") as f:
             MM2_JSON = json.load(f)
     else:
         table_print("Looks like you dont have an MM2.json file, lets create one now...")
@@ -122,16 +122,16 @@ def load_MM2_json():
 
         mm2_conf.update({"passphrase": passphrase})
 
-        with open("MM2.json", "w+") as f:
+        with open(f"{SCRIPT_PATH}/MM2.json", "w+") as f:
             json.dump(mm2_conf, f, indent=4)
-            status_print("MM2.json file created.")
+            status_print(f"{SCRIPT_PATH}/MM2.json file created.")
             status_print("Be sure to make a secure backup of your seed phrase offline!")
 
-        with open("userpass", "w+") as f:
+        with open(f"{SCRIPT_PATH}/userpass", "w+") as f:
             f.write(f'userpass="{rpc_password}"')
             status_print("userpass file created.")
 
-    with open("MM2.json", "r") as f:
+    with open(f"{SCRIPT_PATH}/MM2.json", "r") as f:
         MM2_JSON = json.load(f)
 
     return MM2_JSON
@@ -139,8 +139,8 @@ def load_MM2_json():
 
 # Load or Create config.json
 def load_config():
-    if os.path.exists("config.json"):
-        with open("config.json", "r") as f:
+    if os.path.exists(f"{SCRIPT_PATH}/config.json"):
+        with open(f"{SCRIPT_PATH}/config.json", "r") as f:
             config = json.load(f)
     else:
         table_print("Looks like you dont have an config.json file, lets create one now...")
@@ -200,12 +200,12 @@ def load_config():
                 config["non_antara_addresses"][coin] = non_antara_address
 
 
-        with open("config.json", "w+") as f:
+        with open(f"{SCRIPT_PATH}/config.json", "w+") as f:
             json.dump(config, f, indent=4)
-            status_print("config.json file created.")
+            status_print(f"{SCRIPT_PATH}/config.json file created.")
 
 
-    with open("config.json", "r") as f:
+    with open(f"{SCRIPT_PATH}/config.json", "r") as f:
         config = json.load(f)
 
     return config
@@ -213,12 +213,12 @@ def load_config():
 
 # Download coins if not existing
 def get_coins_file():
-    if not os.path.exists("coins"):
+    if not os.path.exists(f"{SCRIPT_PATH}/coins"):
         status_print("coins file not found, downloading...")
         url = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/coins"
         coins = requests.get(url).json()
 
-        with open('coins', 'w', encoding='utf-8') as f:
+        with open(f"{SCRIPT_PATH}/coins", "w", encoding="utf-8") as f:
             json.dump(coins, f, ensure_ascii=False, indent=4)
 
 CONFIG = load_config()
