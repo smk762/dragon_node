@@ -32,29 +32,32 @@ def view_stats():
     table_print("-"*106)
 
     for coin in DPOW_COINS:
-        resp_time = lib_rpc.get_wallet_response_time(coin)
-        info = lib_rpc.getinfo(coin)
-        blocks = lib_rpc.getblockcount()
-        best_blk_hash = lib_rpc.getbestblockhash()
-        best_blk_info = lib_rpc.getblock(coin, [best_blk_hash])
-        last_block = best_blk_info["time"]
-        connections = info["connections"]
-        split_utxo_count = lib_rpc.get_split_utxo_count(coin)
-        wallet_tx = lib_rpc.get_wallet_tx(coin)
-        tx_count = len(wallet_tx)
-        ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
-        table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^6}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
-            coin,
-            balance,
-            split_utxo_count,
-            ntx_count,
-            blocks,
-            time_since(last_block),
-            resp_time,
-            time_since(last_ntx_time),
-            time_since(last_mined_time),
+        try:
+            resp_time = lib_rpc.get_wallet_response_time(coin)
+            info = lib_rpc.getinfo(coin)
+            blocks = lib_rpc.getblockcount()
+            best_blk_hash = lib_rpc.getbestblockhash()
+            best_blk_info = lib_rpc.getblock(coin, [best_blk_hash])
+            last_block = best_blk_info["time"]
+            connections = info["connections"]
+            split_utxo_count = lib_rpc.get_split_utxo_count(coin)
+            wallet_tx = lib_rpc.get_wallet_tx(coin)
+            tx_count = len(wallet_tx)
+            ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
+            table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^6}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+                coin,
+                balance,
+                split_utxo_count,
+                ntx_count,
+                blocks,
+                time_since(last_block),
+                resp_time,
+                time_since(last_ntx_time),
+                time_since(last_mined_time),
+                )
             )
-        )
+        except:
+            error_print(f"{coin} is unresponsive!")
 
     table_print("-"*106)
 
