@@ -32,17 +32,21 @@ def view_stats():
     table_print("-"*106)
 
     for coin in DPOW_COINS:
+        if coin not in ["AXO", "BTCH", "COQUICASH", "OOT"]:
+
         try:
-            resp_time = lib_rpc.get_wallet_response_time(coin)
+            splittime = str(lib_rpc.get_wallet_response_time(coin)).split(".")[1]
+            resp_time = f"0.{splittime}"
             blocks = lib_rpc.getblockcount(coin)
-            best_blk_info = lib_rpc.getblock(coin, blocks)
+            best_block = lib_rpc.getbestblockhash(coin)
+            best_blk_info = lib_rpc.getblock(coin, best_block)
             balance = lib_rpc.getbalance(coin)
             last_block = best_blk_info["time"]
             split_utxo_count = lib_rpc.get_split_utxo_count(coin)
             wallet_tx = lib_rpc.get_wallet_tx(coin)
             tx_count = len(wallet_tx)
             ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
-            table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^6}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+            table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
                 coin,
                 balance,
                 split_utxo_count,
@@ -54,8 +58,8 @@ def view_stats():
                 time_since(last_mined_time),
                 )
             )
-        except:
-            error_print(f"{coin} is unresponsive!")
+        except Exception as e:
+            error_print(f"{coin} is unresponsive! {e}")
 
     table_print("-"*106)
 
