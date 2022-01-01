@@ -90,7 +90,12 @@ def refresh_wallet(coin=None):
     balance = lib_rpc.getbalance(coin)
     option_print(f"balance: {balance}")
 
-    txid = lib_rpc.sendtoaddress(coin, address, balance)
+    if coin == "KMD":
+        unspendable, txid = consolidate_kmd(address, balance)
+        
+    else:
+        txid = lib_rpc.sendtoaddress(coin, address, balance)
+
     if not txid:
         option_print(f"unable to get txid")
         return False
@@ -116,13 +121,12 @@ def refresh_wallet(coin=None):
     # restart chain
     lib_rpc.start_chain(coin, launch_params)
     block_height = lib_rpc.wait_for_start(coin, launch_params)
-    option_print(f"block_height: {block_height}")
-    time.sleep(20)
 
     while last_block == block_height:
         sleep_message("Waiting for next block...")
         block_height = lib_rpc.getblockcount(coin)
-        option_print(f"block_height: {block_height}")
+        time.sleep(20)
+    option_print(f"block_height: {block_height}")
 
 
     if coin not in ["LTC"] and (CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]):

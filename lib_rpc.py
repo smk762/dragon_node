@@ -198,6 +198,20 @@ def sweep_kmd():
     print(sendtoaddress("KMD", CONFIG["sweep_address"], round(balance-5, 4)))
     
 
+def consolidate_kmd(address, balance):
+    txid = ""
+    balance = 0
+    unspendable = []
+    unspent = get_unspent("KMD")
+    for utxo in unspent:
+        if utxo["spendable"]:
+            balance += utxo["amount"]
+        else:
+            print(uxto)
+            unspendable.append(utxo)
+    return unspendable, txid
+
+
 
 def get_wallet_tx_count(coin):
     return len(rpc_proxy(coin, "listtransactions", ["*", 99999999])['result'])
