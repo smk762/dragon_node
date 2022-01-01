@@ -72,7 +72,10 @@ def refresh_wallet(coin=None):
     if coin in CONFIG["non_antara_addresses"]:
         address = CONFIG["non_antara_addresses"][coin]
     else:
-        address = addr_from_pubkey(coin, CONFIG["pubkey"])
+        if CONFIG["server"] == 'Main':
+            address = addr_from_pubkey("KMD", CONFIG["pubkey"])
+        else:
+            address = addr_from_pubkey(coin, CONFIG["pubkey"])
 
     if not address:            
         option_print(f"unable to get address")
