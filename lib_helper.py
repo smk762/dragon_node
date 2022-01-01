@@ -9,6 +9,17 @@ def sec_to_hms(sec):
   return ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
 
 
+def time_since(ts):
+    sec = int(time.time()) - ts
+    return sec_to_hms(sec)
+
+
+def get_ntx_addr(coin):
+    if coin in NTX_ADDR:
+        return NTX_ADDR[coin]
+    return NTX_ADDR["KMD"]
+
+
 def get_activate_command(coin):
   return requests.get(f"http://116.203.120.91:8762/api/atomicdex/activation_commands/?coin={coin}").json()
 

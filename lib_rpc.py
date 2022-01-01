@@ -73,7 +73,7 @@ def get_creds_from_file(coin):
     return rpc_user, rpc_pass, rpc_port
 
 
-def rpc_proxy(coin, method, method_params=None):
+def rpc_proxy(coin, method, method_params=None, get_response_time=False):
     rpc_user, rpc_pass, rpc_port = get_creds_from_file(coin)
     if not method_params:
         method_params = []
@@ -94,7 +94,13 @@ def rpc_proxy(coin, method, method_params=None):
             if resp["error"].find("Userpass is invalid"):
                 error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
                 sys.exit()
+    if get_response_time:
+        return r.elapsed
     return resp
+
+
+def get_wallet_response_time(coin):
+    return rpc_proxy(coin, "listunspent", None, True)
 
 
 def getinfo(coin):
@@ -149,6 +155,14 @@ def get_wallet_addr(coin):
 
 def get_pubkey(coin, address):
     return rpc_proxy(coin, "validateaddress", [address])['result']["pubkey"]
+
+
+def getblock(coin, blockhash):
+    return rpc_proxy(coin, "getblock", [blockhash])['result']
+
+
+def getbestblockhash(coin):
+    return rpc_proxy(coin, "getbestblockhash")['result']
 
 
 def get_unspent(coin):
@@ -207,6 +221,19 @@ def sweep_kmd():
     print(sendtoaddress("KMD", CONFIG["sweep_address"], round(balance-5, 4)))
     
 
+def get_split_utxo_count(coin, utxo_value=0.00010000):
+    if coin in ["EMC2", "AYA"]:
+        utxo_value = 0.00100000
+    unspent = get_unspent(coin)
+    count = 0
+    for utxo in unspent:
+        if utxo["amount"] == utxo_value:
+            count += 1
+    return count
+
+
+
+
 def consolidate_kmd(address, balance):
     unlock_unspent("KMD")
     time.sleep(1)
@@ -224,9 +251,8 @@ def consolidate_kmd(address, balance):
     return unspendable, txid
 
 
-
-def get_wallet_tx_count(coin):
-    return len(rpc_proxy(coin, "listtransactions", ["*", 99999999])['result'])
+def get_wallet_tx(coin):
+    return rpc_proxy(coin, "listtransactions", ["*", 99999999])['result']
 
 
 def start_chain(coin, launch_params):
@@ -264,3 +290,29 @@ def wait_for_start(coin, launch_params):
                 return block_height
         except:
             pass
+
+
+
+def get_ntx_stats(coin, wallet_tx):
+    last_ntx_time = 0
+    last_mined_time = 0
+    ntx = []
+
+    for tx in wallet_tx:
+        ntx_addr = get_ntx_addr(coin)
+
+        if tx["address"] == ntx_addr:
+
+            if tx["time"] > last_ntx_time:
+                last_ntx_time = tx["time"]
+
+            if tx["category"] == "send":
+                ntx.append(tx)
+
+            if tx["generated"]:
+
+                if tx["time"] > last_mined_time:
+                    last_mined_time = tx["time"]
+
+    ntx_count = len(ntx)
+    return ntx_count, last_ntx_time, last_mined_time

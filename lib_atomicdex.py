@@ -76,8 +76,6 @@ def activate_coins(coins_list, merge_utxo=False):
             error_print(f"Activation params not found for {coin}!")
 
 
-def get_stats_table(coins_list=None):
-    pass
 
 
 # Documentation: https://developers.komodoplatform.com/basic-docs/atomicdex/atomicdex-api-legacy/my_balance.html
@@ -143,6 +141,8 @@ def stop_mm2():
     params = {"method":"stop"}
     resp = mm2_proxy(params)
     return resp
+
+
 
 
 def get_enabled_coins_list():
