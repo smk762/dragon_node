@@ -219,7 +219,7 @@ def consolidate_kmd(address, balance):
         else:
             print(f"Unspendable: {uxto}")
             unspendable.append(utxo)
-    txid = sendtoaddress("KMD", address, balance)
+    txid = sendtoaddress("KMD", address, math.floor(balance*1000)/1000)
     return unspendable, txid
 
 
