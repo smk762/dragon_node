@@ -14,6 +14,7 @@ import mnemonic
 import requests
 from os.path import expanduser
 
+SCRIPT_PATH = sys.path[0]
 
 def colorize(string, color):
     colors = {
@@ -224,7 +225,6 @@ def get_coins_file():
 CONFIG = load_config()
 
 HOME = expanduser("~")
-SCRIPT_PATH = sys.path[0]
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
 ACTIVATE_COMMANDS = requests.get("http://116.203.120.91:8762/api/atomicdex/activation_commands/").json()["commands"]
 LAUNCH_PARAMS = requests.get("http://116.203.120.91:8762/api/info/launch_params/").json()["results"]
