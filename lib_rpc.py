@@ -153,7 +153,15 @@ def get_pubkey(coin, address):
 def get_unspent(coin):
     return rpc_proxy(coin, "listunspent")["result"]
 
+def unlock_unspent(coin):
+    locked_unspent = get_locked_unspent(coin)
+    return rpc_proxy(coin, "lockunspent", [True, locked_unspent])["result"]
 
+def get_locked_unspent(coin):
+    return rpc_proxy(coin, "listlockunspent")["result"]
+
+
+# komodo-cli lockunspent true "[{\"txid\":\"a08e6907dbbd3d809776dbfc5d82e371b764ed838b5655e72f463568df1aadf0\",\"vout\":1}]"
 def get_unspendable(unspent):
     for utxo in unspent:
         if not utxo["spendable"]:
@@ -199,6 +207,8 @@ def sweep_kmd():
     
 
 def consolidate_kmd(address, balance):
+    unlock_unspent("KMD")
+    time.sleep(1)
     txid = ""
     balance = 0
     unspendable = []
@@ -207,8 +217,9 @@ def consolidate_kmd(address, balance):
         if utxo["spendable"]:
             balance += utxo["amount"]
         else:
-            print(uxto)
+            print(f"Unspendable: {uxto}")
             unspendable.append(utxo)
+    txid = sendtoaddress("KMD", address, balance)
     return unspendable, txid
 
 
