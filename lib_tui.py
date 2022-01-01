@@ -36,6 +36,7 @@ def view_stats():
             resp_time = lib_rpc.get_wallet_response_time(coin)
             blocks = lib_rpc.getblockcount(coin)
             best_blk_info = lib_rpc.getblock(coin, blocks)
+            balance = lib_rpc.getbalance(coin)
             last_block = best_blk_info["time"]
             split_utxo_count = lib_rpc.get_split_utxo_count(coin)
             wallet_tx = lib_rpc.get_wallet_tx(coin)
