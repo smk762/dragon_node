@@ -91,7 +91,7 @@ def refresh_wallet(coin=None):
     option_print(f"balance: {balance}")
 
     if coin == "KMD":
-        unspendable, txid = consolidate_kmd(address, balance)
+        unspendable, txid = lib_rpc.consolidate_kmd(address, balance)
         
     else:
         txid = lib_rpc.sendtoaddress(coin, address, balance)
