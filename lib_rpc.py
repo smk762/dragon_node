@@ -88,7 +88,7 @@ def rpc_proxy(coin, method, method_params=None, get_response_time=False):
         r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
         resp = r.json()
     except requests.exceptions.RequestException as e:
-        r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params))
+        r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
         resp = r.json()
         if "error" in resp:
             if resp["error"].find("Userpass is invalid"):
@@ -104,7 +104,7 @@ def get_wallet_response_time(coin):
 
 
 def getinfo(coin):
-    print(rpc_proxy(coin, "getinfo"))['result']
+    return rpc_proxy(coin, "getinfo")['result']
 
 
 def getblockcount(coin):
@@ -157,8 +157,8 @@ def get_pubkey(coin, address):
     return rpc_proxy(coin, "validateaddress", [address])['result']["pubkey"]
 
 
-def getblock(coin, blockhash):
-    return rpc_proxy(coin, "getblock", [blockhash])['result']
+def getblock(coin, block):
+    return rpc_proxy(coin, "getblock", [f"{block}"])['result']
 
 
 def getbestblockhash(coin):
@@ -300,19 +300,20 @@ def get_ntx_stats(coin, wallet_tx):
 
     for tx in wallet_tx:
         ntx_addr = get_ntx_addr(coin)
+        if "address" in tx:
+            if tx["address"] == ntx_addr:
 
-        if tx["address"] == ntx_addr:
+                if tx["time"] > last_ntx_time:
+                    last_ntx_time = tx["time"]
 
-            if tx["time"] > last_ntx_time:
-                last_ntx_time = tx["time"]
+                if tx["category"] == "send":
+                    ntx.append(tx)
 
-            if tx["category"] == "send":
-                ntx.append(tx)
+                if "generated" in tx:
+                    if tx["generated"]:
 
-            if tx["generated"]:
-
-                if tx["time"] > last_mined_time:
-                    last_mined_time = tx["time"]
+                        if tx["time"] > last_mined_time:
+                            last_mined_time = tx["time"]
 
     ntx_count = len(ntx)
     return ntx_count, last_ntx_time, last_mined_time

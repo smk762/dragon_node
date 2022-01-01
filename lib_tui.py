@@ -34,12 +34,11 @@ def view_stats():
     for coin in DPOW_COINS:
         try:
             resp_time = lib_rpc.get_wallet_response_time(coin)
-            info = lib_rpc.getinfo(coin)
-            blocks = lib_rpc.getblockcount()
-            best_blk_hash = lib_rpc.getbestblockhash()
+            blocks = lib_rpc.getblockcount(coin)
+            best_blk_hash = lib_rpc.getbestblockhash(coin)
             best_blk_info = lib_rpc.getblock(coin, [best_blk_hash])
+            print(best_blk_info)
             last_block = best_blk_info["time"]
-            connections = info["connections"]
             split_utxo_count = lib_rpc.get_split_utxo_count(coin)
             wallet_tx = lib_rpc.get_wallet_tx(coin)
             tx_count = len(wallet_tx)
