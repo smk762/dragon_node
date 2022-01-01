@@ -15,8 +15,51 @@ def view_balances():
 
 
 def view_stats():
-    coins_list = lib_atomicdex.get_enabled_coins_list()
-    get_stats_table(coins_list)
+
+    table_print("-"*106)
+    table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+        "COIN",
+        "BALANCE",
+        "UTXOs",
+        "NTX",
+        "BLK",
+        "LastBLK",
+        "RESPONSE",
+        "LastNTX",
+        "LastMINED",
+        )
+    )
+    table_print("-"*106)
+
+    for coin in DPOW_COINS:
+        resp_time = lib_rpc.get_wallet_response_time(coin)
+        info = lib_rpc.getinfo(coin)
+        blocks = lib_rpc.getblockcount()
+        best_blk_hash = lib_rpc.getbestblockhash()
+        best_blk_info = lib_rpc.getblock(coin, [best_blk_hash])
+        last_block = best_blk_info["time"]
+        connections = info["connections"]
+        split_utxo_count = lib_rpc.get_split_utxo_count(coin)
+        wallet_tx = lib_rpc.get_wallet_tx(coin)
+        tx_count = len(wallet_tx)
+        ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
+        table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^6}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+            coin,
+            balance,
+            split_utxo_count,
+            ntx_count,
+            blocks,
+            time_since(last_block),
+            resp_time,
+            time_since(last_ntx_time),
+            time_since(last_mined_time),
+            )
+        )
+
+    table_print("-"*106)
+
+
+
 
 
 def show_launch_params():
@@ -58,7 +101,7 @@ def refresh_wallet(coin=None):
     print(f"Refreshing {coin} wallet")
 
     max_tx_count = 2000
-    tx_count = lib_rpc.get_wallet_tx_count(coin)
+    tx_count = len(lib_rpc.get_wallet_tx(coin))
     if tx_count < max_tx_count:
         option_print(f"Skipping {coin}, less than {max_tx_count}")
         return False
@@ -92,7 +135,7 @@ def refresh_wallet(coin=None):
 
     if coin == "KMD":
         unspendable, txid = lib_rpc.consolidate_kmd(address, balance)
-        
+
     else:
         txid = lib_rpc.sendtoaddress(coin, address, balance)
 

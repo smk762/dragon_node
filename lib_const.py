@@ -263,3 +263,17 @@ MM2_IP = "http://127.0.0.1:7762"
 
 # Get coins file if needed
 get_coins_file()
+
+
+# Notarisation Stats
+UTXO_AMT = 0.00010000
+NTX_AMT = -0.00083600
+
+NTX_ADDR = {
+    "LTC": "LhGojDga6V1fGzQfNGcYFAfKnDvsWeuAsP",
+    "KMD": "RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA",
+    "EMC": "EfCkxbDFSn4X1VKMzyckyHaXLf4ithTGoM",
+    "AYA": "Adpj7WENLyRkq9vVknHa82rf3cVHjYvzCG",
+    "GLEEC-OLD": "FTsxvoops8zGeMbY3pHPwY86bfacGvMdfU",
+    "SFUSD": "SjLrVr9tkBxoYVVxjZcKX3k8Dno2A28YD7"        
+}
