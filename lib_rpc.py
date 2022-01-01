@@ -309,11 +309,9 @@ def get_ntx_stats(coin, wallet_tx):
                 if tx["category"] == "send":
                     ntx.append(tx)
 
-                if "generated" in tx:
-                    if tx["generated"]:
-
-                        if tx["time"] > last_mined_time:
-                            last_mined_time = tx["time"]
+            if "generated" in tx:
+                if tx["time"] > last_mined_time:
+                    last_mined_time = tx["time"]
 
     ntx_count = len(ntx)
     return ntx_count, last_ntx_time, last_mined_time

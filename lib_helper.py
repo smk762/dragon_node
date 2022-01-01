@@ -10,6 +10,8 @@ def sec_to_hms(sec):
 
 
 def time_since(ts):
+    if ts == 0:
+        return "Never"
     sec = int(time.time()) - ts
     return sec_to_hms(sec)
 
