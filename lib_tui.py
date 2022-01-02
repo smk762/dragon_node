@@ -19,7 +19,7 @@ def view_stats():
     table_print("-"*105)
     table_print('|{:^10}|{:^6}|{:^6}|{:^12}|{:^16}|{:^11}|{:^11}|{:^12}|{:^11}|'.format(
         "COIN",
-        "UTXOs",
+        "UTXO",
         "NTX",
         "LastNTX",
         "BALANCE",
@@ -46,7 +46,7 @@ def view_stats():
                 wallet_tx = lib_rpc.get_wallet_tx(coin)
                 tx_count = len(wallet_tx)
                 ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
-                table_print('|{:^12}|{:^16}|{:^6}|{:^8}|{:^13}|{:^11}|{:^12}|{:^12}|{:^10}|'.format(
+                table_print('|{:^10}|{:^6}|{:^6}|{:^12}|{:^16}|{:^11}|{:^11}|{:^12}|{:^11}|'.format(
                     coin,
                     split_utxo_count,
                     ntx_count,
