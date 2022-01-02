@@ -16,12 +16,10 @@ author = '{:^80}'.format('Welcome to the Dragon Node TUI v0.1 by Dragonhound')
 def main():
 
     menu_items = [
-        {"View Balances": lib_tui.view_balances},
         {"View Stats": lib_tui.view_stats},
         {"Show Launch Params": lib_tui.show_launch_params},
         {"Show Private Key": lib_tui.show_privkey},
         {"Refresh Wallet": lib_tui.refresh_wallet},
-        {"Loop Views": lib_tui.loop_views},
         {"Merge UTXOs": lib_tui.merge_utxos},
         {"Withdraw Funds": lib_tui.withdraw_funds},
         {"Exit TUI": lib_tui.exit_tui}

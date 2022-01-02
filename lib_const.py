@@ -236,6 +236,9 @@ DPOW_COINS.sort()
 
 IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "GLEEC-OLD", "SFUSD", "LTC"]
 
+MAX_TX_COUNT = 2000
+if "max_tx_count" in CONFIG:
+    MAX_TX_COUNT = CONFIG["max_tx_count"]
 
 ERROR_EVENTS = [
   "StartFailed", "NegotiateFailed", "TakerFeeValidateFailed", "MakerPaymentTransactionFailed",
