@@ -3,10 +3,15 @@ from lib_const import *
 
 
 def sec_to_hms(sec):
-  minutes, seconds = divmod(sec, 60)
-  hours, minutes = divmod(minutes, 60)
-  periods = [('h', hours), ('m', minutes), ('s', seconds)]
-  return ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
+    if sec < 0:
+        sec = sec*-1
+    minutes, seconds = divmod(sec, 60)
+    hours, minutes = divmod(minutes, 60)
+    periods = [('h', hours), ('m', minutes), ('s', seconds)]
+    result = ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
+    if sec < 0:
+        return f"-{result}"
+    return result
 
 
 def time_since(ts):

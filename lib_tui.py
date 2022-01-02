@@ -16,20 +16,20 @@ def view_balances():
 
 def view_stats():
 
-    table_print("-"*106)
-    table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+    table_print("-"*110)
+    table_print('|{:^12}|{:^16}|{:^6}|{:^8}|{:^13}|{:^11}|{:^12}|{:^12}|{:^10}|'.format(
         "COIN",
-        "BALANCE",
         "UTXOs",
         "NTX",
+        "LastNTX",
+        "BALANCE",
         "BLK",
         "LastBLK",
         "RESPONSE",
-        "LastNTX",
         "LastMINED",
         )
     )
-    table_print("-"*106)
+    table_print("-"*110)
 
     for coin in DPOW_COINS:
         if coin not in ["AXO", "BTCH", "COQUICASH", "OOT"]:
@@ -46,22 +46,22 @@ def view_stats():
                 wallet_tx = lib_rpc.get_wallet_tx(coin)
                 tx_count = len(wallet_tx)
                 ntx_count, last_ntx_time, last_mined_time = lib_rpc.get_ntx_stats(coin, wallet_tx)
-                table_print('|{:^16}|{:^16}|{:^6}|{:^8}|{:^12}|{:^12}|{:^12}|{:^12}|{:^12}|'.format(
+                table_print('|{:^12}|{:^16}|{:^6}|{:^8}|{:^13}|{:^11}|{:^12}|{:^12}|{:^10}|'.format(
                     coin,
-                    balance,
                     split_utxo_count,
                     ntx_count,
+                    time_since(last_ntx_time),
+                    balance,
                     blocks,
                     time_since(last_block),
                     resp_time,
-                    time_since(last_ntx_time),
                     time_since(last_mined_time),
                     )
                 )
             except Exception as e:
                 error_print(f"{coin} is unresponsive! {e}")
 
-    table_print("-"*106)
+    table_print("-"*110)
 
 
 
