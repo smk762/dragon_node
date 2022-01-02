@@ -256,6 +256,14 @@ def get_wallet_tx(coin):
 
 
 def start_chain(coin, launch_params):
+    # check if already running
+    try:
+        block_height = getblockcount(coin)
+        if blockheight: 
+            print(f"{coin} already running...")
+            return
+    except requests.exceptions.RequestException as e:
+        pass
     log_output = open(f"{coin}_daemon.log",'w+')
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
     time.sleep(3)
@@ -279,8 +287,10 @@ def wait_for_start(coin, launch_params):
     while True:
         try:
             i += 1
-            if i > 12:
-                print(f"Looks like there might be an issue with loading {coin}... Here are the launch params to do it manually:")
+            if i > 8:
+                lib_rpc.start_chain(coin, launch_params)
+                print(f"Looks like there might be an issue with loading {coin}...")
+                print(f"We'll try and start it again, but  you need it here are the launch params to do it manually:")
                 print(launch_params)
             print(f"Waiting for {coin} daemon to restart...")
             time.sleep(30)
