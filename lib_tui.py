@@ -119,7 +119,7 @@ def refresh_wallet(coin=None):
     
     tx_count = len(lib_rpc.get_wallet_tx(coin))
     if tx_count < MAX_TX_COUNT:
-        option_print(f"Skipping {coin}, less than {max_tx_count}")
+        option_print(f"Skipping {coin}, less than {MAX_TX_COUNT}")
         return False
 
     launch_params = lib_rpc.get_launch_params(coin)
