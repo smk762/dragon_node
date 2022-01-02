@@ -16,7 +16,7 @@ def view_balances():
 
 def view_stats():
 
-    table_print("-"*113)
+    table_print("-"*114)
     table_print('|{:^10}|{:^6}|{:^6}|{:^12}|{:^16}|{:^11}|{:^11}|{:^8}|{:^12}|{:^11}|'.format(
         "COIN",
         "UTXO",
@@ -30,7 +30,7 @@ def view_stats():
         "LastMINED",
         )
     )
-    table_print("-"*113)
+    table_print("-"*114)
 
     for coin in DPOW_COINS:
         if coin not in ["AXO", "BTCH", "COQUICASH", "OOT"]:
@@ -63,7 +63,7 @@ def view_stats():
             except Exception as e:
                 error_print(f"{coin} is unresponsive! {e}")
 
-    table_print("-"*113)
+    table_print("-"*114)
 
 
 
