@@ -68,6 +68,8 @@ def view_stats(loop=True):
 
             if not loop:
                 break
+            status_print("Press Ctrl-C to exit loop...")
+            time.sleep(120)
         except KeyboardInterrupt:
             break
 
