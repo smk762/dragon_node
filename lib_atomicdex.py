@@ -49,6 +49,8 @@ def activate_coins(coins_list, merge_utxo=False):
 
     for coin in coins_list:
         activated = False
+        if coin == "TOKEL":
+            coin = "TKL"
         activation_command = get_activation_command(coin)
 
         if activation_command:
