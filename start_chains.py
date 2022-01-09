@@ -22,7 +22,7 @@ for coin in lib_const.DPOW_COINS:
                 block_height = last_tx["block_height"]
                 txid = last_tx["tx_hash"]
 
-            if coin not in ["LTC"] and (CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]):
+            if coin not in ["LTC"] and (lib_const.CONFIG["server"] == "Main" or coin in ["KMD", "TOKEL", "MCL"]):
                 lib_rpc.importprivkey(coin, pk, block_height-1)
                 time.sleep(1)
             else:
