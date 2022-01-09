@@ -12,23 +12,23 @@ from lib_helper import *
 
 def get_data_dir(coin):
     if coin == 'KMD':
-        data_dir = f"{os.environ['HOME']}/.komodo"
+        data_dir = f"{USERHOME}/.komodo"
     elif coin == 'LTC':
-        data_dir = f"{os.environ['HOME']}/.litecoin"
+        data_dir = f"{USERHOME}/.litecoin"
     elif coin == 'AYA':
-        data_dir = f"{os.environ['HOME']}/.aryacoin"
+        data_dir = f"{USERHOME}/.aryacoin"
     elif coin == 'CHIPS':
-        data_dir = f"{os.environ['HOME']}/.chips"
+        data_dir = f"{USERHOME}/.chips"
     elif coin == 'EMC2':
-        data_dir = f"{os.environ['HOME']}/.einsteinium"
+        data_dir = f"{USERHOME}/.einsteinium"
     elif coin == 'SFUSD':
-        data_dir = f"{os.environ['HOME']}/.smartusd"
+        data_dir = f"{USERHOME}/.smartusd"
     elif coin == 'GLEEC-OLD':
-        data_dir = f"{os.environ['HOME']}/.gleecbtc"
+        data_dir = f"{USERHOME}/.gleecbtc"
     elif coin == 'ARRR':
-        data_dir = f"{os.environ['HOME']}/.komodo/PIRATE"
+        data_dir = f"{USERHOME}/.komodo/PIRATE"
     else:
-        data_dir = f"{os.environ['HOME']}/.komodo/{coin}"
+        data_dir = f"{USERHOME}/.komodo/{coin}"
 
     return data_dir
 
@@ -87,13 +87,15 @@ def rpc_proxy(coin, method, method_params=None, get_response_time=False):
     try:
         r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
         resp = r.json()
-    except requests.exceptions.RequestException as e:
-        r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
-        resp = r.json()
         if "error" in resp:
             if resp["error"].find("Userpass is invalid"):
                 error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
                 sys.exit()
+    except requests.exceptions.RequestException as e:
+        r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
+        print(r.text)
+        resp = r.text
+
     if get_response_time:
         return r.elapsed
     return resp
@@ -187,7 +189,7 @@ def get_launch_params(coin):
     if coin not in LAUNCH_PARAMS:
         return False
 
-    launch_params = LAUNCH_PARAMS[coin].replace("~", os.environ['HOME'])
+    launch_params = LAUNCH_PARAMS[coin].replace("~", USERHOME)
     launch_params = launch_params.split(" ")
     if CONFIG['pubkey'] != "":
         launch_params.append(f"-pubkey={CONFIG['pubkey']}")    
@@ -259,7 +261,8 @@ def setgenerate(coin, mining=True, cores=1):
     return rpc_proxy(coin, "setgenerate", [mining, cores])['result']
 
 
-def start_chain(coin, launch_params):
+def start_chain(coin):
+    launch_params = get_launch_params(coin)
     # check if already running
     try:
         block_height = getblockcount(coin)
@@ -284,16 +287,16 @@ def wait_for_stop(coin):
     time.sleep(10)
 
 
-def wait_for_start(coin, launch_params):
+def wait_for_start(coin):
     i = 0
     while True:
         try:
             i += 1
             if i > 8:
-                lib_rpc.start_chain(coin, launch_params)
+                lib_rpc.start_chain(coin)
                 print(f"Looks like there might be an issue with loading {coin}...")
                 print(f"We'll try and start it again, but  you need it here are the launch params to do it manually:")
-                print(launch_params)
+                print(get_launch_params(coin))
             print(f"Waiting for {coin} daemon to restart...")
             time.sleep(30)
             block_height = getblockcount(coin)

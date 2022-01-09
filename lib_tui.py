@@ -172,8 +172,8 @@ def refresh_wallet(coin=None):
     time.sleep(30)
 
     # restart chain
-    lib_rpc.start_chain(coin, launch_params)
-    block_height = lib_rpc.wait_for_start(coin, launch_params)
+    lib_rpc.start_chain(coin)
+    block_height = lib_rpc.wait_for_start(coin)
 
     while last_block == block_height:
         sleep_message("Waiting for next block...")

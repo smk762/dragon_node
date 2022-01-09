@@ -151,6 +151,7 @@ def load_config():
             ],
             "pubkey": "",
             "server": "",
+            "userhome": os.environ['HOME'],
             "addnode": [
                 "seed.komodostats.com",
                 "seed.webworker.sh",
@@ -223,8 +224,8 @@ def get_coins_file():
             json.dump(coins, f, ensure_ascii=False, indent=4)
 
 CONFIG = load_config()
+USERHOME = CONFIG["userhome"]
 
-HOME = expanduser("~")
 PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
 ACTIVATE_COMMANDS = requests.get("http://116.203.120.91:8762/api/atomicdex/activation_commands/").json()["commands"]
 LAUNCH_PARAMS = requests.get("http://116.203.120.91:8762/api/info/launch_params/").json()["results"]
