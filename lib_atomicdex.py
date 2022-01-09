@@ -36,8 +36,8 @@ def mm2_proxy(params):
 
 def get_activation_command(coin):
     activation_command = None
-    if coin == "TOKEL":
-        coin = "TKL"
+    if coin == "TKL":
+        coin = "TOKEL"
     for protocol in ACTIVATE_COMMANDS:
         if coin in ACTIVATE_COMMANDS[protocol]:
             activation_command = ACTIVATE_COMMANDS[protocol][coin]
@@ -49,8 +49,6 @@ def activate_coins(coins_list, merge_utxo=False):
 
     for coin in coins_list:
         activated = False
-        if coin == "TOKEL":
-            coin = "TKL"
         activation_command = get_activation_command(coin)
 
         if activation_command:
