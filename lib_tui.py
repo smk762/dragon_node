@@ -34,7 +34,7 @@ def view_stats(loop=True):
             table_print("-"*114)
 
             for coin in DPOW_COINS:
-                if coin not in ["AXO", "BTCH", "COQUICASH", "OOT"]:
+                if coin not in IGNORE_COINS:
 
                     try:
                         splittime = str(lib_rpc.get_wallet_response_time(coin)).split(".")[1]
@@ -202,6 +202,8 @@ def refresh_wallet(coin=None):
         time.sleep(1)
 
     
+    if coin == "KMD":
+        lib_rpc.setgenerate(coin)        
 
     return lib_rpc.getbalance(coin)
         

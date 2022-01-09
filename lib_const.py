@@ -234,6 +234,8 @@ if CONFIG["server"] == "Main":
     DPOW_COINS.append("LTC")
 DPOW_COINS.sort()
 
+IGNORE_COINS = ["AXO", "BTCH", "COQUICASH", "OOT"]
+
 IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "GLEEC-OLD", "SFUSD", "LTC"]
 
 MAX_TX_COUNT = 2000

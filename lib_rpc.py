@@ -255,13 +255,15 @@ def get_wallet_tx(coin):
     return rpc_proxy(coin, "listtransactions", ["*", 99999999])['result']
 
 
+def setgenerate(coin, mining=True, cores=1):
+    return rpc_proxy(coin, "setgenerate", [mining, cores])['result']
+
+
 def start_chain(coin, launch_params):
     # check if already running
     try:
         block_height = getblockcount(coin)
-        if blockheight: 
-            print(f"{coin} already running...")
-            return
+        return
     except requests.exceptions.RequestException as e:
         pass
     log_output = open(f"{coin}_daemon.log",'w+')
