@@ -15,6 +15,9 @@ def start_mm2(logfile='mm2_output.log'):
 
 
 def mm2_proxy(params):
+    if "coin" in params:
+        if params["coin"] == "TOKEL":
+            params["coin"] = "TKL"
     params.update({"userpass": MM2_USERPASS})
     #print(json.dumps(params))
     try:

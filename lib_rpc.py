@@ -83,14 +83,17 @@ def rpc_proxy(coin, method, method_params=None, get_response_time=False):
         "method": method,
         "params": method_params,
     }
-    #print(json.dumps(params))
     try:
         r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
         resp = r.json()
-        if "error" in resp:
-            if resp["error"].find("Userpass is invalid"):
-                error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
-                sys.exit()
+        if resp:
+            if "error" in resp:
+                if resp["error"]:
+                    if resp["error"].find("Userpass is invalid"):
+                        error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
+                        sys.exit()
+                    else:
+                        print(resp["error"])
     except requests.exceptions.RequestException as e:
         r = requests.post(f"http://127.0.0.1:{rpc_port}", json.dumps(params), auth=HTTPBasicAuth(rpc_user, rpc_pass))
         print(r.text)
@@ -190,6 +193,7 @@ def get_launch_params(coin):
         return False
 
     launch_params = LAUNCH_PARAMS[coin].replace("~", USERHOME)
+    launch_params = launch_params.strip()
     launch_params = launch_params.split(" ")
     if CONFIG['pubkey'] != "":
         launch_params.append(f"-pubkey={CONFIG['pubkey']}")    
