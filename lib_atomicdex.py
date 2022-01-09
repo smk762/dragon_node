@@ -49,6 +49,9 @@ def activate_coins(coins_list, merge_utxo=False):
         activation_command = get_activation_command(coin)
 
         if activation_command:
+            activation_command.update({
+                "tx_history": True
+            })
             if merge_utxo:
                 activation_command.update({
                     "utxo_merge_params":{
@@ -226,6 +229,11 @@ def is_address_valid(coin, address):
 # https://developers.komodoplatform.com/basic-docs/atomicdex-api-legacy/show_priv_key.html
 def get_privkey(coin):
     return mm2_proxy({"method":"show_priv_key","coin":coin})
+
+
+# https://developers.komodoplatform.com/basic-docs/atomicdex-api-legacy/show_priv_key.html
+def get_tx_history(coin, limit=1):
+    return mm2_proxy({"method":"my_tx_history","coin":coin, "limit":limit})
 
 
 # https://developers.komodoplatform.com/basic-docs/atomicdex-api-legacy/validateaddress.html

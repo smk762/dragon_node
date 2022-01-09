@@ -13,6 +13,18 @@ def sec_to_hms(sec):
         return f"-{result}"
     return result
 
+def get_address(coin):
+    # get address 
+    address = None
+    if coin in CONFIG["non_antara_addresses"]:
+        address = CONFIG["non_antara_addresses"][coin]
+    else:
+        if CONFIG["server"] == 'Main':
+            address = addr_from_pubkey("KMD", CONFIG["pubkey"])
+        else:
+            address = addr_from_pubkey(coin, CONFIG["pubkey"])
+    return address
+
 
 def time_since(ts):
     if ts == 0:

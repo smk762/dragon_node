@@ -127,14 +127,8 @@ def refresh_wallet(coin=None):
         option_print(f"unable to launch_params")
         return False
 
-    # get address 
-    if coin in CONFIG["non_antara_addresses"]:
-        address = CONFIG["non_antara_addresses"][coin]
-    else:
-        if CONFIG["server"] == 'Main':
-            address = addr_from_pubkey("KMD", CONFIG["pubkey"])
-        else:
-            address = addr_from_pubkey(coin, CONFIG["pubkey"])
+    address = get_address(coin)
+
 
     if not address:            
         option_print(f"unable to get address")
@@ -196,7 +190,7 @@ def refresh_wallet(coin=None):
         time.sleep(1)
         # VRSC does not support import from height or importprunedfunds
         if coin in ["VRSC"]:
-            lib_atomicdex.send_withdraw(coin, amount, 'MAX')
+            lib_atomicdex.send_withdraw(coin, "MAX", address)
         else:
             option_print(lib_rpc.importprunedfunds(coin, raw_tx, txoutproof))
         time.sleep(1)
