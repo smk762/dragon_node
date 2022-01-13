@@ -89,9 +89,12 @@ def rpc_proxy(coin, method, method_params=None, get_response_time=False):
         if resp:
             if "error" in resp:
                 if resp["error"]:
-                    if resp["error"].find("Userpass is invalid"):
-                        error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
-                        sys.exit()
+                    if not isinstance(resp["error"], dict)
+                        if resp["error"].find("Userpass is invalid"):
+                            error_print(f"The {coin} daemon is rejecting your rpc_password. Please check it is running.")
+                            sys.exit()
+                        else:
+                            print(resp["error"])
                     else:
                         print(resp["error"])
     except requests.exceptions.RequestException as e:

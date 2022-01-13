@@ -19,7 +19,7 @@ def get_address(coin):
     if coin in CONFIG["non_antara_addresses"]:
         address = CONFIG["non_antara_addresses"][coin]
     else:
-        if CONFIG["server"] == 'Main':
+        if CONFIG["server"] == 'Main' and coin != "LTC":
             address = addr_from_pubkey("KMD", CONFIG["pubkey"])
         else:
             address = addr_from_pubkey(coin, CONFIG["pubkey"])
