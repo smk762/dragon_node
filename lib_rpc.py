@@ -270,17 +270,18 @@ def setgenerate(coin, mining=True, cores=1):
 
 def start_chain(coin):
     launch_params = get_launch_params(coin)
-    # check if already running
-    try:
-        block_height = getblockcount(coin)
-        return
-    except requests.exceptions.RequestException as e:
-        pass
-    log_output = open(f"{coin}_daemon.log",'w+')
-    subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
-    time.sleep(3)
-    success_print('{:^60}'.format( f"{coin} daemon starting."))
-    success_print('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
+    if launch_params:
+        # check if already running
+        try:
+            block_height = getblockcount(coin)
+            return
+        except requests.exceptions.RequestException as e:
+            pass
+        log_output = open(f"{coin}_daemon.log",'w+')
+        subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
+        time.sleep(3)
+        success_print('{:^60}'.format( f"{coin} daemon starting."))
+        success_print('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
 
 
 def wait_for_stop(coin):
@@ -300,7 +301,7 @@ def wait_for_start(coin):
         try:
             i += 1
             if i > 8:
-                lib_rpc.start_chain(coin)
+                start_chain(coin)
                 print(f"Looks like there might be an issue with loading {coin}...")
                 print(f"We'll try and start it again, but  you need it here are the launch params to do it manually:")
                 print(get_launch_params(coin))
