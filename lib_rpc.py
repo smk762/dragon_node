@@ -304,6 +304,7 @@ def wait_for_start(coin):
                 print(f"Looks like there might be an issue with loading {coin}...")
                 print(f"We'll try and start it again, but  you need it here are the launch params to do it manually:")
                 print(get_launch_params(coin))
+                i = 0
             print(f"Waiting for {coin} daemon to restart...")
             time.sleep(30)
             block_height = getblockcount(coin)
