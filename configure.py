@@ -65,6 +65,9 @@ class Config():
     
     def save(self):
         with open(self.config_path, "w") as f:
+            for i in self.config:
+                if i in self.readonly:
+                    self.config.pop(i)
             json.dump(self.config, f, indent=4)
     
     def options_legend(self):
