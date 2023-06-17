@@ -89,6 +89,8 @@ class Config():
                             self.color_msg.table(f"    {j}: {self.config[i][j]}")
                 elif i in self.readonly:
                     self.color_msg.info(f"{i}: {self.config[i]}")
+                elif len(self.config[i]) is None:
+                    self.color_msg.warning(f"{i}: {self.config[i]}")
                 elif len(self.config[i]) == 0:
                     self.color_msg.warning(f"{i}: {self.config[i]}")
                 else:
