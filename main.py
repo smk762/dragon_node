@@ -37,9 +37,11 @@ while True:
         if options[q] == "configure":
             config.create()
         elif options[q] == "convert_privkey":
-            wif = input("wif: ")
+            wif = input("Enter private key: ")
             for coin in const.DPOW_COINS:
-                print(f"{coin}: {helper.wif_convert(coin, wif)}")
+                if coin != "KMD_3P":
+                    print(f"{coin}: {helper.wif_convert(coin, wif)}")
+                    
         
         elif options[q] == "stats":
             # Todo: last mined KMD since
