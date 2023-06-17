@@ -12,6 +12,7 @@ userpass*
 DB/
 old/
 .lock
+OLD_REVIEW/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/

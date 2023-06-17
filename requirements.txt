@@ -1,2 +1,0 @@
-mnemonic==0.20
-requests==2.26.0
