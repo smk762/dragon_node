@@ -65,7 +65,8 @@ class Config():
     
     def save(self):
         with open(self.config_path, "w") as f:
-            for i in self.config.keys():
+            items = list(self.config.keys())
+            for i in items:
                 if i in self.readonly:
                     self.config.pop(i)
             json.dump(self.config, f, indent=4)
