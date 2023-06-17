@@ -24,7 +24,7 @@ SWEEP_ADDR = os.getenv("SWEEP_ADDR")
 
 
 # Coins constants
-COINS_MAIN = ["PIRATE", "CCL", "KMD", "CLC" "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
+COINS_MAIN = ["PIRATE", "CCL", "KMD", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
 CONF_PATHS = {
     "Main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
