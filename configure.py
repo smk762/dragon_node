@@ -58,16 +58,18 @@ class Config():
         self.config = self.load()
 
     def load(self):
-        if os.path.exists(self.config_path):
-            with open(self.config_path, "r") as f:
-                return json.load(f)
+        try:
+            if os.path.exists(self.config_path):
+                with open(self.config_path, "r") as f:
+                    return json.load(f)
+        except json.decoder.JSONDecodeError:
+            pass
         return self.__dict__.copy()
     
     def save(self):
         with open(self.config_path, "w") as f:
-            items = list(self.config.keys())
-            for i in items:
-                if i in self.readonly:
+            for i in self.hidden:
+                if i in self.config:
                     self.config.pop(i)
             json.dump(self.config, f, indent=4)
     
@@ -102,7 +104,7 @@ class Config():
         self.options_legend()        
 
     def show_config(self):
-        self.color_msg.status("==== Existing Config ====")
+        self.color_msg.status(f"\n==== Existing Config ====")
         self.display()
 
     def get_options(self):
@@ -136,7 +138,7 @@ class Config():
         if option not in options:
             self.color_msg.error("Invalid option, will not update.")
             return
-
+        print(f"updating {option}")
         if isinstance(self.config[option], dict):
             if option in ["addnode", "addnotary"]:
                 k = self.color_msg.input(f"Enter notary: ")
@@ -162,21 +164,27 @@ class Config():
         self.save()
 
     def calculate_addresses(self):
-        if self.pubkey_main != "":
-            updated = self.address_main = based_58.get_addr_from_pubkey(self.pubkey_main)
-            if not updated:
+        print(self.config["pubkey_main"])
+        print(self.config["pubkey_3p"])
+        if self.config["pubkey_main"] != "":
+            address = based_58.get_addr_from_pubkey(self.config["pubkey_main"])
+            if not address:
                 self.color_msg.warning("Unable to calculate address from pubkey.")
-                self.pubkey_main = ""
+                self.config["pubkey_main"] = ""
+            else:
+                self.config["address_main"] = address
              
-        if self.pubkey_3p != "":
-            for coin in self.addresses_3p:
-                address = based_58.get_addr_from_pubkey(self.pubkey_3p, coin)
+        if self.config["pubkey_3p"] != "":
+            for coin in const.COINS_3P:
+                if coin == "KMD_3P":
+                    coin = "KMD"
+                address = based_58.get_addr_from_pubkey(self.config["pubkey_3p"], coin)
                 if not address:
                     self.color_msg.warning(f"Unable to calculate {coin} address from pubkey.")
-                    self.pubkey_3p = ""
+                    self.config["pubkey_3p"] = ""
                     return
                 else:
-                    self.addresses_3p.update({
+                    self.config["addresses_3p"].update({
                         coin: address
                     })
 
