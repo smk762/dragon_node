@@ -1,0 +1,3 @@
+[submodule "dPoW"]
+	path = dPoW
+	url = https://github.com/KomodoPlatform/dPoW/

@@ -13,6 +13,7 @@ DB/
 old/
 .lock
 OLD_REVIEW/
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
