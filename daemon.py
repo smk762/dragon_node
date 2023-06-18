@@ -39,7 +39,7 @@ class DaemonRPC():
                 logger.error(f"rpcport not in {self.conf_path}")
         return [rpcuser, rpcpassword, rpcport]
 
-    def rpc_response_time(self, method: str, method_params: object=list) -> dict:
+    def rpc_response_time(self, method: str, method_params: object=None) -> dict:
         if not method_params:
             method_params = []
         params = {
@@ -62,7 +62,7 @@ class DaemonRPC():
             return {"error": e}
     
         
-    def rpc(self, method: str, method_params: object=list) -> dict:
+    def rpc(self, method: str, method_params: object=None) -> dict:
         if not method_params:
             method_params = []
         params = {
