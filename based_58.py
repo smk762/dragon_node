@@ -9,11 +9,13 @@ from bitcoin.wallet import P2PKHBitcoinAddress
 from logger import logger
 
 BASE58_PARAMS = {
+    "LTC": {'pubtype': 48, 'wiftype': 5, 'p2shtype': 176},
     "AYA": {"pubtype": 23, "wiftype": 176, "p2shtype": 5},
     "EMC2": {"pubtype": 33, "wiftype": 176, "p2shtype": 5},
     "KMD": {"pubtype": 60, "wiftype": 188, "p2shtype": 85},
     "MIL": {"pubtype": 23, "wiftype": 176, "p2shtype": 5}
 }
+
 
 def get_CoinParams(coin):
     params = BASE58_PARAMS[coin]

@@ -24,6 +24,7 @@ class TUI():
             for coin in const.CONF_PATHS[server]:
                 # Check to see if already imported
                 address = based_58.get_addr_from_pubkey(pubkey, coin)
+                logger.debug(f"Checking if {coin} address {address} already imported...")
                 daemon = DaemonRPC(coin)
                 addr_validation = daemon.validateaddress(address)["result"]
                 logger.debug(addr_validation)
