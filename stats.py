@@ -35,36 +35,49 @@ class StatsLine:
         return "-"
         pass
 
-    def get(self):
-        # Blocks
-        block_count = self.daemon.getblockcount()
-        last_block_time = self.daemon.block_time(block_count)
-        since_last_block_time = int(time.time()) - last_block_time
+    def get(self) -> list:
+        row = [self.coin]
+        try:
+            # Notarizations        
+            wallet_tx = self.daemon.listtransactions()
+            ntx_stats = helper.get_ntx_stats(wallet_tx, self.coin)
+            ntx_count = ntx_stats[0]
+            row.append(str(ntx_count))
+            
+            last_ntx_time = ntx_stats[1]
+            row.append(str(last_ntx_time))
+            last_mined = ntx_stats[2]
 
-        # Notarizations        
-        wallet_tx = self.daemon.listtransactions()
-        tx_count = len(wallet_tx)
-        ntx_stats = helper.get_ntx_stats(wallet_tx, self.coin)
-        ntx_count = ntx_stats[0]
-        last_ntx_time = ntx_stats[1]
-        last_mined = ntx_stats[2]
+            ntx_utxo_count = self.ntx_utxo_count(self.coin)
+            row.append(str(ntx_utxo_count))
 
-        # Wallet
-        start = time.perf_counter()
-        r = self.daemon.rpc("listunspent")
-        response_time = time.perf_counter() - start
-        response_time = f"{response_time:.4f}"
+            balance = self.daemon.getbalance()
+            row.append(f"{balance:.4f}")
 
-        ntx_utxo_count = self.ntx_utxo_count(self.coin)
-        balance = self.daemon.getbalance()
-        connections = self.connections()
-        wallet_size = self.wallet_size()
+            # Blocks
+            block_count = self.daemon.getblockcount()
+            row.append(str(block_count))
+            last_block_time = self.daemon.block_time(block_count)
+            since_last_block_time = int(time.time()) - last_block_time
+            row.append(str(since_last_block_time))
 
-        row = [
-            self.coin, ntx_count, last_ntx_time, ntx_utxo_count,
-            balance, block_count, since_last_block_time, connections,
-            wallet_size, tx_count, response_time
-        ]
+            connections = self.connections()
+            row.append(str(connections))
+            
+            wallet_size = self.wallet_size()
+            row.append(str(wallet_size))
+            
+            tx_count = len(wallet_tx)
+            row.append(str(tx_count))
+            
+            start = time.perf_counter()
+            r = self.daemon.rpc("listunspent")
+            response_time = time.perf_counter() - start
+            row.append(f"{response_time:.4f}")
+
+        except Exception as e:
+            logger.error(f"Error getting stats for {self.coin}: {e}")
+
         return row
 
 
