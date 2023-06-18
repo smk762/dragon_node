@@ -130,7 +130,12 @@ class DaemonRPC():
         return self.getblock(height)["tx"]
     
     def block_time(self, height: int) -> int:
-        return self.getblock(height)["time"]
+        blockinfo = self.getblock(height)
+        try:
+            return blockinfo["time"]
+        except:
+            logger.debug(blockinfo)
+            return 0
 
     def getbestblockhash(self) -> dict:
         height = self.getblockcount()

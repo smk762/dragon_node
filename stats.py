@@ -84,10 +84,10 @@ class StatsLine:
 class Stats:
     def __init__(self, coins: list):
         self.coins = coins
-        self.col_widths = [9, 6, 6, 6, 10, 12, 8, 6, 8, 8, 8]
+        self.col_widths = [9, 6, 8, 6, 10, 12, 8, 6, 8, 8, 8]
         self.columns = [
-            "COIN", "NTX", "LAST", "UTXO", "BALANCE",
-            "BLOCKS", "LAST", "CONN", "SIZE", "NUMTX" "TIME"
+            "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
+            "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX" "TIME"
         ]
         
     def format_line(self, row):
