@@ -194,6 +194,28 @@ def get_utxo_value(coin):
     else:
         utxo_value = 0.00010000
 
+def get_ntx_stats(wallet_tx, coin):
+    last_ntx_time = 0
+    last_mined_time = 0
+    ntx = []
+    ntx_addr = helper.get_ntx_address(coin)
+    for tx in wallet_tx:            
+        if "address" in tx:
+            if tx["address"] == ntx_addr:
+
+                if tx["time"] > last_ntx_time:
+                    last_ntx_time = tx["time"]
+
+                if tx["category"] == "send":
+                    ntx.append(tx)
+
+            if "generated" in tx:
+                if tx["time"] > last_mined_time:
+                    last_mined_time = tx["time"]
+
+    ntx_count = len(ntx)
+    return [ntx_count, last_ntx_time, last_mined_time]
+
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)

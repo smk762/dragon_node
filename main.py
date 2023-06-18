@@ -8,7 +8,7 @@ from tui import TUI
 
 color_msg = ColorMsg()
 config = Config()
-stats = Stats()
+stats = Stats(const.DPOW_COINS)
 tui = TUI()
 
 print('''
@@ -48,15 +48,10 @@ while True:
                     print(f"{coin}: {helper.wif_convert(coin, wif)}")
         
         elif options[q] == "stats":
-            # Todo: last mined KMD since
-            print(stats.header())
-            print(stats.spacer())
-            for coin in const.DPOW_COINS:
-                print(stats.stats_line())
+            stats.show()
         
         elif options[q] == "import_privkey":
             tui.import_privkey()
-            break
                 
         elif options[q] == "exit":
             break
