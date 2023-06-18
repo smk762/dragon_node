@@ -117,7 +117,7 @@ class DaemonRPC():
 
     ## Blocks
 
-    def getblock(self, block: int) -> dict:
+    def getblock(self, block) -> dict:
         return self.rpc("getblock", [f"{block}"])["result"]
     
     def getblockcount(self) -> int:
@@ -129,16 +129,17 @@ class DaemonRPC():
     def block_tx(self, height: int) -> dict:
         return self.getblock(height)["tx"]
     
-    def time_since_block(self, height) -> int:
+    def time_since_block(self, height) -> str:
         if self.coin in ["LTC", "AYA", "EMC2", "MIL", "CHIPS"]:
-            hash = self.getbestblockhash(height)
+            hash = self.getbestblockhash()
             blockinfo = self.getblock(hash)
-            return blockinfo["time"]
+            blocktime = blockinfo["time"]
         else:
-            return self.block_time(height)
+            blocktime = self.block_time(height)
+        return helper.time_since(blocktime)
         
     def block_time(self, height: int) -> int:
-        logger.debug(height)
+        print(height)
         blockinfo = self.getblock(height)
         try:
             return blockinfo["time"]

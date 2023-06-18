@@ -57,8 +57,7 @@ class StatsLine:
             # Blocks
             block_count = self.daemon.getblockcount()
             row.append(str(block_count))
-            last_block_time = self.daemon.block_time(block_count)
-            since_last_block_time = int(time.time()) - last_block_time
+            since_last_block_time = self.daemon.block_time(block_count)
             row.append(str(since_last_block_time))
 
             connections = self.connections()
