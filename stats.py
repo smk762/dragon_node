@@ -2,6 +2,7 @@
 import const
 import helper
 from daemon import DaemonRPC
+from logger import logger
 
 class Stats:
     def __init__(self, coin="KMD"):
@@ -101,7 +102,7 @@ class Stats:
         unspent = daemon.get_unspent()
         count = 0
         for utxo in unspent:
-            print(utxo)
+            logger.debug(utxo)
             #if utxo["amount"] == utxo_value:
             #    count += 1
         return count

@@ -24,7 +24,7 @@ class DaemonRPC():
         rpcuser = ''
         rpcpassword = ''
         if not os.path.exists(self.conf_path):
-            print(f"{self.conf_path} not found!")
+            logger.error(f"{self.conf_path} not found!")
         else:
             with open(self.conf_path, 'r') as f:
                 for line in f:
@@ -78,12 +78,13 @@ class DaemonRPC():
             timeout=90
         )
         try:
+            logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
             if "error" in resp:
-                if resp["error"]:
-                    print(resp["error"])
-            logger.debug(f"RPC: {method} {method_params}")
-            logger.debug(f"{resp}")
+                logger.error(resp)
+            else:
+                logger.debug(f"{resp}")
+                return resp["result"]
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
         except requests.exceptions.RequestException as e:
@@ -141,11 +142,11 @@ class DaemonRPC():
         return self.rpc("validateaddress", [address])
 
     ## Blocks
-    def getblockcount(self) -> int:
-        return self.rpc("getblockcount")["result"]
+    def getblockcount(self):
+        return self.rpc("getblockcount")
 
     def getblock(self, block: int) -> dict:
-        return self.rpc("getblock", [f"{block}"])["result"]
+        return self.rpc("getblock", [f"{block}"])
 
     def getblockhash(self, height: int) -> dict:
         return self.getblock(height)["hash"]
@@ -185,4 +186,4 @@ class DaemonRPC():
     def get_unspendable(self, unspent):
         for utxo in unspent:
             if not utxo["spendable"]:
-                print(utxo)
+                logger.info(utxo)
