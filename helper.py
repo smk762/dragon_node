@@ -188,8 +188,8 @@ def sec_to_hms(sec):
         return f"-{result}"
     return result
 
-def get_utxo_value(self):
-    if self.coin in const.LARGE_UTXO_COINS:
+def get_utxo_value(coin):
+    if coin in const.LARGE_UTXO_COINS:
         utxo_value = 0.00100000
     else:
         utxo_value = 0.00010000

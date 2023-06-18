@@ -14,21 +14,21 @@ class Stats:
         self.coin = coin
         self.daemon = DaemonRPC(self.coin)
 
-    def last_block_time(self, coin):
+    def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
         last_block = best_blk_info["time"]
         return last_block
 
-    def connections(self, coin):
+    def connections(self):
         return "-"
         pass
 
-    def wallet_size(self, coin):
+    def wallet_size(self):
         return "-"
         pass
 
-    def stats_line(self, coin):
+    def stats_line(self):
         # Blocks
         block_count = self.daemon.getblockcount()
         last_block_time = self.daemon.block_time(block_count)
@@ -43,13 +43,13 @@ class Stats:
 
         # Wallet
         response_time = self.daemon.rpc_response_time("listunspent")
-        ntx_utxo_count = self.ntx_utxo_count(coin)
+        ntx_utxo_count = self.ntx_utxo_count(self.coin)
         balance = self.daemon.rpc("balance")
-        connections = self.connections(coin)
-        wallet_size = self.wallet_size(coin)
+        connections = self.connections()
+        wallet_size = self.wallet_size()
 
         row = [
-            coin, ntx_count, last_ntx_time, ntx_utxo_count,
+            self.coin, ntx_count, last_ntx_time, ntx_utxo_count,
             balance, block_count, last_block_time, connections,
             wallet_size, tx_count, response_time
         ]
