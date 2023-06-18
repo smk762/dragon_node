@@ -40,7 +40,7 @@ class Stats:
         return self.daemon.rpc_response_time("listunspent")
 
     def stats_line(self, coin):
-        wallet_tx = self.daemon.rpc.listtransactions()
+        wallet_tx = self.daemon.listtransactions()
         tx_count = len(wallet_tx)
         ntx_stats = self.get_ntx_stats(wallet_tx)
         ntx_count = ntx_stats[0]
