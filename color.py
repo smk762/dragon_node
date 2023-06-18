@@ -26,35 +26,38 @@ class ColorMsg():
             'lightcyan':'\033[96m',
         }
 
-    def colorize(self, msg, color):
+    def color(self, color: str) -> str:
+        return self.colors[color]
+        
+    def colorize(self, msg: str, color: str) -> str:
         if color not in self.colors:
             return f"{msg}"
         else:
-            return f"{self.colors[color]} {msg} {self.colors['default']}"
+            return f"{self.color(color)} {msg} {self.color('default')}"
 
-    def input(self, msg):
+    def input(self, msg: str) -> str:
         return input(f'\n> {self.colorize(msg, "orange")}')
 
-    def table(self, msg):
+    def table(self, msg: str) -> None:
         print(self.colorize(msg, "cyan"))
 
-    def info(self, msg):
+    def info(self, msg: str) -> None:
         print(self.colorize(msg, "orange"))
 
-    def status(self, msg):
+    def status(self, msg: str) -> None:
         print(self.colorize(msg, "status"))
 
-    def success(self, msg):
+    def success(self, msg: str) -> None:
         print(self.colorize(msg, "green"))
 
-    def option(self, msg):
+    def option(self, msg: str) -> None:
         print(self.colorize(msg, "darkgrey"))
 
-    def warning(self, msg):
+    def warning(self, msg: str) -> None:
         print(self.colorize(msg, "lightred"))
 
-    def error(self, msg):
+    def error(self, msg: str) -> None:
         print(self.colorize(msg, "error"))
 
-    def confirm(self, msg=None):
+    def confirm(self) -> None:
         self.input("Press [Enter] to continue...")
