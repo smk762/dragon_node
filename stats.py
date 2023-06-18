@@ -16,12 +16,6 @@ class Stats:
     def ntx_utxo_count(self, coin):
         return self.get_split_utxo_count(coin)
 
-    def balance(self, coin):
-        return self.daemon.rpc("balance")
-
-    def block_count(self, coin):
-        self.daemon.rpc("getblockcount")
-
     def last_block_time(self, coin):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
@@ -36,24 +30,26 @@ class Stats:
         return "-"
         pass
 
-    def response_time(self, coin):
-        return self.daemon.rpc_response_time("listunspent")
-
     def stats_line(self, coin):
+        # Blocks
+        block_count = self.daemon.getblockcount()
+        last_block_time = self.daemon.block_time(block_count)
+
+        # Notarizations        
         wallet_tx = self.daemon.listtransactions()
         tx_count = len(wallet_tx)
         ntx_stats = self.get_ntx_stats(wallet_tx)
         ntx_count = ntx_stats[0]
         last_ntx_time = ntx_stats[1]
         last_mined = ntx_stats[2]
+
+        # Wallet
+        response_time = self.daemon.rpc_response_time("listunspent")
         ntx_utxo_count = self.ntx_utxo_count(coin)
-        balance = self.balance(coin)
-        block_count = self.block_count(coin)
-        last_block_time = self.last_block_time(coin)
+        balance = self.daemon.rpc("balance")
         connections = self.connections(coin)
         wallet_size = self.wallet_size(coin)
-        response_time = self.response_time(coin)
-        
+
         row = [
             coin, ntx_count, last_ntx_time, ntx_utxo_count,
             balance, block_count, last_block_time, connections,

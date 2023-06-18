@@ -82,6 +82,8 @@ class DaemonRPC():
             if "error" in resp:
                 if resp["error"]:
                     print(resp["error"])
+            logger.debug(f"RPC: {method} {method_params}")
+            logger.debug(f"{resp}")
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
         except requests.exceptions.RequestException as e:
@@ -91,10 +93,6 @@ class DaemonRPC():
 
     def getinfo(self):
         return self.rpc("getinfo")
-
-
-    def getblockcount(self):
-        return self.rpc("getblockcount")
 
 
     def getbalance(self):
@@ -142,14 +140,28 @@ class DaemonRPC():
     def validateaddress(self, address: str) -> dict:
         return self.rpc("validateaddress", [address])
 
-    def getblock(self, block):
-        return self.rpc("getblock", [f"{block}"])
+    ## Blocks
+    def getblockcount(self) -> int:
+        return self.rpc("getblockcount")["result"]
 
+    def getblock(self, block: int) -> dict:
+        return self.rpc("getblock", [f"{block}"])["result"]
 
-    def getbestblockhash(self):
-        return self.rpc("getbestblockhash")
+    def getblockhash(self, height: int) -> dict:
+        return self.getblock(height)["hash"]
 
-    def get_unspent(self):
+    def block_tx(self, height: int) -> dict:
+        return self.getblock(height)["tx"]
+    
+    def block_time(self, height: int) -> dict:
+        return self.getblock(height)["time"]
+
+    def getbestblockhash(self) -> dict:
+        height = self.getblockcount()
+        return self.getblockhash(height)
+
+    # Wallet
+    def get_unspent(self) -> dict:
         return self.rpc("listunspent")
 
     def unlock_unspent(self):
@@ -159,10 +171,11 @@ class DaemonRPC():
     def get_locked_unspent(self):
         return self.rpc("listlockunspent")
 
+    # Transactions
     def listtransactions(self, count: int=99999999) -> dict:
         return self.rpc("listtransactions", ["*", count])
 
-
+    # Mining
     def setgenerate(self, mining=True, cores=1):
         return self.rpc("setgenerate", [mining, cores])
 
