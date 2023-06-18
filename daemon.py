@@ -39,28 +39,6 @@ class DaemonRPC():
                 logger.error(f"rpcport not in {self.conf_path}")
         return [rpcuser, rpcpassword, rpcport]
 
-    def rpc_response_time(self, method: str, method_params: object=None) -> dict:
-        if not method_params:
-            method_params = []
-        params = {
-            "jsonrpc": "1.0",
-            "id":"curltest",
-            "method": method,
-            "params": method_params,
-        }
-        try:
-            r = requests.post(
-                f"http://127.0.0.1:{self.rpcport}",
-                json.dumps(params),
-                auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
-                timeout=90
-            )
-            return {"result": r.elapsed}
-        except requests.exceptions.InvalidURL as e:
-            return {"error": "Invalid URL"}
-        except requests.exceptions.RequestException as e:
-            return {"error": e}
-    
         
     def rpc(self, method: str, method_params: object=None) -> dict:
         if not method_params:
@@ -80,11 +58,7 @@ class DaemonRPC():
         try:
             logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
-            if resp["error"]:
-                logger.error(resp)
-            else:
-                logger.debug(f"{resp['result']}")
-                return resp
+            return resp
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
         except requests.exceptions.RequestException as e:

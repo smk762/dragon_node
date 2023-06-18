@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+import time
 import const
 import helper
 from daemon import DaemonRPC
@@ -42,7 +43,10 @@ class Stats:
         last_mined = ntx_stats[2]
 
         # Wallet
-        response_time = self.daemon.rpc_response_time("listunspent")
+        start = time.perf_counter()
+        r = self.daemon.rpc("listunspent")
+        response_time = time.perf_counter() - start
+
         ntx_utxo_count = self.ntx_utxo_count(self.coin)
         balance = self.daemon.getbalance()
         connections = self.connections()
