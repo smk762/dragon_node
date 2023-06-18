@@ -28,6 +28,7 @@ COINS_MAIN = ["PIRATE", "CCL", "KMD", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", 
 CONF_PATHS = {
     "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
+        "LTC": f"{HOME}/.litecoin/litecoin.conf",
     },
     "3p": {
         "KMD_3P": f"{HOME}/.komodo_3p/komodo.conf",
@@ -41,7 +42,7 @@ CONF_PATHS = {
     }    
 }
 # Autopopulate conf paths for all main coins
-[CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin != "KMD"]
+[CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC"]]
 COINS_3P = list(CONF_PATHS["3p"].keys())
 IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "MIL", "LTC"]
 DPOW_COINS = COINS_3P + COINS_MAIN
