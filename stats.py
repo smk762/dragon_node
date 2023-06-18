@@ -37,7 +37,7 @@ class Stats:
         pass
 
     def response_time(self, coin):
-        return self.daemon.rpc("listunspent", None, True)
+        return self.daemon.rpc_response_time("listunspent")
 
     def stats_line(self, coin):
         wallet_tx = self.daemon.rpc.get_wallet_tx(coin)

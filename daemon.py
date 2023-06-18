@@ -14,6 +14,10 @@ class DaemonRPC():
     def __init__(self, coin):
         self.coin = coin
         self.conf_path = helper.get_conf_path(coin)
+        self.creds = self.get_creds()
+        self.rpcuser = self.creds[0]
+        self.rpcpass = self.creds[1]
+        self.rpcport = self.creds[2]
 
     def get_creds(self):
         rpcport = 0
@@ -35,8 +39,7 @@ class DaemonRPC():
                 logger.error(f"rpcport not in {self.conf_path}")
         return [rpcuser, rpcpassword, rpcport]
 
-    def rpc(self, method, method_params=None, response_time=False):
-        creds = self.get_creds()
+    def rpc_response_time(self, method: str, method_params: object=list) -> dict:
         if not method_params:
             method_params = []
         params = {
@@ -45,9 +48,35 @@ class DaemonRPC():
             "method": method,
             "params": method_params,
         }
-        r = requests.post(f"http://127.0.0.1:{creds[2]}", json.dumps(params), auth=HTTPBasicAuth(creds[0], creds[1]), timeout=90)
-        if response_time:
-            return str(r.elapsed)
+        try:
+            r = requests.post(
+                f"http://127.0.0.1:{self.rpcport}",
+                json.dumps(params),
+                auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
+                timeout=90
+            )
+            return {"result": r.elapsed}
+        except requests.exceptions.InvalidURL as e:
+            return {"error": "Invalid URL"}
+        except requests.exceptions.RequestException as e:
+            return {"error": e}
+    
+        
+    def rpc(self, method: str, method_params: object=list) -> dict:
+        if not method_params:
+            method_params = []
+        params = {
+            "jsonrpc": "1.0",
+            "id":"curltest",
+            "method": method,
+            "params": method_params,
+        }
+        r = requests.post(
+            f"http://127.0.0.1:{self.rpcport}",
+            json.dumps(params),
+            auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
+            timeout=90
+        )
         try:
             resp = r.json()
             if "error" in resp:
@@ -61,7 +90,7 @@ class DaemonRPC():
 
 
     def getinfo(self):
-        return self.rpc("getinfo", None, True)
+        return self.rpc("getinfo")
 
 
     def getblockcount(self):
@@ -110,9 +139,8 @@ class DaemonRPC():
         return addr
 
 
-    def get_pubkey(self, address):
+    def validateaddress(self, address: str) -> dict:
         return self.rpc("validateaddress", [address])
-
 
     def getblock(self, block):
         return self.rpc("getblock", [f"{block}"])

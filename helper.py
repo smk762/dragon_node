@@ -192,7 +192,5 @@ def sec_to_hms(sec):
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)
-    print(pubkey)
-    
     
 

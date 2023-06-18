@@ -4,6 +4,7 @@ import helper
 from configure import Config
 from daemon import DaemonRPC
 from logger import logger
+import based_58
 
 
 class TUI():
@@ -21,11 +22,18 @@ class TUI():
             logger.error("Private key does not match public key for this server!")
         else:
             for coin in const.CONF_PATHS[server]:
-                logger.info(f"Importing {coin} private key...")
-                wif = helper.wif_convert(coin, wif)
+                # Check to see if already imported
+                address = based_58.get_addr_from_pubkey(pubkey, coin)
                 daemon = DaemonRPC(coin)
-                r = daemon.importprivkey(wif)
-                logger.info(f"Address: {r}")
+                addr_validation = daemon.validateaddress(address)["result"]
+                logger.debug(addr_validation)
+                if not addr_validation["ismine"]:
+                    logger.info(f"Importing {coin} private key...")
+                    wif = helper.wif_convert(coin, wif)
+                    r = daemon.importprivkey(wif)
+                    logger.info(f"Address: {r}")
+                else:
+                    logger.info(f"Address {address} already imported.")
 
         
     

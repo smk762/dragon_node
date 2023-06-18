@@ -33,7 +33,7 @@ for coin in BASE58_PARAMS:
     coin_params[coin] = get_CoinParams(coin)
 
 
-def get_addr_from_pubkey(pubkey, coin="KMD"):
+def get_addr_from_pubkey(pubkey: str, coin: str="KMD") -> str:
     if coin not in coin_params:
         coin = "KMD"
     bitcoin.params = coin_params[coin]
@@ -45,4 +45,4 @@ def get_addr_from_pubkey(pubkey, coin="KMD"):
         logger.error(f"Error! {e}")
         print(f"\n\n")
         time.sleep(1)
-        return False
+        return ""
