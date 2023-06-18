@@ -76,7 +76,6 @@ class StatsLine:
 
         except Exception as e:
             logger.error(f"Error getting stats for {self.coin}: {e}")
-
         return row
 
 

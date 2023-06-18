@@ -139,12 +139,10 @@ class DaemonRPC():
         return helper.time_since(blocktime)
         
     def block_time(self, height: int) -> int:
-        print(height)
         blockinfo = self.getblock(height)
         try:
             return blockinfo["time"]
         except:
-            logger.debug(blockinfo)
             return 0
 
     def getbestblockhash(self) -> str:

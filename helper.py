@@ -53,7 +53,7 @@ def addr_from_ripemd(prefix, ripemd):
 def get_wiftype(coin):
     params = get_base58_params()
     if coin not in params:
-        print(f"Coin {coin} not found in base 58 params")
+        logger.error(f"Coin {coin} not found in base 58 params")
         sys.exit(1)
     else:
         return params[coin]["wiftype"]

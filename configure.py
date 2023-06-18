@@ -138,7 +138,6 @@ class Config():
         if option not in options:
             self.color_msg.error("Invalid option, will not update.")
             return
-        print(f"updating {option}")
         if isinstance(self.config[option], dict):
             if option in ["addnode", "addnotary"]:
                 k = self.color_msg.input(f"Enter notary: ")
@@ -164,8 +163,6 @@ class Config():
         self.save()
 
     def calculate_addresses(self):
-        print(self.config["pubkey_main"])
-        print(self.config["pubkey_3p"])
         if self.config["pubkey_main"] != "":
             address = based_58.get_addr_from_pubkey(self.config["pubkey_main"])
             if not address:
