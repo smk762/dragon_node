@@ -1,3 +1,5 @@
+import datetime
+import time
 from color import ColorMsg
 import helper
 import const
@@ -48,7 +50,14 @@ while True:
                     print(f"{coin}: {helper.wif_convert(coin, wif)}")
         
         elif options[q] == "stats":
-            stats.show()
+            while True:
+                try:
+                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
+                    stats.show()
+                    print("Ctrl+C to exit to main menu.")
+                    time.sleep(600)
+                except KeyboardInterrupt:
+                    break
         
         elif options[q] == "import_privkey":
             tui.import_privkey()

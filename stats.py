@@ -104,9 +104,11 @@ class Stats:
         return "-" * sum(self.col_widths)
     
     def show(self):
+        print()
         print(self.header())
         print(self.spacer())
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
             print(self.format_line(row))
+        print()
