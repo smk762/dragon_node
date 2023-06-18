@@ -8,6 +8,7 @@ import helper
 import requests
 from slickrpc import Proxy
 from requests.auth import HTTPBasicAuth
+from logger import logger
 
 class DaemonRPC():
     def __init__(self, coin):
@@ -31,7 +32,7 @@ class DaemonRPC():
                     elif re.search('rpcport', l):
                         rpcport = int(l.replace('rpcport=', ''))
             if rpcport == 0:
-                print(f"rpcport not in {self.conf_path}")
+                logger.error(f"rpcport not in {self.conf_path}")
         return [rpcuser, rpcpassword, rpcport]
 
     def rpc(self, method, method_params=None, response_time=False):
@@ -44,7 +45,7 @@ class DaemonRPC():
             "method": method,
             "params": method_params,
         }
-        r = requests.post(f"http://127.0.0.1:{creds[0]}", json.dumps(params), auth=HTTPBasicAuth(creds[1], creds[2]), timeout=90)
+        r = requests.post(f"http://127.0.0.1:{creds[2]}", json.dumps(params), auth=HTTPBasicAuth(creds[0], creds[1]), timeout=90)
         if response_time:
             return str(r.elapsed)
         try:
@@ -52,8 +53,10 @@ class DaemonRPC():
             if "error" in resp:
                 if resp["error"]:
                     print(resp["error"])
+        except requests.exceptions.InvalidURL as e:
+            resp = {"error": "Invalid URL"}
         except requests.exceptions.RequestException as e:
-            resp = r.text
+            resp = {"result": r.text}
         return resp
 
 
