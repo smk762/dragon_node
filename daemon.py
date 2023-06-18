@@ -166,9 +166,6 @@ class DaemonRPC():
     def get_unspent(self) -> dict:
         return self.rpc("listunspent")["result"]
 
-    def balance(self):
-        self.rpc("balance")["result"]
-
     def unlock_unspent(self):
         locked_unspent = self.get_locked_unspent()
         return self.rpc("lockunspent", [True, locked_unspent])["result"]

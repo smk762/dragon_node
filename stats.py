@@ -44,7 +44,7 @@ class Stats:
         # Wallet
         response_time = self.daemon.rpc_response_time("listunspent")
         ntx_utxo_count = self.ntx_utxo_count(self.coin)
-        balance = self.daemon.rpc("balance")
+        balance = self.daemon.getbalance()
         connections = self.connections()
         wallet_size = self.wallet_size()
 
