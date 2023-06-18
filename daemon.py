@@ -80,11 +80,11 @@ class DaemonRPC():
         try:
             logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
-            if "error" in resp:
+            if resp["error"]:
                 logger.error(resp)
             else:
-                logger.debug(f"{resp}")
-                return resp["result"]
+                logger.debug(f"{resp['result']}")
+                return resp
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
         except requests.exceptions.RequestException as e:
@@ -142,11 +142,12 @@ class DaemonRPC():
         return self.rpc("validateaddress", [address])
 
     ## Blocks
-    def getblockcount(self):
-        return self.rpc("getblockcount")
 
     def getblock(self, block: int) -> dict:
         return self.rpc("getblock", [f"{block}"])
+    
+    def getblockcount(self) -> int:
+        return self.rpc("getblockcount")["result"]
 
     def getblockhash(self, height: int) -> dict:
         return self.getblock(height)["hash"]
@@ -155,7 +156,7 @@ class DaemonRPC():
         return self.getblock(height)["tx"]
     
     def block_time(self, height: int) -> dict:
-        return self.getblock(height)["time"]
+        return self.getblock(height)["result"]["time"]
 
     def getbestblockhash(self) -> dict:
         height = self.getblockcount()
@@ -164,6 +165,9 @@ class DaemonRPC():
     # Wallet
     def get_unspent(self) -> dict:
         return self.rpc("listunspent")
+
+    def balance(self):
+        self.rpc("balance")["result"]
 
     def unlock_unspent(self):
         locked_unspent = self.get_locked_unspent()
@@ -174,7 +178,7 @@ class DaemonRPC():
 
     # Transactions
     def listtransactions(self, count: int=99999999) -> dict:
-        return self.rpc("listtransactions", ["*", count])
+        return self.rpc("listtransactions", ["*", count])["result"]
 
     # Mining
     def setgenerate(self, mining=True, cores=1):

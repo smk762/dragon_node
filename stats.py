@@ -14,9 +14,6 @@ class Stats:
         self.coin = coin
         self.daemon = DaemonRPC(self.coin)
 
-    def ntx_utxo_count(self, coin):
-        return self.get_split_utxo_count(coin)
-
     def last_block_time(self, coin):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
@@ -95,14 +92,12 @@ class Stats:
         ntx_count = len(ntx)
         return [ntx_count, last_ntx_time, last_mined_time]
         
-    def get_split_utxo_count(self, utxo_value=0.00010000):
-        daemon = DaemonRPC(self.coin)
-        if self.coin in const.LARGE_UTXO_COINS:
-            utxo_value = 0.00100000
-        unspent = daemon.get_unspent()
+    def ntx_utxo_count(self, utxo_value):
+        utxo_value = helper.get_utxo_value(self.coin)
+        unspent = self.daemon.get_unspent()
         count = 0
         for utxo in unspent:
             logger.debug(utxo)
-            #if utxo["amount"] == utxo_value:
-            #    count += 1
+            if utxo["amount"] == utxo_value:
+                count += 1
         return count
