@@ -93,45 +93,45 @@ class DaemonRPC():
 
 
     def getinfo(self):
-        return self.rpc("getinfo")
+        return self.rpc("getinfo")["result"]
 
 
     def getbalance(self):
-        return self.rpc("getbalance")
+        return self.rpc("getbalance")["result"]
 
 
     def dumpprivkey(self, address):
-        return self.rpc("dumpprivkey", [address])
+        return self.rpc("dumpprivkey", [address])["result"]
 
 
     def sendtoaddress(self, address, amount):
-        return self.rpc("sendtoaddress", [address, amount, "", "", True])
+        return self.rpc("sendtoaddress", [address, amount, "", "", True])["result"]
 
 
     def gettxoutproof(self, txid):
-        return self.rpc("gettxoutproof", [[txid]])
+        return self.rpc("gettxoutproof", [[txid]])["result"]
 
 
     def importprunedfunds(self, raw_tx, txoutproof):
-        return self.rpc("importprunedfunds", [raw_tx, txoutproof])
+        return self.rpc("importprunedfunds", [raw_tx, txoutproof])["result"]
 
 
     def getrawtransaction(self, txid):
-        return self.rpc("getrawtransaction", [txid])
+        return self.rpc("getrawtransaction", [txid])["result"]
 
 
     def importprivkey(self, pk, height=None):
         if height: 
-            return self.rpc("importprivkey", [pk, "", True, height])
-        return self.rpc("importprivkey", [pk, "", False])
+            return self.rpc("importprivkey", [pk, "", True, height])["result"]
+        return self.rpc("importprivkey", [pk, "", False])["result"]
 
 
     def stop(self):
-        return self.rpc("stop")
+        return self.rpc("stop")["result"]
 
 
     def get_wallet_addr(self):
-        resp = self.rpc("listaddressgroupings")
+        resp = self.rpc("listaddressgroupings")["result"]
         addr = None
         if len(resp) > 0:
             addr = resp[0][0][0]
@@ -139,12 +139,12 @@ class DaemonRPC():
 
 
     def validateaddress(self, address: str) -> dict:
-        return self.rpc("validateaddress", [address])
+        return self.rpc("validateaddress", [address])["result"]
 
     ## Blocks
 
     def getblock(self, block: int) -> dict:
-        return self.rpc("getblock", [f"{block}"])
+        return self.rpc("getblock", [f"{block}"])["result"]
     
     def getblockcount(self) -> int:
         return self.rpc("getblockcount")["result"]
@@ -156,7 +156,7 @@ class DaemonRPC():
         return self.getblock(height)["tx"]
     
     def block_time(self, height: int) -> dict:
-        return self.getblock(height)["result"]["time"]
+        return self.getblock(height)["time"]
 
     def getbestblockhash(self) -> dict:
         height = self.getblockcount()
@@ -164,17 +164,17 @@ class DaemonRPC():
 
     # Wallet
     def get_unspent(self) -> dict:
-        return self.rpc("listunspent")
+        return self.rpc("listunspent")["result"]
 
     def balance(self):
         self.rpc("balance")["result"]
 
     def unlock_unspent(self):
         locked_unspent = self.get_locked_unspent()
-        return self.rpc("lockunspent", [True, locked_unspent])
+        return self.rpc("lockunspent", [True, locked_unspent])["result"]
 
     def get_locked_unspent(self):
-        return self.rpc("listlockunspent")
+        return self.rpc("listlockunspent")["result"]
 
     # Transactions
     def listtransactions(self, count: int=99999999) -> dict:
@@ -182,7 +182,7 @@ class DaemonRPC():
 
     # Mining
     def setgenerate(self, mining=True, cores=1):
-        return self.rpc("setgenerate", [mining, cores])
+        return self.rpc("setgenerate", [mining, cores])["result"]
 
 
 

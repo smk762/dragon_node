@@ -52,7 +52,7 @@ while True:
             print(stats.header())
             print(stats.spacer())
             for coin in const.DPOW_COINS:
-                print(stats.stats_line(coin))
+                print(stats.stats_line())
         
         elif options[q] == "import_privkey":
             tui.import_privkey()
