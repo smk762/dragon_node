@@ -216,9 +216,9 @@ class Config():
             server = color_input(msg)
 
         if server.lower() == "m":
-            config["server"] = "Main"
+            config["server"] = "main"
         elif server == "3":
-            config["server"] = "Third_Party"
+            config["server"] = "3p"
 
             for coin in config["non_antara_addresses"]:
                 non_antara_address = color_input(f"Enter your {coin} address: ")

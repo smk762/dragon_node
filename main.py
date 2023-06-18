@@ -1,13 +1,15 @@
 from color import ColorMsg
 import helper
 import const
+import tui
 from configure import Config
 from stats import Stats
+from tui import TUI
 
 color_msg = ColorMsg()
 config = Config()
 stats = Stats()
-options = ["configure" ,"convert_privkey", "stats"]
+tui = TUI()
 
 print('''
   ________                                         _____   __     _________      
@@ -18,6 +20,7 @@ print('''
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
 
+options = ["configure", "stats", "convert_privkey", "import_privkey"]
 while True:
     color_msg.status(f"\n==== Options ====")
     for i in range(len(options)):
@@ -34,14 +37,15 @@ while True:
     elif q > len(options):
         color_msg.error("Invalid option, try again.")
     else:
+        
         if options[q] == "configure":
             config.create()
+            
         elif options[q] == "convert_privkey":
             wif = input("Enter private key: ")
             for coin in const.DPOW_COINS:
                 if coin != "KMD_3P":
                     print(f"{coin}: {helper.wif_convert(coin, wif)}")
-                    
         
         elif options[q] == "stats":
             # Todo: last mined KMD since
@@ -50,5 +54,9 @@ while True:
             for coin in const.DPOW_COINS:
                 print(stats.stats_line(coin))
         
+        elif options[q] == "import_privkey":
+            tui.import_privkey()
+            break
+                
         elif options[q] == "exit":
             break

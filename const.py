@@ -26,7 +26,7 @@ SWEEP_ADDR = os.getenv("SWEEP_ADDR")
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "KMD", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
 CONF_PATHS = {
-    "Main": {
+    "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
     },
     "3p": {
@@ -41,11 +41,12 @@ CONF_PATHS = {
     }    
 }
 # Autopopulate conf paths for all main coins
-[CONF_PATHS["Main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin != "KMD"]
+[CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin != "KMD"]
 COINS_3P = list(CONF_PATHS["3p"].keys())
 IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "MIL", "LTC"]
 DPOW_COINS = COINS_3P + COINS_MAIN
 LARGE_UTXO_COINS = ["EMC2", "AYA"]
+DPOW_SERVERS = list(CONF_PATHS.keys())
 
 # Notarisation constants
 UTXO_AMT = 0.00010000

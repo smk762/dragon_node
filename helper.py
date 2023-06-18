@@ -3,14 +3,29 @@
 import sys
 import time
 import const
+import ecdsa
 import base58
 import string
+import codecs
 import hashlib
 import secrets
 import requests
 import binascii
+import helper
 from color import ColorMsg
+from logger import logger
 
+
+def get_launch_params():
+    url = "https://stats.kmd.io/api/info/launch_params/"
+    launch_params = requests.get(url).json()["results"]
+    return launch_params
+
+
+def get_base58_params():
+    url = "https://stats.kmd.io/api/info/base_58/"
+    return requests.get(url).json()["results"]
+    
 
 def generate_rpc_pass(length):
     special_chars = "@~-_|():+"
@@ -35,12 +50,79 @@ def addr_from_ripemd(prefix, ripemd):
     return(final.decode())
 
 
-def WIFdecode(WIF):
-    b58decode = base58.b58decode(WIF)
-    full_privkey = binascii.hexlify(b58decode)
-    raw_privkey = full_privkey[2:-8]
-    return(raw_privkey.decode("utf-8"))
+def get_wiftype(coin):
+    params = get_base58_params()
+    if coin not in params:
+        print(f"Coin {coin} not found in base 58 params")
+        sys.exit(1)
+    else:
+        return params[coin]["wiftype"]
 
+def validate_wif(pubkey, wif):
+    compressed_public_key = helper.wif_to_pubkey(wif)
+    if pubkey == compressed_public_key:
+        return True
+    return False
+
+
+def wif_decode(compressed_wif):
+    b58decode = base58.b58decode(compressed_wif) 
+    full_privkey = binascii.hexlify(b58decode) 
+    raw_privkey = full_privkey[2:-8]
+    private_key = raw_privkey.decode("utf-8")
+    return private_key
+
+
+def private_key_to_public_key(private_key):
+    # Hex decoding the private key to bytes using codecs library
+    private_key_bytes = codecs.decode(private_key[:-2], 'hex')
+    # Generating a public key in bytes using SECP256k1 & ecdsa library
+    public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
+    public_key_bytes = public_key_raw.to_string()
+    # Hex encoding the public key from bytes
+    public_key_hex = codecs.encode(public_key_bytes, 'hex')
+    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
+    public_key = (b'04' + public_key_hex).decode("utf-8")
+    return public_key
+
+
+def compress_public_key(public_key):
+# Checking if the last byte is odd or even
+    if (ord(bytearray.fromhex(public_key[-2:])) % 2 == 0):
+        prefix = '02'
+    else:
+        prefix = '03'
+    # Add bytes 0x02 to the X of the key if even or 0x03 if odd
+    compressed_public_key = prefix + public_key[2:66]
+    return compressed_public_key
+
+
+def wif_convert(coin, wif):
+    raw_privkey = wif_decode(wif)
+    wiftype = get_wiftype(coin)
+    wiftype_hex = int_to_hexstr(wiftype)
+    return WIF_compressed(wiftype_hex, raw_privkey)
+
+
+def wif_to_pubkey(wif):
+    private_key = wif_decode(wif)
+    public_key = private_key_to_public_key(private_key)
+    compressed_public_key = compress_public_key(public_key)
+    return compressed_public_key # AKA pubkey
+
+
+def uncompressed_public_key_from_private_key(private_key, byte=b'04'):
+    # Hex decoding the private key to bytes using codecs library
+    private_key_bytes = codecs.decode(private_key, 'hex')
+    # Generating a public key in bytes using SECP256k1 & ecdsa library
+    public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
+    public_key_bytes = public_key_raw.to_string()
+    # Hex encoding the public key from bytes
+    public_key_hex = codecs.encode(public_key_bytes, 'hex')
+    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
+    public_key = (byte + public_key_hex).decode("utf-8")
+    return public_key
+    
 
 def WIF_uncompressed(byte, raw_privkey):
     extended_key = byte+raw_privkey
@@ -64,25 +146,6 @@ def WIF_compressed(byte, raw_privkey):
     return(WIF.decode("utf-8"))
 
 
-def get_launch_params():
-    url = "https://stats.kmd.io/api/info/launch_params/"
-    launch_params = requests.get(url).json()["results"]
-    return launch_params
-
-
-def get_base58_params():
-    url = "https://stats.kmd.io/api/info/base_58/"
-    return requests.get(url).json()["results"]
-
-def get_wiftype(coin):
-    params = get_base58_params()
-    if coin not in params:
-        print(f"Coin {coin} not found in base 58 params")
-        sys.exit(1)
-    else:
-        return params[coin]["wiftype"]
-
-
 def int_to_hexstr(x):
     if x == 0: return '00'
     hex_chars = '0123456789ABCDEF'
@@ -94,16 +157,11 @@ def int_to_hexstr(x):
     return hex_string
 
 
-def wif_convert(coin, wif):
-    raw_privkey = WIFdecode(wif)
-    wiftype = get_wiftype(coin)
-    wiftype_hex = int_to_hexstr(wiftype)
-    return WIF_compressed(wiftype_hex, raw_privkey)
-
 def get_ntx_address(coin):
     if coin in const.NTX_ADDR:
         return const.NTX_ADDR[coin]
     return const.NTX_ADDR["KMD"]
+
 
 def get_conf_path(coin):
     for server in const.CONF_PATHS:
@@ -132,11 +190,9 @@ def sec_to_hms(sec):
 
 
 if __name__ == '__main__':
-    if len(sys.argv[1]) != 3:
-        print('Usage: ./helpers.py <coin> <wif>')
-        sys.exit(1)
-    else:
-        coin = sys.argv[1]
-        wif = sys.argv[2]
-        print(wif_convert(coin, wif))
+    wif = input("Enter WIF: ")
+    pubkey = wif_to_pubkey(wif)
+    print(pubkey)
+    
+    
 
