@@ -24,10 +24,8 @@ class TUI():
             for coin in const.CONF_PATHS[server]:
                 # Check to see if already imported
                 address = based_58.get_addr_from_pubkey(pubkey, coin)
-                logger.debug(f"Checking if {coin} address {address} already imported...")
                 daemon = DaemonRPC(coin)
                 addr_validation = daemon.validateaddress(address)["result"]
-                logger.debug(addr_validation)
                 if not addr_validation["ismine"]:
                     logger.info(f"Importing {coin} private key...")
                     wif = helper.wif_convert(coin, wif)
@@ -35,8 +33,3 @@ class TUI():
                     logger.info(f"Address: {r}")
                 else:
                     logger.info(f"Address {address} already imported.")
-
-        
-    
-    
-    
