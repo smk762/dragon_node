@@ -33,6 +33,7 @@ class Stats:
         # Blocks
         block_count = self.daemon.getblockcount()
         last_block_time = self.daemon.block_time(block_count)
+        since_last_block_time = int(time.time()) - last_block_time
 
         # Notarizations        
         wallet_tx = self.daemon.listtransactions()
@@ -46,6 +47,7 @@ class Stats:
         start = time.perf_counter()
         r = self.daemon.rpc("listunspent")
         response_time = time.perf_counter() - start
+        response_time = f"{response_time:.4f}"
 
         ntx_utxo_count = self.ntx_utxo_count(self.coin)
         balance = self.daemon.getbalance()
@@ -54,7 +56,7 @@ class Stats:
 
         row = [
             self.coin, ntx_count, last_ntx_time, ntx_utxo_count,
-            balance, block_count, last_block_time, connections,
+            balance, block_count, since_last_block_time, connections,
             wallet_size, tx_count, response_time
         ]
         return self.format_line(row)

@@ -56,7 +56,7 @@ class DaemonRPC():
             timeout=90
         )
         try:
-            logger.debug(f"RPC: {method} {method_params}")
+            # logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
             return resp
         except requests.exceptions.InvalidURL as e:
@@ -129,7 +129,7 @@ class DaemonRPC():
     def block_tx(self, height: int) -> dict:
         return self.getblock(height)["tx"]
     
-    def block_time(self, height: int) -> dict:
+    def block_time(self, height: int) -> int:
         return self.getblock(height)["time"]
 
     def getbestblockhash(self) -> dict:
