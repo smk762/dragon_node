@@ -159,8 +159,8 @@ class DaemonRPC():
     def get_locked_unspent(self):
         return self.rpc("listlockunspent")
 
-    def get_wallet_tx(self):
-        return self.rpc("listtransactions", ["*", 99999999])
+    def listtransactions(self, count: int=99999999) -> dict:
+        return self.rpc("listtransactions", ["*", count])
 
 
     def setgenerate(self, mining=True, cores=1):
