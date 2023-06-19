@@ -57,14 +57,17 @@ class StatsLine:
             row.append(str(ntx_utxo_count))
 
             balance = self.daemon.getbalance()
-            row.append(f"{balance:.4f}")
+            if balance < 0.1:
+                row.append('\033[31m' + f"   {balance:.3f}" + '\033[0m')
+            else:
+                row.append(f"{balance:.3f}")
 
             # Blocks
             block_count = self.daemon.getblockcount()
             row.append(str(block_count))
             last_blocktime = self.daemon.last_block_time(block_count)
             if last_blocktime == 0:
-                dhms_since = "Never"
+                dhms_since = '\033[31m' + "  Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
                 dhms_since = helper.sec_to_dhms(sec_since, 3600)
