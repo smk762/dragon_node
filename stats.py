@@ -58,7 +58,7 @@ class StatsLine:
 
             balance = self.daemon.getbalance()
             if balance < 0.1:
-                row.append('\033[31m' + f"   {balance:.3f}" + '\033[0m')
+                row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
             else:
                 row.append(f"{balance:.3f}")
 
