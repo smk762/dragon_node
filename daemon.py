@@ -9,6 +9,7 @@ import requests
 from slickrpc import Proxy
 from requests.auth import HTTPBasicAuth
 from logger import logger
+from color import ColorMsg
 
 class DaemonRPC():
     def __init__(self, coin):
@@ -18,13 +19,14 @@ class DaemonRPC():
         self.rpcuser = self.creds[0]
         self.rpcpass = self.creds[1]
         self.rpcport = self.creds[2]
+        self.msg = ColorMsg()
 
     def get_creds(self):
         rpcport = 0
         rpcuser = ''
         rpcpassword = ''
         if not os.path.exists(self.conf_path):
-            logger.error(f"{self.conf_path} not found!")
+            self.msg.warning(f"{self.conf_path} not found!")
         else:
             with open(self.conf_path, 'r') as f:
                 for line in f:
@@ -36,7 +38,7 @@ class DaemonRPC():
                     elif re.search('rpcport', l):
                         rpcport = int(l.replace('rpcport=', ''))
             if rpcport == 0:
-                logger.error(f"rpcport not in {self.conf_path}")
+                self.msg.error(f"rpcport not in {self.conf_path}")
         return [rpcuser, rpcpassword, rpcport]
 
         

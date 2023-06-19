@@ -5,6 +5,7 @@ import helper
 import datetime
 from daemon import DaemonRPC
 from logger import logger
+from color import ColorMsg
 
 class StatsLine:
     def __init__(self, column_widths, coin="KMD"):
@@ -12,6 +13,7 @@ class StatsLine:
         self.coin = coin
         self.daemon = DaemonRPC(self.coin)
         self.col_widths = column_widths
+        self.msg = ColorMsg()
 
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
@@ -51,7 +53,13 @@ class StatsLine:
             row.append(str(ntx_count))
             
             last_ntx_time = ntx_stats[1]
-            row.append(str(last_ntx_time))
+            if last_ntx_time == 0:
+                dhms_since = '\033[31m' + "  Never" + '\033[0m' 
+            else:
+                sec_since = helper.sec_since(last_ntx_time)
+                dhms_since = helper.sec_to_dhms(sec_since, 3600)
+            row.append(dhms_since)
+            
             last_mined = ntx_stats[2]
 
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
@@ -89,7 +97,7 @@ class StatsLine:
             row.append(f"{response_time:.4f}")
 
         except Exception as e:
-            logger.error(f"Error getting stats for {self.coin}: {e}")
+            self.msg.warning(f"Error getting stats for {self.coin}: {e}")
         return row
 
 
@@ -125,8 +133,9 @@ class Stats:
         print(self.spacer())
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
-            row = line.get()
-            print(self.format_line(row))
+            if line.daemon.rpcport != 0:
+                row = line.get()
+                print(self.format_line(row))
         print(self.spacer())
         date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width)
