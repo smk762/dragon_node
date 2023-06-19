@@ -193,6 +193,10 @@ def sec_to_dhms(sec: int, threshold: int=86400) -> str:
     if sec < 0:
         result = f"-{result}"
     if sec > threshold:
+        # Add color and fix padding
+        result = result + " "
+        while len(result) < 10:
+            result = f" {result}"
         result = '\033[31m' + result + '\033[0m'
     return result
 
