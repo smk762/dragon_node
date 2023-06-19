@@ -183,7 +183,7 @@ def get_wallet_path(coin: str) -> str:
     for server in const.CONF_PATHS:
         if coin in const.CONF_PATHS[server]:
             conf_path = os.path.split(const.CONF_PATHS[server][coin])[0]
-            return f"{conf_path}/{coin.lower()}.dat"
+            return f"{conf_path}/wallet.dat"
     return ""
 
 def sec_since(ts):
