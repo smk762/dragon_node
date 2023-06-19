@@ -10,10 +10,10 @@ from color import ColorMsg
 class StatsLine:
     def __init__(self, column_widths, coin="KMD"):
         # Todo: last mined KMD since
+        self.msg = ColorMsg()
         self.coin = coin
         self.daemon = DaemonRPC(self.coin)
         self.col_widths = column_widths
-        self.msg = ColorMsg()
 
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()

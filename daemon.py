@@ -13,13 +13,13 @@ from color import ColorMsg
 
 class DaemonRPC():
     def __init__(self, coin):
+        self.msg = ColorMsg()
         self.coin = coin
         self.conf_path = helper.get_conf_path(coin)
         self.creds = self.get_creds()
         self.rpcuser = self.creds[0]
         self.rpcpass = self.creds[1]
         self.rpcport = self.creds[2]
-        self.msg = ColorMsg()
 
     def get_creds(self):
         rpcport = 0
