@@ -85,7 +85,7 @@ class Stats:
         self.col_widths = [9, 6, 8, 6, 10, 12, 8, 6, 8, 8, 8]
         self.columns = [
             "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
-            "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX" "TIME"
+            "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME"
         ]
         
     def format_line(self, row):
@@ -101,7 +101,7 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self):
-        return "-" * sum(self.col_widths)
+        return "-" * (sum(self.col_widths) + 2 * (len(self.col_widths) + 1))
     
     def show(self):
         print()
