@@ -1,5 +1,6 @@
 
 #!/usr/bin/env python3
+import os
 import sys
 import time
 import const
@@ -32,6 +33,18 @@ def generate_rpc_pass(length):
     rpc_chars = string.ascii_letters + string.digits + special_chars
     return "".join(secrets.choice(rpc_chars) for _ in range(length))
 
+def bytes_to_unit(filesize):
+    unit = 'bytes'
+    if filesize > 1024:
+        unit = 'kb'
+    if filesize > 1024 ** 2:
+        unit = 'mb'
+    if filesize > 1024 ** 3:
+        unit = 'gb'
+        
+    exponents_map = {'bytes': 0, 'kb': 1, 'mb': 2, 'gb': 3}
+    size = filesize / 1024 ** exponents_map[unit]
+    return f"{round(size, 3)}{unit}"
 
 def hash160(hexstr):
     preshabin = binascii.unhexlify(hexstr)
@@ -145,7 +158,6 @@ def WIF_compressed(byte, raw_privkey):
     WIF = base58.b58encode(binascii.unhexlify(final_key))
     return(WIF.decode("utf-8"))
 
-
 def int_to_hexstr(x):
     if x == 0: return '00'
     hex_chars = '0123456789ABCDEF'
@@ -156,12 +168,10 @@ def int_to_hexstr(x):
         x = x // 16
     return hex_string
 
-
 def get_ntx_address(coin):
     if coin in const.NTX_ADDR:
         return const.NTX_ADDR[coin]
     return const.NTX_ADDR["KMD"]
-
 
 def get_conf_path(coin):
     for server in const.CONF_PATHS:
@@ -169,10 +179,15 @@ def get_conf_path(coin):
             return const.CONF_PATHS[server][coin]
     return ""
 
+def get_wallet_path(coin: str) -> str:
+    for server in const.CONF_PATHS:
+        if coin in const.CONF_PATHS[server]:
+            conf_path = os.path.split(const.CONF_PATHS[server][coin])[0]
+            return f"{conf_path}/{coin.lower()}.dat"
+    return ""
 
 def sec_since(ts):
     return int(time.time()) - ts
-
 
 def sec_to_dhms(sec: int, threshold: int=86400) -> str:
     if sec < 0:

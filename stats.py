@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import time
+import os
 import const
 import helper
 import datetime
@@ -10,11 +11,14 @@ from color import ColorMsg
 class StatsLine:
     def __init__(self, column_widths, coin="KMD"):
         # Todo: last mined KMD since
+        self.errors = []
         self.msg = ColorMsg()
         self.coin = coin
-        self.daemon = DaemonRPC(self.coin)
         self.col_widths = column_widths
-
+        self.daemon = DaemonRPC(self.coin)
+        if self.daemon.rpcport == 0:
+            self.errors.append(f"[rpcport] not in {self.daemon.conf_path}")        
+        
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
@@ -31,12 +35,13 @@ class StatsLine:
         return count
 
     def connections(self):
-        return "-"
-        pass
+        networkinfo = self.daemon.getnetworkinfo()
+        return networkinfo["connections"]
 
     def wallet_size(self):
-        return "-"
-        pass
+        filename = helper.get_wallet_path(self.coin)
+        filesize = os.path.getsize(filename)
+        return helper.bytes_to_unit(filesize)
 
     def get(self) -> list:
         if self.coin == "KMD_3P":
@@ -54,7 +59,7 @@ class StatsLine:
             
             last_ntx_time = ntx_stats[1]
             if last_ntx_time == 0:
-                dhms_since = '\033[31m' + "  Never" + '\033[0m' 
+                dhms_since = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_ntx_time)
                 dhms_since = helper.sec_to_dhms(sec_since, 3600)
@@ -76,7 +81,7 @@ class StatsLine:
             row.append(str(block_count))
             last_blocktime = self.daemon.last_block_time(block_count)
             if last_blocktime == 0:
-                dhms_since = '\033[31m' + "  Never" + '\033[0m' 
+                dhms_since = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
                 dhms_since = helper.sec_to_dhms(sec_since, 3600)
@@ -97,14 +102,15 @@ class StatsLine:
             row.append(f"{response_time:.4f}")
 
         except Exception as e:
-            self.msg.warning(f"Error getting stats for {self.coin}: {e}")
+            self.errors.append(f"Error getting stats for {self.coin}. Is it running?")
         return row
 
 
 class Stats:
-    def __init__(self, coins: list):
+    def __init__(self, coins: list) -> None:
         self.coins = coins
         self.coins.sort()
+        self.msg = ColorMsg()
         self.col_widths = [12, 6, 8, 6, 10, 10, 8, 6, 8, 8, 8]
         self.columns = [
             "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
@@ -112,7 +118,7 @@ class Stats:
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
-    def format_line(self, row):
+    def format_line(self, row: list) -> str:
         line = "| "
         for i in range(len(row)):
             if i in [0]:
@@ -121,21 +127,26 @@ class Stats:
                 line += f"{str(row[i]).rjust(self.col_widths[i])} |"
         return line
     
-    def header(self):
+    def header(self) -> str:
         return self.format_line(self.columns)
     
-    def spacer(self):
+    def spacer(self) -> str:
         return "-" * self.table_width
     
-    def show(self):
+    def format_errors(self, errors: list) -> str:
+        return "| " + " | ".join(errors).center(self.table_width - 4) + " |"
+    
+    def show(self) -> None:
         print()
         print(self.header())
         print(self.spacer())
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
-            if line.daemon.rpcport != 0:
-                row = line.get()
-                print(self.format_line(row))
+            row = line.get()
+            print(self.format_line(row))
+            if len(line.errors) > 0:
+                errors = self.format_errors(line.errors)
+                self.msg.colorize(errors, "lightred")
         print(self.spacer())
         date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width)

@@ -67,34 +67,29 @@ class DaemonRPC():
             resp = {"result": r.text}
         return resp
 
-
     def getinfo(self):
         return self.rpc("getinfo")["result"]
-
+    
+    def getnetworkinfo(self):
+        return self.rpc("getnetworkinfo")["result"]
 
     def getbalance(self):
         return self.rpc("getbalance")["result"]
 
-
     def dumpprivkey(self, address):
         return self.rpc("dumpprivkey", [address])["result"]
-
 
     def sendtoaddress(self, address, amount):
         return self.rpc("sendtoaddress", [address, amount, "", "", True])["result"]
 
-
     def gettxoutproof(self, txid):
         return self.rpc("gettxoutproof", [[txid]])["result"]
-
 
     def importprunedfunds(self, raw_tx, txoutproof):
         return self.rpc("importprunedfunds", [raw_tx, txoutproof])["result"]
 
-
     def getrawtransaction(self, txid):
         return self.rpc("getrawtransaction", [txid])["result"]
-
 
     def importprivkey(self, pk, height=None):
         if height: 
