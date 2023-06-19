@@ -143,10 +143,11 @@ class Stats:
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
-            print(self.format_line(row))
             if len(line.errors) > 0:
                 errors = self.format_errors(line.errors)
                 self.msg.colorize(errors, "lightred")
+            else:
+                print(self.format_line(row))
         print(self.spacer())
         date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width)
