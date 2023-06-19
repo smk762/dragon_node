@@ -2,6 +2,7 @@
 import time
 import const
 import helper
+import datetime
 from daemon import DaemonRPC
 from logger import logger
 
@@ -101,6 +102,7 @@ class Stats:
             "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
             "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME"
         ]
+        self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
     def format_line(self, row):
         line = "| "
@@ -115,7 +117,7 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self):
-        return "-" * (sum(self.col_widths) + 2 * (len(self.col_widths) + 1))
+        return "-" * self.table_width
     
     def show(self):
         print()
@@ -125,4 +127,6 @@ class Stats:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
             print(self.format_line(row))
+        date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        print(f"{str(date_str).rjust(self.table_width)}")
         print()

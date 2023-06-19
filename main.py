@@ -52,7 +52,6 @@ while True:
         elif options[q] == "stats":
             while True:
                 try:
-                    print(datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"))
                     stats.show()
                     print("Ctrl+C to exit to main menu.")
                     time.sleep(600)
