@@ -128,8 +128,8 @@ class Stats:
             row = line.get()
             print(self.format_line(row))
         print(self.spacer())
-        date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        date_str = '| ' + str(date_str).rjust(self.table_width) + ' |'
-        print(f"{date_str}")
+        date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
+        fmt_date_str = str(date_str).rjust(self.table_width)
+        print(fmt_date_str)
         footer = "-" * len(date_str)
         print(footer.rjust(len(footer)))
