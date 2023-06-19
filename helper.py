@@ -174,15 +174,24 @@ def time_since(ts):
     if ts == 0:
         return "Never"
     sec = int(time.time()) - ts
-    return sec_to_hms(sec)
+    return sec_to_dhms(sec)
 
 
-def sec_to_hms(sec):
+def sec_to_dhms(sec):
     if sec < 0:
         sec = sec*-1
     minutes, seconds = divmod(sec, 60)
     hours, minutes = divmod(minutes, 60)
-    periods = [('h', hours), ('m', minutes), ('s', seconds)]
+    days, hours = divmod(hours, 24)
+    periods = []
+    if days > 0:
+        periods = [('d', days), ('h', hours)]
+    elif hours > 0:
+        periods = [('h', hours), ('m', minutes)]
+    elif minutes > 0:
+        periods = [('m', minutes), ('s', seconds)]
+    else:
+        periods = [('s', seconds)]
     result = ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
     if sec < 0:
         return f"-{result}"
