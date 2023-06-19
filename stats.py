@@ -131,5 +131,3 @@ class Stats:
         date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width)
         print(fmt_date_str)
-        footer = "-" * len(date_str)
-        print(footer.rjust(len(footer)))
