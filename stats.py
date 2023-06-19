@@ -36,7 +36,12 @@ class StatsLine:
         pass
 
     def get(self) -> list:
-        row = [self.coin]
+        if self.coin == "KMD_3P":
+            row = ["KMD (3P)"]
+        elif self.coin in const.COINS_3P:
+            row = [f"{self.coin} (3P)"]
+        else:
+            row = [self.coin]
         try:
             # Notarizations        
             wallet_tx = self.daemon.listtransactions()
