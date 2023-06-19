@@ -26,8 +26,7 @@ class DaemonRPC():
         rpcuser = ''
         rpcpassword = ''
         if not os.path.exists(self.conf_path):
-            file = os.path.split(self.conf_path)[1]            
-            self.msg.warning(f"{file} not found!")
+            pass
         else:
             with open(self.conf_path, 'r') as f:
                 for line in f:
