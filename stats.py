@@ -11,13 +11,10 @@ from color import ColorMsg
 class StatsLine:
     def __init__(self, column_widths, coin="KMD"):
         # Todo: last mined KMD since
-        self.errors = []
         self.msg = ColorMsg()
         self.coin = coin
         self.col_widths = column_widths
-        self.daemon = DaemonRPC(self.coin)
-        if self.daemon.rpcport == 0:
-            self.errors.append(f"[rpcport] not in {self.daemon.conf_path}")        
+        self.daemon = DaemonRPC(self.coin)   
         
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
@@ -102,7 +99,7 @@ class StatsLine:
             row.append(f"{response_time:.4f}")
 
         except Exception as e:
-            self.errors.append(f"Error getting stats for {self.coin}. Is it running?")
+            return [f"Error getting stats for {self.coin}. Is it running?"]
         return row
 
 
@@ -133,8 +130,8 @@ class Stats:
     def spacer(self) -> str:
         return "-" * self.table_width
     
-    def format_errors(self, errors: list) -> str:
-        return "| " + " | ".join(errors).center(self.table_width - 4) + " |"
+    def format_errors(self, errors: str) -> str:
+        return "| " + errors.center(self.table_width - 4) + " |"
     
     def show(self) -> None:
         print()
@@ -143,9 +140,9 @@ class Stats:
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
-            if len(line.errors) > 0:
-                errors = self.format_errors(line.errors)
-                self.msg.colorize(errors, "lightred")
+            if len(row) == 1:
+                errors = self.format_errors(row[0])
+                print(self.msg.colorize(errors, "lightred"))
             else:
                 print(self.format_line(row))
         print(self.spacer())

@@ -22,11 +22,9 @@ def get_launch_params():
     launch_params = requests.get(url).json()["results"]
     return launch_params
 
-
 def get_base58_params():
     url = "https://stats.kmd.io/api/info/base_58/"
     return requests.get(url).json()["results"]
-    
 
 def generate_rpc_pass(length):
     special_chars = "@~-_|():+"
@@ -34,23 +32,22 @@ def generate_rpc_pass(length):
     return "".join(secrets.choice(rpc_chars) for _ in range(length))
 
 def bytes_to_unit(filesize):
-    unit = 'bytes'
+    unit = 'B'
     if filesize > 1024:
-        unit = 'kb'
+        unit = 'K'
     if filesize > 1024 ** 2:
-        unit = 'mb'
+        unit = 'M'
     if filesize > 1024 ** 3:
-        unit = 'gb'
+        unit = 'G'
         
-    exponents_map = {'bytes': 0, 'kb': 1, 'mb': 2, 'gb': 3}
+    exponents_map = {'B': 0, 'K': 1, 'M': 2, 'G': 3}
     size = filesize / 1024 ** exponents_map[unit]
-    return f"{round(size, 3)}{unit}"
+    return f"{round(size, 2)}{unit}"
 
 def hash160(hexstr):
     preshabin = binascii.unhexlify(hexstr)
     my160 = hashlib.sha256(preshabin).hexdigest()
     return(hashlib.new('ripemd160', binascii.unhexlify(my160)).hexdigest())
-
 
 def addr_from_ripemd(prefix, ripemd):
     net_byte = prefix + ripemd
@@ -61,7 +58,6 @@ def addr_from_ripemd(prefix, ripemd):
     hmmmm = binascii.unhexlify(net_byte + sha256b[:8])
     final = base58.b58encode(hmmmm)
     return(final.decode())
-
 
 def get_wiftype(coin):
     params = get_base58_params()
@@ -77,14 +73,12 @@ def validate_wif(pubkey, wif):
         return True
     return False
 
-
 def wif_decode(compressed_wif):
     b58decode = base58.b58decode(compressed_wif) 
     full_privkey = binascii.hexlify(b58decode) 
     raw_privkey = full_privkey[2:-8]
     private_key = raw_privkey.decode("utf-8")
     return private_key
-
 
 def private_key_to_public_key(private_key):
     # Hex decoding the private key to bytes using codecs library
@@ -98,7 +92,6 @@ def private_key_to_public_key(private_key):
     public_key = (b'04' + public_key_hex).decode("utf-8")
     return public_key
 
-
 def compress_public_key(public_key):
 # Checking if the last byte is odd or even
     if (ord(bytearray.fromhex(public_key[-2:])) % 2 == 0):
@@ -109,20 +102,17 @@ def compress_public_key(public_key):
     compressed_public_key = prefix + public_key[2:66]
     return compressed_public_key
 
-
 def wif_convert(coin, wif):
     raw_privkey = wif_decode(wif)
     wiftype = get_wiftype(coin)
     wiftype_hex = int_to_hexstr(wiftype)
     return WIF_compressed(wiftype_hex, raw_privkey)
 
-
 def wif_to_pubkey(wif):
     private_key = wif_decode(wif)
     public_key = private_key_to_public_key(private_key)
     compressed_public_key = compress_public_key(public_key)
     return compressed_public_key # AKA pubkey
-
 
 def uncompressed_public_key_from_private_key(private_key, byte=b'04'):
     # Hex decoding the private key to bytes using codecs library
@@ -135,7 +125,6 @@ def uncompressed_public_key_from_private_key(private_key, byte=b'04'):
     # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
     public_key = (byte + public_key_hex).decode("utf-8")
     return public_key
-    
 
 def WIF_uncompressed(byte, raw_privkey):
     extended_key = byte+raw_privkey
@@ -146,7 +135,6 @@ def WIF_uncompressed(byte, raw_privkey):
     # Wallet Import Format = base 58 encoded final_key
     WIF = base58.b58encode(binascii.unhexlify(final_key))
     return(WIF.decode("utf-8"))
-
 
 def WIF_compressed(byte, raw_privkey):
     extended_key = byte+raw_privkey+'01'
