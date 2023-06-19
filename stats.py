@@ -116,7 +116,7 @@ class Stats:
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
     def format_line(self, row: list) -> str:
-        line = "| "
+        line = " | "
         for i in range(len(row)):
             if i in [0]:
                 line += f"{str(row[i]).ljust(self.col_widths[i])} |"
@@ -128,7 +128,7 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self) -> str:
-        return "-" * self.table_width
+        return " " + "-" * self.table_width
     
     def format_errors(self, errors: str) -> str:
         return "| " + errors.center(self.table_width - 4) + " |"
