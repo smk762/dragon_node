@@ -127,6 +127,9 @@ class Stats:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
             print(self.format_line(row))
+        print(self.spacer())
         date_str = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-        print(f"{str(date_str).rjust(self.table_width)}")
-        print()
+        date_str = '| ' + str(date_str).rjust(self.table_width) + ' |'
+        print(f"{date_str}")
+        footer = "-" * len(date_str)
+        print(footer.rjust(len(footer)))
