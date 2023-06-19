@@ -129,14 +129,14 @@ class DaemonRPC():
     def block_tx(self, height: int) -> dict:
         return self.getblock(height)["tx"]
     
-    def time_since_block(self, height) -> str:
+    def last_block_time(self, height) -> int:
         if self.coin in ["LTC", "AYA", "EMC2", "MIL", "CHIPS"]:
             hash = self.getbestblockhash()
             blockinfo = self.getblock(hash)
             blocktime = blockinfo["time"]
         else:
             blocktime = self.block_time(height)
-        return helper.time_since(blocktime)
+        return blocktime
         
     def block_time(self, height: int) -> int:
         blockinfo = self.getblock(height)

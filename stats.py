@@ -62,8 +62,13 @@ class StatsLine:
             # Blocks
             block_count = self.daemon.getblockcount()
             row.append(str(block_count))
-            since_last_block_time = self.daemon.time_since_block(block_count)
-            row.append(str(since_last_block_time))
+            last_blocktime = self.daemon.last_block_time(block_count)
+            if last_blocktime == 0:
+                dhms_since = "Never"
+            else:
+                sec_since = helper.sec_since(last_blocktime)
+                dhms_since = helper.sec_to_dhms(sec_since, 3600)
+            row.append(str(dhms_since))
 
             connections = self.connections()
             row.append(str(connections))

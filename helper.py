@@ -170,14 +170,11 @@ def get_conf_path(coin):
     return ""
 
 
-def time_since(ts):
-    if ts == 0:
-        return "Never"
-    sec = int(time.time()) - ts
-    return sec_to_dhms(sec)
+def sec_since(ts):
+    return int(time.time()) - ts
 
 
-def sec_to_dhms(sec):
+def sec_to_dhms(sec: int, threshold: int=86400) -> str:
     if sec < 0:
         sec = sec*-1
     minutes, seconds = divmod(sec, 60)
@@ -194,7 +191,9 @@ def sec_to_dhms(sec):
         periods = [('s', seconds)]
     result = ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
     if sec < 0:
-        return f"-{result}"
+        result = f"-{result}"
+    if sec > threshold:
+        result = '\033[31m' + result + '\033[0m'
     return result
 
 def get_utxo_value(coin):
