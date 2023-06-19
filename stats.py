@@ -87,7 +87,7 @@ class StatsLine:
 class Stats:
     def __init__(self, coins: list):
         self.coins = coins
-        self.col_widths = [9, 6, 8, 6, 10, 12, 8, 6, 8, 8, 8]
+        self.col_widths = [12, 6, 8, 6, 10, 10, 8, 6, 8, 8, 8]
         self.columns = [
             "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
             "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME"
