@@ -249,9 +249,9 @@ def sec_to_dhms(sec: int, threshold: int=86400) -> str:
 
 def get_utxo_value(coin):
     if coin in const.LARGE_UTXO_COINS:
-        utxo_value = 0.00100000
+        return 0.00100000
     else:
-        utxo_value = 0.00010000
+        return 0.00010000
 
 
 def get_ntx_stats(wallet_tx, coin):
