@@ -58,8 +58,7 @@ NTX_ADDR = {
     "KMD": "RXL3YXG2ceaB6C5hfJcN4fvmLH2C34knhA",
     "EMC": "EfCkxbDFSn4X1VKMzyckyHaXLf4ithTGoM",
     "AYA": "Adpj7WENLyRkq9vVknHa82rf3cVHjYvzCG",
-    "GLEEC-OLD": "FTsxvoops8zGeMbY3pHPwY86bfacGvMdfU",
-    "SFUSD": "SjLrVr9tkBxoYVVxjZcKX3k8Dno2A28YD7"        
+    "MIL": "MVx1hSH9WqwQurgqR7HBDRCu3ESkuhQC8r"
 }
 
 '''

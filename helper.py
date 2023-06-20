@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import json
 import time
 import const
 import ecdsa
@@ -18,9 +19,23 @@ from logger import logger
 
 
 def get_launch_params():
-    url = "https://stats.kmd.io/api/info/launch_params/"
-    launch_params = requests.get(url).json()["results"]
-    return launch_params
+    if not os.path.exists("launch_params.json"):
+        r = requests.get("https://raw.githubusercontent.com/KomodoPlatform/coins/master/launch/smartchains.json")
+        data = r.json()
+        write_json_data("launch_params.json", data)
+    else:
+        data = read_json_data("launch_params.json")
+    data.update({
+        "AYA": "aya",
+        "EMC2": "emc2",
+        "MCL": "mcl",
+        "CHIPS": "chips",
+        "VRSC": "vrsc",
+        "MIL": "mil",
+        "TOKEL": "tokel",
+        "KMD_3P": "kmd"
+    })
+    return data
 
 def get_base58_params():
     url = "https://stats.kmd.io/api/info/base_58/"
@@ -146,6 +161,7 @@ def WIF_compressed(byte, raw_privkey):
     WIF = base58.b58encode(binascii.unhexlify(final_key))
     return(WIF.decode("utf-8"))
 
+
 def int_to_hexstr(x):
     if x == 0: return '00'
     hex_chars = '0123456789ABCDEF'
@@ -156,10 +172,17 @@ def int_to_hexstr(x):
         x = x // 16
     return hex_string
 
+
 def get_ntx_address(coin):
     if coin in const.NTX_ADDR:
         return const.NTX_ADDR[coin]
     return const.NTX_ADDR["KMD"]
+
+def get_coin_server(coin):
+    for server in const.CONF_PATHS:
+        if coin in const.CONF_PATHS[server]:
+            return server
+    return ""
 
 def get_conf_path(coin):
     for server in const.CONF_PATHS:
@@ -173,6 +196,28 @@ def get_wallet_path(coin: str) -> str:
             conf_path = os.path.split(const.CONF_PATHS[server][coin])[0]
             return f"{conf_path}/wallet.dat"
     return ""
+
+def get_utxos(coin: str, pubkey: str) -> list:
+    url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
+    try:
+        url += f"?coin={coin}&pubkey={pubkey}"
+        r = requests.get(url)
+        return r.json()["results"]["utxos"]
+    except Exception as e:
+        logger.error(f"Error getting UTXOs for {coin} with pubkey {pubkey}")
+        logger.error(e)
+        return []
+
+def format_param(param, value):
+    return '-' + param + '=' + value
+
+def write_json_data(data: object, filename: str) -> None:
+    with open(filename, "w") as f:
+        json.dump(data, f, indent=4)
+
+def read_json_data(filename: str) -> dict:
+    with open(filename, "r") as f:
+        return json.load(f)
 
 def sec_since(ts):
     return int(time.time()) - ts
@@ -208,6 +253,7 @@ def get_utxo_value(coin):
     else:
         utxo_value = 0.00010000
 
+
 def get_ntx_stats(wallet_tx, coin):
     last_ntx_time = 0
     last_mined_time = 0
@@ -229,6 +275,11 @@ def get_ntx_stats(wallet_tx, coin):
 
     ntx_count = len(ntx)
     return [ntx_count, last_ntx_time, last_mined_time]
+
+
+def get_assetchains():
+    with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
+        return json.load(file)
 
 if __name__ == '__main__':
     wif = input("Enter WIF: ")

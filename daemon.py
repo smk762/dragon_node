@@ -96,10 +96,8 @@ class DaemonRPC():
             return self.rpc("importprivkey", [pk, "", True, height])["result"]
         return self.rpc("importprivkey", [pk, "", False])["result"]
 
-
     def stop(self):
         return self.rpc("stop")["result"]
-
 
     def get_wallet_addr(self):
         resp = self.rpc("listaddressgroupings")["result"]
@@ -108,12 +106,10 @@ class DaemonRPC():
             addr = resp[0][0][0]
         return addr
 
-
     def validateaddress(self, address: str) -> dict:
         return self.rpc("validateaddress", [address])["result"]
 
     ## Blocks
-
     def getblock(self, block) -> dict:
         return self.rpc("getblock", [f"{block}"])["result"]
     
@@ -146,7 +142,7 @@ class DaemonRPC():
         return self.rpc("getbestblockhash")["result"]
 
     # Wallet
-    def get_unspent(self) -> dict:
+    def listunspent(self) -> dict:
         return self.rpc("listunspent")["result"]
 
     def unlock_unspent(self):
@@ -163,8 +159,6 @@ class DaemonRPC():
     # Mining
     def setgenerate(self, mining=True, cores=1):
         return self.rpc("setgenerate", [mining, cores])["result"]
-
-
 
     # komodo-cli lockunspent true "[{\"txid\":\"a08e6907dbbd3d809776dbfc5d82e371b764ed838b5655e72f463568df1aadf0\",\"vout\":1}]"
     def get_unspendable(self, unspent):

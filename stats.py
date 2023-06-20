@@ -24,7 +24,7 @@ class StatsLine:
 
     def ntx_utxo_count(self, utxo_value):
         utxo_value = helper.get_utxo_value(self.coin)
-        unspent = self.daemon.get_unspent()
+        unspent = self.daemon.listunspent()
         count = 0
         for utxo in unspent:
             if utxo["amount"] == utxo_value:
@@ -147,5 +147,5 @@ class Stats:
                 print(self.format_line(row))
         print(self.spacer())
         date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
-        fmt_date_str = str(date_str).rjust(self.table_width)
+        fmt_date_str = str(date_str).rjust(self.table_width + 1)
         print(fmt_date_str)
