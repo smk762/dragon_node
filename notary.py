@@ -12,7 +12,9 @@ from logger import logger
 class Notary():
     def __init__(self):
         self.config = Config().load()
-        self.addnoary = self.config["addnotary"]
+        if "addnotary" not in self.config:
+            print("Node configuration missing. Select 'Configure' from the main menu to set your node config.")
+        self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
         self.coins_data = {}
         self.log_path = f"{const.HOME}/logs"
