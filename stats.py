@@ -73,15 +73,15 @@ class StatsLine:
 
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
             if ntx_utxo_count < 5:
-                ntx_utxo_count = '\033[31m' + f"  {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count < 10:
-                ntx_utxo_count = '\033[33m' + f"  {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[33m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count > 100:
                 ntx_utxo_count = '\033[31m' + "> 100" + '\033[0m'
             elif ntx_utxo_count > 40:
-                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count >= 10:
-                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             row.append(str(ntx_utxo_count))
 
             balance = self.daemon.getbalance()
