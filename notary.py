@@ -23,7 +23,11 @@ class Notary():
             os.makedirs(self.log_path)
 
     def check_config(self):
-        if "addnotary" not in self.config:
+        if "pubkey_main" not in self.config:
+            return False
+        if "pubkey_3p" not in self.config:
+            return False
+        if "sweep_address" not in self.config:
             return False
         return True
 
