@@ -38,7 +38,12 @@ class StatsLine:
     def wallet_size(self):
         filename = helper.get_wallet_path(self.coin)
         filesize = os.path.getsize(filename)
-        return helper.bytes_to_unit(filesize)
+        if filesize > 10485760:
+            return '\033[31m' + "   > 10M" + '\033[0m' 
+        elif filesize > 5242880:
+            return '\033[31m' + f"   {helper.bytes_to_unit(filesize)}" + '\033[0m' 
+        else:
+            return helper.bytes_to_unit(filesize)
 
     def get(self) -> list:
         if self.coin == "KMD_3P":
