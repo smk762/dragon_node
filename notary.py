@@ -12,9 +12,7 @@ from logger import logger
 class Notary():
     def __init__(self):
         self.config = Config().load()
-        if "addnotary" not in self.config:
-            print("Node configuration missing. Select 'Configure' from the main menu to set your node config.")
-            return
+        self.configured = self.check_config()
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
         self.coins_data = self.get_coins_data()
@@ -22,8 +20,16 @@ class Notary():
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
 
-    def get_coins_data(self):
+    def check_config(self):
+        if "addnotary" not in self.config:
+            print("Node configuration missing. Select 'Configure' from the main menu to set your node config.")
+            return False
+        return True
+
+    def get_coins_data(self) -> dict:
         coins_data = {}
+        if not self.configured:
+            return coins_data
         for server in const.CONF_PATHS:
             for coin in const.CONF_PATHS[server]:
                 coins_data.update({
@@ -42,7 +48,9 @@ class Notary():
                 })
         return coins_data
     
-    def move_wallet(self, coin):
+    def move_wallet(self, coin: str) -> None:
+        if not self.configured:
+            return
         try:
             now = int(time.time())
             wallet = self.coins_data[coin]["wallet"]
@@ -51,7 +59,9 @@ class Notary():
         except Exception as e:
             logger.error(e)
 
-    def rm_komodoevents(self, coin):
+    def rm_komodoevents(self, coin) -> None:
+        if not self.configured:
+            return
         data_dir = os.path.split(self.coins_data[coin]["wallet"])
         for filename in ["komodoevents", "komodoevents.ind"]:
             try:
@@ -60,6 +70,8 @@ class Notary():
                 logger.error(e)
     
     def consolidate(self, coin: str) -> None:
+        if not self.configured:
+            return
         address = self.coins_data[coin]["address"]
         pubkey = self.coins_data[coin]["pubkey"]
         daemon = self.coins_data[coin]["daemon"]
@@ -140,6 +152,8 @@ class Notary():
             logger.debug(f"{skipped_inputs} {coin} UTXOs skipped due to < 100 confs")
 
     def sweep_kmd(self, coin: str) -> None:
+        if not self.configured:
+            return
         daemon = self.coins_data[coin]["daemon"]
         unspent = daemon.listunspent()
         logger.info(f"{len(unspent)} unspent utxos detected")
@@ -153,7 +167,9 @@ class Notary():
         else:
             logger.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
 
-    def stop(self, coin):
+    def stop(self, coin: str) -> None:
+        if not self.configured:
+            return
         daemon = self.coins_data[coin]["daemon"]
         try:
             daemon.stop()
@@ -162,7 +178,9 @@ class Notary():
             logger.error(e)
 
 
-    def wait_for_stop(self, coin):
+    def wait_for_stop(self, coin: str) -> bool:
+        if not self.configured:
+            return False
         daemon = self.coins_data[coin]["daemon"]
         i = 0
         while True:
@@ -181,7 +199,9 @@ class Notary():
                 logger.error(e)
                 return True
 
-    def wait_for_start(self, coin):
+    def wait_for_start(self, coin: str) -> bool:
+        if not self.configured:
+            return False
         daemon = self.coins_data[coin]["daemon"]
         launch_params = self.coins_data[coin]["launch_params"]
         i = 0
@@ -204,6 +224,8 @@ class Notary():
                 pass
 
     def start(self, coin: str) -> None:
+        if not self.configured:
+            return
         daemon = self.coins_data[coin]["daemon"]
         server = self.coins_data[coin]["server"]
         if server == "main":
