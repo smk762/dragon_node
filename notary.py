@@ -14,6 +14,7 @@ class Notary():
         self.config = Config().load()
         if "addnotary" not in self.config:
             print("Node configuration missing. Select 'Configure' from the main menu to set your node config.")
+            return
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
         self.coins_data = {}
