@@ -83,7 +83,7 @@ class Notary():
 
     def reset_wallet(self, coin: str) -> None:
         daemon = DaemonRPC(coin)
-        server = helper.get_coin_server
+        server = helper.get_coin_server(coin)
         # Backup wallet
         self.move_wallet(coin)
         # Stop coin
