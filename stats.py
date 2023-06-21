@@ -139,7 +139,7 @@ class Stats:
             "COIN", "NTX", "LASTNTX", "UTXO", "BLOCKS",
             "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME", "BALANCE"
         ]
-        self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
+        self.table_width = (sum(self.col_widths) + 2) * (len(self.col_widths) + 1)
         
     def format_line(self, row: list, color: str="") -> str:
         line = " | "
