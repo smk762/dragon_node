@@ -97,7 +97,7 @@ class Notary():
         # Consolidate
         # TODO: This relies on access to explorer APIs, which may not be available for all coins
         # TODO: Electrums may be a viable alternative
-        self.consolidate(coin)
+        self.consolidate(coin, True)
 
         
     def consolidate(self, coin: str, reset=False) -> None:
