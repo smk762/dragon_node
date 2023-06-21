@@ -7,6 +7,7 @@ import tui
 from configure import Config
 from stats import Stats
 from tui import TUI
+from notary import Notary
 
 color_msg = ColorMsg()
 config = Config()
@@ -22,7 +23,7 @@ print('''
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
 
-options = ["configure", "stats", "convert_privkey", "import_privkey"]
+options = ["configure", "consolidate" "stats", "convert_privkey", "import_privkey"]
 while True:
     color_msg.status(f"\n==== Options ====")
     for i in range(len(options)):
@@ -42,6 +43,16 @@ while True:
         
         if options[q] == "configure":
             config.create()
+        if options[q] == "consolidate":
+            notary = Notary()
+            coin = input("Enter coin to consolidate (or ALL): ")
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    notary.consolidate(coin)
+            elif coin.upper() in const.DPOW_COINS:
+                notary.consolidate(coin)
+            else:
+                color_msg.error(f"Invalid coin '{coin}', try again.")
             
         elif options[q] == "convert_privkey":
             wif = input("Enter private key: ")

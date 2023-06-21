@@ -39,7 +39,7 @@ class StatsLine:
         filename = helper.get_wallet_path(self.coin)
         filesize = os.path.getsize(filename)
         if filesize > 10485760:
-            return '\033[31m' + "  > 10M" + '\033[0m' 
+            return '\033[31m' + " > 10M" + '\033[0m' 
         elif filesize > 3145728:
             return '\033[33m' + f"  > 3M" + '\033[0m' 
         elif filesize < 1048576:
@@ -81,7 +81,7 @@ class StatsLine:
             elif ntx_utxo_count < 10:
                 ntx_utxo_count = '\033[33m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count > 100:
-                ntx_utxo_count = '\033[31m' + "  > 100" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + " > 100" + '\033[0m'
             elif ntx_utxo_count > 40:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count >= 10:
