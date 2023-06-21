@@ -52,7 +52,7 @@ class Notary():
                 })
                 if server == "main":
                     coins_data[coin].update({
-                        "address": self.config[f"address_main"][coin],
+                        "address": self.config[f"address_main"],
                 })
                 else:
                     coins_data[coin].update({
