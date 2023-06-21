@@ -157,7 +157,7 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self) -> str:
-        return " " + "-" * self.table_width
+        return " " + "-" * (self.table_width  - 1)
 
     def show(self) -> None:
         print()
@@ -180,5 +180,5 @@ class Stats:
         print(self.spacer())
         
         date_str = f'| {mined_str} |' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
-        fmt_date_str = str(date_str).rjust(self.table_width + 1)
+        fmt_date_str = str(date_str).rjust(self.table_width + 9)
         print(fmt_date_str)
