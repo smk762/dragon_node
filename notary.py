@@ -291,22 +291,26 @@ class Notary():
     def wait_for_start(self, coin: str) -> bool:
         if not self.configured:
             return False
+        time.sleep(5)
         daemon = self.coins_data[coin]["daemon"]
         i = 0
         while True:
             try:
                 i += 1
-                if i == 20:
+                if i == 180:
                     logger.info(f"Looks like there might be an issue with loading {coin}...")
                     # TODO: Send an alert if this happens
                     return False
                 resp = daemon.is_responding()
                 if resp["result"] is None:
                     logger.debug(f"Waiting for {coin} daemon to start...{resp}")
-                    time.sleep(10)
                 else:
                     return True
+            except ConnectionResetError as e:
+                logger.debug(f"Waiting for {coin} daemon to start...{e}")
             except Exception as e:
-                logger.error(e)
+                logger.debug(f"Waiting for {coin} daemon to start...{e}")
+            time.sleep(5)
+                
 
 
