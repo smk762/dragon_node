@@ -29,7 +29,7 @@ while True:
     for i in range(len(options)):
         color_msg.option(f'[{i}] {options[i].title().replace("_", " ")}')
     color_msg.option(f"[{len(options)}] Exit")
-    q = color_msg.input("Select an option:")
+    q = color_msg.input("Select an option: ")
     try:
         q = int(q)
     except ValueError:
