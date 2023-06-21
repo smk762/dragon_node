@@ -98,7 +98,7 @@ class StatsLine:
                 dhms_since = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
-                dhms_since = helper.sec_to_dhms(sec_since, 3600)
+                dhms_since = helper.sec_to_dhms(sec_since, True, 600, 1800, 7200)
             row.append(str(dhms_since))
 
             connections = self.connections()
