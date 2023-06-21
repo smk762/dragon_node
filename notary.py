@@ -17,25 +17,31 @@ class Notary():
             return
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
-        self.coins_data = {}
+        self.coins_data = self.get_coins_data()
         self.log_path = f"{const.HOME}/logs"
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
+
+    def get_coins_data(self):
+        coins_data = {}
         for server in const.CONF_PATHS:
             for coin in const.CONF_PATHS[server]:
-                self.coins_data[coin] = {
-                    "conf": const.CONF_PATHS[server][coin],
-                    "wallet": helper.get_wallet_path(coin),
-                    "daemon": DaemonRPC(coin),
-                    "utxo_value": helper.get_utxo_value(coin),
-                    "min_utxo_count": 20,
-                    "split_count": 20,
-                    "server": server,
-                    "launch_params": server,
-                    "address": self.config[f"addresses_{server}"][coin],
-                    "pubkey": self.config[f"pubkey_{server}"]
-                }
-
+                coins_data.update({
+                    coin: {
+                        "conf": const.CONF_PATHS[server][coin],
+                        "wallet": helper.get_wallet_path(coin),
+                        "daemon": DaemonRPC(coin),
+                        "utxo_value": helper.get_utxo_value(coin),
+                        "min_utxo_count": 20,
+                        "split_count": 20,
+                        "server": server,
+                        "launch_params": server,
+                        "address": self.config[f"addresses_{server}"][coin],
+                        "pubkey": self.config[f"pubkey_{server}"]
+                    }
+                })
+        return coins_data
+    
     def move_wallet(self, coin):
         try:
             now = int(time.time())
