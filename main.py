@@ -23,7 +23,7 @@ print('''
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
 
-options = ["configure", "consolidate" "stats", "convert_privkey", "import_privkey"]
+options = ["configure", "consolidate", "stats", "convert_privkey", "import_privkey"]
 while True:
     color_msg.status(f"\n==== Options ====")
     for i in range(len(options)):
