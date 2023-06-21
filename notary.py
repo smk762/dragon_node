@@ -10,9 +10,11 @@ from logger import logger
 
 
 class Notary():
-    def __init__(self):
+    def __init__(self) -> None:
         self.config = Config().load()
         self.configured = self.check_config()
+        if self.configured is False:
+            return            
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
         self.coins_data = self.get_coins_data()
