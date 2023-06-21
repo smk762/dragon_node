@@ -97,8 +97,11 @@ class Config():
                     self.color_msg.info(f"{i}: {self.config[i]}")
                 elif self.config[i] is None:
                     self.color_msg.warning(f"{i}: {self.config[i]}")
-                elif len(self.config[i]) == 0:
-                    self.color_msg.warning(f"{i}: {self.config[i]}")
+                elif isinstance(self.config[i], list):
+                    if len(self.config[i]) == 0:
+                        self.color_msg.warning(f"{i}: {self.config[i]}")
+                    else:
+                        self.color_msg.table(f"{i}: {self.config[i]}")
                 else:
                     self.color_msg.table(f"{i}: {self.config[i]}")
         self.options_legend()        
