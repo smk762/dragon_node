@@ -192,7 +192,7 @@ class Notary():
                 launch_params = self.coins_data[coin]["launch_params"]
                 # check if already running
                 try:
-                    block_height = daemon.get_blockheight(coin)
+                    block_height = daemon.getblockcount(coin)
                     if block_height:
                         logger.debug(f"{coin} daemon is already running.")
                         return
@@ -204,7 +204,8 @@ class Notary():
                 time.sleep(3)
                 logger.info('{:^60}'.format( f"{coin} daemon starting."))
                 logger.info('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
-        self.wait_for_start(coin)
+            # TODO: add non docker 3p server start
+            self.wait_for_start(coin)
 
     def stop(self, coin: str, docker=True) -> None:
         if not self.configured:
@@ -218,7 +219,7 @@ class Notary():
                 self.wait_for_stop(coin)
             except Exception as e:
                 logger.error(e)
-        self.wait_for_stop(coin)
+            self.wait_for_stop(coin)
         
     def start_container(self, coin):
         server = self.coins_data[coin]["server"]
@@ -256,7 +257,7 @@ class Notary():
                     return False
                 logger.debug(f"Waiting for {coin} daemon to stop...")
                 time.sleep(15)
-                block_height = daemon.get_blockheight(coin)
+                block_height = daemon.getblockcount(coin)
                 if not block_height:
                     return True
             except Exception as e:
@@ -277,7 +278,7 @@ class Notary():
                     return False
                 logger.debug(f"Waiting for {coin} daemon to restart...")
                 time.sleep(30)
-                block_height = daemon.get_blockheight(coin)
+                block_height = daemon.getblockcount(coin)
                 if block_height:
                     return True
             except Exception as e:
