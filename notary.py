@@ -145,24 +145,28 @@ class Notary():
             input_utxo = {"txid": utxo["txid"], "vout": utxo["vout"]}
             inputs.append(input_utxo)
 
-            logger.debug(f"inputs: {len(inputs)}")
-            logger.debug(f"value: {value}")
-            logger.debug(f"remaining_inputs: {remaining_inputs}")
+            # logger.debug(f"inputs: {len(inputs)}")
+            # logger.debug(f"value: {value}")
+            # logger.debug(f"remaining_inputs: {remaining_inputs}")
             value += utxo["satoshis"]
             if len(inputs) > merge_amount or remaining_inputs < 1:
                 value = round(value/100000000, 8)
+                logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
                 if coin in ["EMC", "CHIPS", "AYA"]:
                     # Got -26 error if not reducing amount
                     vouts = {address: value - 0.001}
                 else:
                     vouts = {address: value}
+                logger.debug(f"vouts: {vouts}")
                 try:
                     unsignedhex = daemon.createrawtransaction(inputs, vouts)
+                    logger.debug(f"unsignedhex: {unsignedhex}")
                     time.sleep(0.1)
                     if coin in ["AYA"]:
                         signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
                     else:
                         signedhex = daemon.signrawtransaction(unsignedhex)
+                    logger.debug(f"signedhex: {signedhex}")
                     time.sleep(0.1)
                     txid = daemon.sendrawtransaction(signedhex["hex"])
                     # TODO: add explorer URL
