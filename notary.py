@@ -111,10 +111,12 @@ class Notary():
 
     def get_utxos(self, coin: str, pubkey: str) -> list:
         daemon = DaemonRPC(coin)
-        try:
-            utxos_data = daemon.listunspent()
-        except Exception as e:
-            utxos_data = helper.get_utxos(coin, pubkey)
+        utxos_data = helper.get_utxos(coin, pubkey)
+        if len(utxos_data) == 0:
+            try:
+                utxos_data = daemon.listunspent()
+            except Exception as e:
+                utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             return []
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
