@@ -127,7 +127,7 @@ class DaemonRPC():
     def getblock(self, block) -> dict:
         return self.rpc("getblock", [f"{block}"])["result"]
     
-    def is_responding(self, daemon) -> dict:
+    def is_responding(self) -> dict:
         return self.rpc("getblockcount")
     
     def getblockcount(self) -> int:
