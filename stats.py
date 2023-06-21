@@ -179,6 +179,6 @@ class Stats:
             
         print(self.spacer())
         
-        date_str = f'| {mined_str} |' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
+        date_str = f'| {mined_str}  | ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width + 9)
         print(fmt_date_str)
