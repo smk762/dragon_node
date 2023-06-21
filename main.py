@@ -23,7 +23,7 @@ print('''
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
 
-options = ["configure", "consolidate", "stats", "convert_privkey", "import_privkey"]
+options = ["configure", "consolidate", "stats", "convert_privkey", "import_privkey", "reset_wallet", "start_coin", "stop_coin", "restart_coin", "exit"]
 while True:
     color_msg.status(f"\n  ==== Main Menu ====")
     for i in range(len(options)):
@@ -40,7 +40,7 @@ while True:
     elif q > len(options):
         color_msg.error("Invalid option, try again.")
     else:
-        
+
         if options[q] == "configure":
             config.create()
         if options[q] == "consolidate":
@@ -56,13 +56,35 @@ while True:
                     color_msg.error(f"Invalid coin '{coin}', try again.")
             else:
                 color_msg.error(f"Node configuration missing. Select 'Configure' from the main menu to set your node config.")
-            
+
         elif options[q] == "convert_privkey":
             wif = input("Enter private key: ")
             for coin in const.DPOW_COINS:
                 if coin != "KMD_3P":
                     print(f"{coin}: {helper.wif_convert(coin, wif)}")
-        
+
+        elif options[q] == "reset_wallet":
+            notary = Notary()
+            if notary.configured:
+                coin = input("Enter coin to reset wallet (or ALL): ")
+                if coin.lower() == "all":
+                    for coin in const.DPOW_COINS:
+                        notary.move_wallet(coin)
+                elif coin.upper() in const.DPOW_COINS:
+                    # Backup wallet
+                    notary.move_wallet(coin)
+                    # Stop chain
+                    
+                    # Restart chain
+                    
+                    # Import wallet
+                    
+                    # Consolidate
+                    
+                else:
+                    color_msg.error(f"Invalid coin '{coin}', try again.")
+
+
         elif options[q] == "stats":
             while True:
                 try:
@@ -71,9 +93,42 @@ while True:
                     time.sleep(600)
                 except KeyboardInterrupt:
                     break
-        
+
         elif options[q] == "import_privkey":
             tui.import_privkey()
-                
+
+        elif options[q] == "start_coin":
+            notary = Notary()
+            coin = input("Enter coin to start (or ALL): ")
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    notary.start(coin)
+            elif coin.upper() in const.DPOW_COINS:
+                notary.start(coin)
+            else:
+                color_msg.error(f"Invalid coin '{coin}', try again.")
+
+        elif options[q] == "restart_coin":
+            notary = Notary()
+            coin = input("Enter coin to restart (or ALL): ")
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    notary.restart(coin)
+            elif coin.upper() in const.DPOW_COINS:
+                notary.restart(coin)
+            else:
+                color_msg.error(f"Invalid coin '{coin}', try again.")
+
+        elif options[q] == "stop_coin":
+            notary = Notary()
+            coin = input("Enter coin to stop (or ALL): ")
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    notary.stop(coin)
+            elif coin.upper() in const.DPOW_COINS:
+                notary.stop(coin)
+            else:
+                color_msg.error(f"Invalid coin '{coin}', try again.")
+
         elif options[q] == "exit":
             break

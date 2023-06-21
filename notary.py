@@ -139,22 +139,19 @@ class Notary():
                     vouts = {address: value}
                 try:
                     unsignedhex = daemon.createrawtransaction(inputs, vouts)
-                    #logger.debug(f"rawhex: {rawhex}")
                     time.sleep(0.1)
                     if coin in ["AYA"]:
                         signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
                     else:
                         signedhex = daemon.signrawtransaction(unsignedhex)
-                    #logger.debug(f"signedhex: {signedhex}")
                     time.sleep(0.1)
                     txid = daemon.sendrawtransaction(signedhex["hex"])
+                    # TODO: add explorer URL
                     logger.info(f"Sent {value} to {address}")
                     logger.info(f"txid: {txid}")
                     time.sleep(0.1)
                 except Exception as e:
                     logger.error(e)
-                    #logger.debug(utxo)
-                    #logger.debug(vouts)
                 inputs = []
                 value = 0
                 if remaining_inputs < 0: remaining_inputs = 0
@@ -179,16 +176,61 @@ class Notary():
         else:
             logger.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
 
-    def stop(self, coin: str) -> None:
+    def restart(self, coin: str, docker=True) -> None:
+        self.stop(coin, docker)
+        self.start(coin, docker)
+
+    def start(self, coin: str, docker=True) -> None:
         if not self.configured:
             return
-        daemon = self.coins_data[coin]["daemon"]
+        if docker:
+             self.start_container(coin)
+        if not docker:
+            daemon = self.coins_data[coin]["daemon"]
+            server = self.coins_data[coin]["server"]
+            if server == "main":
+                launch_params = self.coins_data[coin]["launch_params"]
+                # check if already running
+                try:
+                    block_height = daemon.get_blockheight(coin)
+                    if block_height:
+                        logger.debug(f"{coin} daemon is already running.")
+                        return
+                except Exception as e:
+                    logger.error(e)
+
+                log_output = open(f"{self.log_path}/{coin}_daemon.log",'w+')
+                subprocess.Popen(launch_params.split(" "), stdout=log_output, stderr=log_output, universal_newlines=True)
+                time.sleep(3)
+                logger.info('{:^60}'.format( f"{coin} daemon starting."))
+                logger.info('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
+        self.wait_for_start(coin)
+
+    def stop(self, coin: str, docker=True) -> None:
+        if not self.configured:
+            return
+        if docker:
+             self.stop_container(coin)
+        if not docker:
+            daemon = self.coins_data[coin]["daemon"]
+            try:
+                daemon.stop()
+                self.wait_for_stop(coin)
+            except Exception as e:
+                logger.error(e)
+        self.wait_for_stop(coin)
+        
+    def start_container(self, coin):
         try:
-            daemon.stop()
-            self.wait_for_stop(coin)
-        except Exception as e:
+            subprocess.run(['docker compose', '-f', const.COMPOSE_PATH, coin.lower(), 'up', '-d'], check=True)
+        except subprocess.CalledProcessError as e:
             logger.error(e)
 
+    def stop_container(self, coin):
+        try:
+            subprocess.run(['docker compose', '-f', const.COMPOSE_PATH, coin.lower(), 'stop'], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(e)
 
     def wait_for_stop(self, coin: str) -> bool:
         if not self.configured:
@@ -215,15 +257,12 @@ class Notary():
         if not self.configured:
             return False
         daemon = self.coins_data[coin]["daemon"]
-        launch_params = self.coins_data[coin]["launch_params"]
         i = 0
         while True:
             try:
                 i += 1
                 if i == 20:
                     logger.info(f"Looks like there might be an issue with loading {coin}...")
-                    logger.info(f"We'll try and start it again, but if you need it here are the launch params to do it manually:")
-                    logger.info(' '.join(launch_params))
                     # TODO: Send an alert if this happens
                     return False
                 logger.debug(f"Waiting for {coin} daemon to restart...")
@@ -233,33 +272,5 @@ class Notary():
                     return True
             except Exception as e:
                 logger.error(e)
-                pass
-
-    def start(self, coin: str) -> None:
-        if not self.configured:
-            return
-        daemon = self.coins_data[coin]["daemon"]
-        server = self.coins_data[coin]["server"]
-        if server == "main":
-            launch_params = self.coins_data[coin]["launch_params"]
-            # check if already running
-            try:
-                block_height = daemon.get_blockheight(coin)
-                if block_height:
-                    logger.debug(f"{coin} daemon is already running.")
-                    return
-            except Exception as e:
-                logger.error(e)
-
-            log_output = open(f"{self.log_path}/{coin}_daemon.log",'w+')
-            subprocess.Popen(launch_params.split(" "), stdout=log_output, stderr=log_output, universal_newlines=True)
-            time.sleep(3)
-            logger.info('{:^60}'.format( f"{coin} daemon starting."))
-            logger.info('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
-        else:
-            # TODO: Add support for starting 3p via docker
-            pass
-        self.wait_for_start(coin)
-            
 
 

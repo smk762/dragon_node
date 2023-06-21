@@ -20,6 +20,7 @@ load_dotenv()
 HOME = expanduser('~')
 SCRIPT_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 SWEEP_ADDR = os.getenv("SWEEP_ADDR")
+COMPOSE_PATH = f'{SCRIPT_PATH}/docker-compose.yml'
 
 
 
