@@ -100,7 +100,7 @@ class Notary():
         self.consolidate(coin)
 
         
-    def consolidate(self, coin: str) -> None:
+    def consolidate(self, coin: str, reset=False) -> None:
         if not self.configured:
             return
         address = self.coins_data[coin]["address"]
@@ -126,7 +126,7 @@ class Notary():
         skipped_inputs = 0
         remaining_inputs = len(utxos)
         merge_amount = 800
-        if len(utxos) < 20 and daemon.getbalance() > 0.001:
+        if len(utxos) < 20 and daemon.getbalance() > 0.001 and reset is False:
             logger.debug(f"< 20 UTXOs to consolidate {coin}, skipping")
             return
 
@@ -135,7 +135,7 @@ class Notary():
             # for daemon resp data
             if "satoshis" not in utxo:
                 utxo["satoshis"] = utxo["amount"] * 100000000
-            if utxo["confirmations"] < 100:
+            if utxo["confirmations"] < 100 and reset is False:
                 skipped_inputs += 1
                 remaining_inputs -= 1
                 if remaining_inputs > 0:
