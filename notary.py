@@ -80,7 +80,26 @@ class Notary():
                 os.remove(f"{data_dir}{filename}")
             except Exception as e:
                 logger.error(e)
-    
+
+    def reset_wallet(self, coin: str) -> None:
+        daemon = DaemonRPC(coin)
+        server = helper.get_coin_server
+        # Backup wallet
+        self.move_wallet(coin)
+        # Stop coin
+        self.stop(coin)
+        # Restart coin
+        self.start(coin)
+        # Import wallet without rescan
+        pk = input(f"Enter {server.upper()} KMD private key: ")
+        pk = helper.wif_convert(coin, pk)
+        daemon.importprivkey(pk, False)
+        # Consolidate
+        # TODO: This relies on access to explorer APIs, which may not be available for all coins
+        # TODO: Electrums may be a viable alternative
+        self.consolidate(coin)
+
+        
     def consolidate(self, coin: str) -> None:
         if not self.configured:
             return

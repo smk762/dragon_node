@@ -4,6 +4,7 @@ from color import ColorMsg
 import helper
 import const
 import tui
+from daemon import DaemonRPC
 from configure import Config
 from stats import Stats
 from tui import TUI
@@ -71,21 +72,11 @@ while True:
                 coin = input("Enter coin to reset wallet (or ALL): ")
                 if coin.lower() == "all":
                     for coin in const.DPOW_COINS:
-                        notary.move_wallet(coin)
+                        notary.reset_wallet(coin)                        
                 elif coin.upper() in const.DPOW_COINS:
-                    # Backup wallet
-                    notary.move_wallet(coin)
-                    # Stop chain
-                    
-                    # Restart chain
-                    
-                    # Import wallet
-                    
-                    # Consolidate
-                    
+                    notary.reset_wallet(coin)                    
                 else:
                     color_msg.error(f"Invalid coin '{coin}', try again.")
-
 
         elif options[q] == "stats":
             while True:

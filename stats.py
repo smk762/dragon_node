@@ -14,7 +14,7 @@ class StatsLine:
         self.msg = ColorMsg()
         self.coin = coin
         self.col_widths = column_widths
-        self.daemon = DaemonRPC(self.coin)   
+        self.daemon = DaemonRPC(self.coin)
         
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()

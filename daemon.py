@@ -103,10 +103,11 @@ class DaemonRPC():
     def getrawtransaction(self, txid):
         return self.rpc("getrawtransaction", [txid])["result"]
 
-    def importprivkey(self, pk, height=None):
-        if height: 
-            return self.rpc("importprivkey", [pk, "", True, height])["result"]
-        return self.rpc("importprivkey", [pk, "", False])["result"]
+    def importprivkey(self, pk, rescan=False, height=None):
+        if height:
+            # Not all coins support this, but it mimght come in handy later
+            return self.rpc("importprivkey", [pk, "", rescan, height])["result"]
+        return self.rpc("importprivkey", [pk, "", rescan])["result"]
 
     def stop(self):
         return self.rpc("stop")["result"]
