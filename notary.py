@@ -47,9 +47,16 @@ class Notary():
                         "split_count": 20,
                         "server": server,
                         "launch_params": server,
-                        "address": self.config[f"addresses_{server}"][coin],
                         "pubkey": self.config[f"pubkey_{server}"]
                     }
+                })
+                if server == "main":
+                    coins_data[coin].update({
+                        "address": self.config[f"address_main"][coin],
+                })
+                else:
+                    coins_data[coin].update({
+                        "address": self.config[f"addresses_3p"][coin],
                 })
         return coins_data
     
