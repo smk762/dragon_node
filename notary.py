@@ -222,13 +222,13 @@ class Notary():
         
     def start_container(self, coin):
         try:
-            subprocess.run(['docker compose', '-f', const.COMPOSE_PATH, coin.lower(), 'up', '-d'], check=True)
+            subprocess.run(['docker', 'compose', '-f', const.COMPOSE_PATH, 'up', coin.lower(), '-d'], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(e)
 
     def stop_container(self, coin):
         try:
-            subprocess.run(['docker compose', '-f', const.COMPOSE_PATH, coin.lower(), 'stop'], check=True)
+            subprocess.run(['docker', 'compose', '-f', const.COMPOSE_PATH, 'stop', coin.lower()], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(e)
 
