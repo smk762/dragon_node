@@ -40,10 +40,10 @@ class StatsLine:
         filesize = os.path.getsize(filename)
         if filesize > 10485760:
             return '\033[31m' + "   > 10M" + '\033[0m' 
-        elif filesize > 5242880:
-            return '\033[33m' + f"    > 5M" + '\033[0m' 
+        elif filesize > 3145728:
+            return '\033[33m' + f"    > 3M" + '\033[0m' 
         elif filesize < 1048576:
-            return '\033[33m' + f"    > 1M" + '\033[0m' 
+            return '\033[92m' + f"    < 1M" + '\033[0m' 
         else:
             return helper.bytes_to_unit(filesize)
 
@@ -116,7 +116,8 @@ class StatsLine:
             row.append(f"{response_time:.4f}")
 
         except Exception as e:
-            return [f"Error getting stats for {self.coin}. Is it running?"]
+            return [self.coin, "-", "-", "-", "-",
+                    "-", "-", "-", "-", "-", "-"]
         return row
 
 
@@ -132,24 +133,24 @@ class Stats:
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
-    def format_line(self, row: list) -> str:
+    def format_line(self, row: list, color: str="") -> str:
         line = " | "
         for i in range(len(row)):
             if i in [0]:
                 line += f"{str(row[i]).ljust(self.col_widths[i])} |"
             else:
                 line += f"{str(row[i]).rjust(self.col_widths[i])} |"
-        return line
+        if color != "":
+            return self.msg.colorize(line, color)
+        else:
+            return line
     
     def header(self) -> str:
         return self.format_line(self.columns)
     
     def spacer(self) -> str:
         return " " + "-" * self.table_width
-    
-    def format_errors(self, errors: str) -> str:
-        return "| " + errors.center(self.table_width - 4) + " |"
-    
+
     def show(self) -> None:
         print()
         print(self.header())
@@ -157,9 +158,8 @@ class Stats:
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
-            if len(row) == 1:
-                errors = self.format_errors(row[0])
-                print(self.msg.colorize(errors, "lightred"))
+            if row[-1] == "-":
+                print(self.format_line(row, "lightred"))
             else:
                 print(self.format_line(row))
         print(self.spacer())
