@@ -45,14 +45,17 @@ while True:
             config.create()
         if options[q] == "consolidate":
             notary = Notary()
-            coin = input("Enter coin to consolidate (or ALL): ")
-            if coin.lower() == "all":
-                for coin in const.DPOW_COINS:
+            if notary.configured:
+                coin = input("Enter coin to consolidate (or ALL): ")
+                if coin.lower() == "all":
+                    for coin in const.DPOW_COINS:
+                        notary.consolidate(coin)
+                elif coin.upper() in const.DPOW_COINS:
                     notary.consolidate(coin)
-            elif coin.upper() in const.DPOW_COINS:
-                notary.consolidate(coin)
+                else:
+                    color_msg.error(f"Invalid coin '{coin}', try again.")
             else:
-                color_msg.error(f"Invalid coin '{coin}', try again.")
+                color_msg.error(f"Node configuration missing. Select 'Configure' from the main menu to set your node config.")
             
         elif options[q] == "convert_privkey":
             wif = input("Enter private key: ")

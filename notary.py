@@ -14,7 +14,7 @@ class Notary():
         self.config = Config().load()
         self.configured = self.check_config()
         if self.configured is False:
-            return            
+            return
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
         self.coins_data = self.get_coins_data()
@@ -24,7 +24,6 @@ class Notary():
 
     def check_config(self):
         if "addnotary" not in self.config:
-            print("Node configuration missing. Select 'Configure' from the main menu to set your node config.")
             return False
         return True
 
