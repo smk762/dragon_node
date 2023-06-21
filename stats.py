@@ -84,12 +84,6 @@ class StatsLine:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             row.append(str(ntx_utxo_count))
 
-            balance = self.daemon.getbalance()
-            if balance < 0.1:
-                row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
-            else:
-                row.append(f"{balance:.3f}")
-
             # Blocks
             block_count = self.daemon.getblockcount()
             row.append(str(block_count))
@@ -115,6 +109,13 @@ class StatsLine:
             response_time = time.perf_counter() - start
             row.append(f"{response_time:.4f}")
 
+            # Balance
+            balance = self.daemon.getbalance()
+            if balance < 0.1:
+                row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
+            else:
+                row.append(f"{balance:.3f}")
+
         except Exception as e:
             return [self.coin, "-", "-", "-", "-",
                     "-", "-", "-", "-", "-", "-"]
@@ -126,10 +127,10 @@ class Stats:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
-        self.col_widths = [12, 6, 8, 6, 10, 10, 8, 6, 8, 8, 8]
+        self.col_widths = [11, 6, 8, 6, 10, 9, 8, 6, 8, 8, 8]
         self.columns = [
-            "COIN", "NTX", "LASTNTX", "UTXO", "BALANCE",
-            "BLOCKS", "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME"
+            "COIN", "NTX", "LASTNTX", "UTXO", "BLOCKS",
+            "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME", "BALANCE"
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
