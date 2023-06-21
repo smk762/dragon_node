@@ -221,14 +221,24 @@ class Notary():
         self.wait_for_stop(coin)
         
     def start_container(self, coin):
+        server = self.coins_data[coin]["server"]
+        if server == "main":
+            compose = const.COMPOSE_PATH_MAIN
+        else:
+            compose = const.COMPOSE_PATH_3P
         try:
-            subprocess.run(['docker', 'compose', '-f', const.COMPOSE_PATH, 'up', coin.lower(), '-d'], check=True)
+            subprocess.run(['docker', 'compose', '-f', compose, 'up', coin.lower(), '-d'], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(e)
 
     def stop_container(self, coin):
+        server = self.coins_data[coin]["server"]
+        if server == "main":
+            compose = const.COMPOSE_PATH_MAIN
+        else:
+            compose = const.COMPOSE_PATH_3P
         try:
-            subprocess.run(['docker', 'compose', '-f', const.COMPOSE_PATH, 'stop', coin.lower()], check=True)
+            subprocess.run(['docker', 'compose', '-f', compose, 'stop', coin.lower()], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(e)
 

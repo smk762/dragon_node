@@ -23,7 +23,9 @@ print('''
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
 
-options = ["configure", "consolidate", "stats", "convert_privkey", "import_privkey", "reset_wallet", "start_coin", "stop_coin", "restart_coin", "exit"]
+options = ["configure", "consolidate", "stats", "convert_privkey",
+           "import_privkey", "reset_wallet", "start_coin", "stop_coin",
+           "restart_coin"]
 while True:
     color_msg.status(f"\n  ==== Main Menu ====")
     for i in range(len(options)):

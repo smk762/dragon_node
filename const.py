@@ -20,7 +20,8 @@ load_dotenv()
 HOME = expanduser('~')
 SCRIPT_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 SWEEP_ADDR = os.getenv("SWEEP_ADDR")
-COMPOSE_PATH = f'{SCRIPT_PATH}/docker-compose.yml'
+COMPOSE_PATH_MAIN = f'{HOME}/notary_docker_main/docker-compose.yml'
+COMPOSE_PATH_3P = f'{HOME}/docker-compose.yml'
 
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
