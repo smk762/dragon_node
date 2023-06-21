@@ -41,7 +41,9 @@ class StatsLine:
         if filesize > 10485760:
             return '\033[31m' + "   > 10M" + '\033[0m' 
         elif filesize > 5242880:
-            return '\033[31m' + f"   {helper.bytes_to_unit(filesize)}" + '\033[0m' 
+            return '\033[33m' + f"    > 5M" + '\033[0m' 
+        elif filesize < 1048576:
+            return '\033[33m' + f"    > 1M" + '\033[0m' 
         else:
             return helper.bytes_to_unit(filesize)
 
@@ -70,6 +72,16 @@ class StatsLine:
             last_mined = ntx_stats[2]
 
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
+            if ntx_utxo_count < 5:
+                ntx_utxo_count = '\033[31m' + f"  {ntx_utxo_count}" + '\033[0m'
+            elif ntx_utxo_count < 10:
+                ntx_utxo_count = '\033[33m' + f"  {ntx_utxo_count}" + '\033[0m'
+            elif ntx_utxo_count > 100:
+                ntx_utxo_count = '\033[31m' + "> 100" + '\033[0m'
+            elif ntx_utxo_count > 40:
+                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count}" + '\033[0m'
+            elif ntx_utxo_count >= 10:
+                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count}" + '\033[0m'
             row.append(str(ntx_utxo_count))
 
             balance = self.daemon.getbalance()

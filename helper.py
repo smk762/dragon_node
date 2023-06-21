@@ -222,7 +222,7 @@ def read_json_data(filename: str) -> dict:
 def sec_since(ts):
     return int(time.time()) - ts
 
-def sec_to_dhms(sec: int, threshold: int=86400) -> str:
+def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_threshold: int=21600, upper_threshold: int=86400) -> str:
     if sec < 0:
         sec = sec*-1
     minutes, seconds = divmod(sec, 60)
@@ -240,11 +240,19 @@ def sec_to_dhms(sec: int, threshold: int=86400) -> str:
     result = ' '.join('{}{}'.format(int(val), name) for name, val in periods if val)
     if sec < 0:
         result = f"-{result}"
-    if sec > threshold:
-        # Add color and fix padding
+    # Add color and fix padding
+    if sec < optimal_max:
+        while len(result) < 8:
+            result = f" {result}"
+        result = '\033[92m' + result + '\033[0m'
+    if sec > upper_threshold:
         while len(result) < 8:
             result = f" {result}"
         result = '\033[31m' + result + '\033[0m'
+    if sec > lower_threshold:
+        while len(result) < 8:
+            result = f" {result}"
+        result = '\033[33m' + result + '\033[0m'
     return result
 
 def get_utxo_value(coin):
