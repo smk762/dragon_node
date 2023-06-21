@@ -133,9 +133,12 @@ class Notary():
                 if "satoshis" not in utxo:
                     utxo["satoshis"] = utxo["amount"] * 100000000
                 if utxo["confirmations"] < 100:
-                        continue
+                    logger.debug(f"excluding {utxo['txid']}:{utxo['vout']} - {utxo['confirmations']} confirmations")
+                    continue
                 inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
                 value += utxo["satoshis"]
+            else:
+                logger.debug(f"excluding {utxo['txid']}:{utxo['vout']}")
         return [inputs, value]
         
 
