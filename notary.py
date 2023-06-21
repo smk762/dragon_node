@@ -146,7 +146,7 @@ class Notary():
         pubkey = self.coins_data[coin]["pubkey"]
         daemon = self.coins_data[coin]["daemon"]
         utxos = self.get_utxos(coin, pubkey)
-        if not len(utxos) == 0:
+        if len(utxos) == 0:
             logger.warning(f"No UTXOs found for {coin}")
             return
         if not reset:
