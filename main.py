@@ -25,9 +25,9 @@ print('''
 
 options = ["configure", "consolidate", "stats", "convert_privkey", "import_privkey"]
 while True:
-    color_msg.status(f"\n==== Options ====")
+    color_msg.status(f"\n  ==== Main Menu ====")
     for i in range(len(options)):
-        color_msg.option(f'[{i}] {options[i].title().replace("_", " ")}')
+        color_msg.option(f'  [{i}] {options[i].title().replace("_", " ")}')
     color_msg.option(f"[{len(options)}] Exit")
     q = color_msg.input("Select an option: ")
     try:

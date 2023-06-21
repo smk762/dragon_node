@@ -118,10 +118,10 @@ class Config():
     def create(self):
         while True:
             self.show_config()
-            self.color_msg.status(f"\n==== Options ====")
+            self.color_msg.status(f"\n  ==== Config Options ====")
             options = self.get_options()
             for i in range(len(options)):
-                self.color_msg.option(f"[{i}] Update {options[i]}")
+                self.color_msg.option(f"  [{i}] Update {options[i]}")
             self.color_msg.option(f"[{len(options)}] Exit")
             q = self.color_msg.input("Select an option: ")
             try:
