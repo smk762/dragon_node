@@ -229,7 +229,9 @@ def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_thre
     hours, minutes = divmod(minutes, 60)
     days, hours = divmod(hours, 24)
     periods = []
-    if days > 0:
+    if days > 7:
+        return result = '\033[31m' + "> week!" + '\033[0m'
+    elif days > 0:
         periods = [('d', days), ('h', hours)]
     elif hours > 0:
         periods = [('h', hours), ('m', minutes)]
