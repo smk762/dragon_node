@@ -89,21 +89,13 @@ class DaemonRPC():
         return self.rpc("importprunedfunds", [raw_tx, txoutproof])["result"]
 
     def createrawtransaction(self, inputs, vouts):
-        """_summary_
+        return self.rpc("createrawtransaction", [inputs, vouts])["result"]
 
-        Args:
-            inputs (_type_): _description_
-            vouts (_type_): _description_
+    def signrawtransaction(self, unsignedhex):
+        return self.rpc("signrawtransaction", [unsignedhex])["result"]
 
-        Returns:
-            _type_: _description_
-        """        return self.rpc("createrawtransaction", [inputs, vouts])["result"]
-
-    def signrawtransaction(self, rawhex):
-        return self.rpc("signrawtransaction", [rawhex])["result"]
-
-    def signrawtransactionwithwallet(self, rawhex):
-        return self.rpc("signrawtransactionwithwallet", [rawhex])["result"]
+    def signrawtransactionwithwallet(self, unsignedhex):
+        return self.rpc("signrawtransactionwithwallet", [unsignedhex])["result"]
 
     def sendrawtransaction(self, signedhex):
         return self.rpc("sendrawtransaction", [signedhex])["result"]

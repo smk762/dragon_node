@@ -138,13 +138,13 @@ class Notary():
                 else:
                     vouts = {address: value}
                 try:
-                    rawhex = daemon.createrawtransaction(inputs, vouts)
+                    unsignedhex = daemon.createrawtransaction(inputs, vouts)
                     #logger.debug(f"rawhex: {rawhex}")
                     time.sleep(0.1)
                     if coin in ["AYA"]:
-                        signedhex = daemon.signrawtransactionwithwallet(rawhex)
+                        signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
                     else:
-                        signedhex = daemon.signrawtransaction(rawhex)
+                        signedhex = daemon.signrawtransaction(unsignedhex)
                     #logger.debug(f"signedhex: {signedhex}")
                     time.sleep(0.1)
                     txid = daemon.sendrawtransaction(signedhex["hex"])
