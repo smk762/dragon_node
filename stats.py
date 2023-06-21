@@ -39,11 +39,11 @@ class StatsLine:
         filename = helper.get_wallet_path(self.coin)
         filesize = os.path.getsize(filename)
         if filesize > 10485760:
-            return '\033[31m' + "   > 10M" + '\033[0m' 
+            return '\033[31m' + "  > 10M" + '\033[0m' 
         elif filesize > 3145728:
-            return '\033[33m' + f"    > 3M" + '\033[0m' 
+            return '\033[33m' + f"  > 3M" + '\033[0m' 
         elif filesize < 1048576:
-            return '\033[92m' + f"    < 1M" + '\033[0m' 
+            return '\033[92m' + f"  < 1M" + '\033[0m' 
         else:
             return helper.bytes_to_unit(filesize)
 
@@ -127,7 +127,8 @@ class Stats:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
-        self.col_widths = [11, 6, 8, 6, 10, 9, 8, 6, 8, 8, 8]
+        self.col_widths = [11, 6, 8, 6, 10,
+                           8, 8, 6, 8, 8, 8]
         self.columns = [
             "COIN", "NTX", "LASTNTX", "UTXO", "BLOCKS",
             "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME", "BALANCE"
