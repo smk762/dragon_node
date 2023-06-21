@@ -60,6 +60,7 @@ class DaemonRPC():
         try:
             # logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
+            # logger.debug(f"response: {resp}")
             return resp
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
@@ -125,6 +126,9 @@ class DaemonRPC():
     ## Blocks
     def getblock(self, block) -> dict:
         return self.rpc("getblock", [f"{block}"])["result"]
+    
+    def is_responding(self, daemon) -> dict:
+        return self.rpc("getblockcount")
     
     def getblockcount(self) -> int:
         return self.rpc("getblockcount")["result"]

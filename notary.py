@@ -215,7 +215,7 @@ class Notary():
                 launch_params = self.coins_data[coin]["launch_params"]
                 # check if already running
                 try:
-                    block_height = daemon.getblockcount(coin)
+                    block_height = daemon.getblockcount()
                     if block_height:
                         logger.debug(f"{coin} daemon is already running.")
                         return
@@ -228,7 +228,7 @@ class Notary():
                 logger.info('{:^60}'.format( f"{coin} daemon starting."))
                 logger.info('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
             # TODO: add non docker 3p server start
-            self.wait_for_start(coin)
+        self.wait_for_start(coin)
 
     def stop(self, coin: str, docker=True) -> None:
         if not self.configured:
@@ -278,10 +278,11 @@ class Notary():
                     logger.warning(f"Looks like there might be an issue with stopping {coin}...")
                     # TODO: Send an alert if this happens
                     return False
-                logger.debug(f"Waiting for {coin} daemon to stop...")
-                time.sleep(15)
-                block_height = daemon.getblockcount(coin)
-                if not block_height:
+                resp = daemon.is_responding()
+                if resp["result"] is None:
+                    logger.debug(f"Waiting for {coin} daemon to stop...{resp}")
+                    time.sleep(10)
+                else:
                     return True
             except Exception as e:
                 logger.error(e)
@@ -299,10 +300,11 @@ class Notary():
                     logger.info(f"Looks like there might be an issue with loading {coin}...")
                     # TODO: Send an alert if this happens
                     return False
-                logger.debug(f"Waiting for {coin} daemon to restart...")
-                time.sleep(30)
-                block_height = daemon.getblockcount(coin)
-                if block_height:
+                resp = daemon.is_responding()
+                if resp["result"] is None:
+                    logger.debug(f"Waiting for {coin} daemon to start...{resp}")
+                    time.sleep(10)
+                else:
                     return True
             except Exception as e:
                 logger.error(e)
