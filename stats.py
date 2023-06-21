@@ -69,8 +69,12 @@ class StatsLine:
                 dhms_since = helper.sec_to_dhms(sec_since)
             row.append(dhms_since)
             
+            # Last Mined
             last_mined = ntx_stats[2]
+            last_mined = helper.sec_since(last_mined)
+            last_mined = helper.sec_to_dhms(last_mined)
 
+            # UTXOS
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
             if ntx_utxo_count < 5:
                 ntx_utxo_count = '\033[31m' + f"     {ntx_utxo_count}" + '\033[0m'
@@ -115,7 +119,9 @@ class StatsLine:
                 row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
             else:
                 row.append(f"{balance:.3f}")
-
+                
+            if self.coin == "KMD":
+                row.append(last_mined)
         except Exception as e:
             return [self.coin, "-", "-", "-", "-",
                     "-", "-", "-", "-", "-", "-"]
@@ -128,7 +134,7 @@ class Stats:
         self.coins.sort()
         self.msg = ColorMsg()
         self.col_widths = [11, 6, 8, 6, 10,
-                           8, 8, 6, 8, 8, 8]
+                           8, 8, 6, 8, 8, 10]
         self.columns = [
             "COIN", "NTX", "LASTNTX", "UTXO", "BLOCKS",
             "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME", "BALANCE"
@@ -157,14 +163,20 @@ class Stats:
         print()
         print(self.header())
         print(self.spacer())
+        mined_str = ""
         for coin in self.coins:
             line = StatsLine(self.col_widths, coin)
             row = line.get()
+            if coin == "KMD":
+                last_mined = row[-1]
+                row = row[:-1]
+                mined_str = f"Last KMD Mined: {last_mined}"
             if row[-1] == "-":
                 print(self.format_line(row, "lightred"))
             else:
                 print(self.format_line(row))
         print(self.spacer())
-        date_str = '| ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
+        
+        date_str = f'| {mined_str} |' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
         fmt_date_str = str(date_str).rjust(self.table_width + 1)
         print(fmt_date_str)

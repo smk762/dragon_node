@@ -257,6 +257,7 @@ def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_thre
         result = '\033[33m' + result + '\033[0m'
     return result
 
+
 def get_utxo_value(coin):
     if coin in const.LARGE_UTXO_COINS:
         return 0.00100000
