@@ -66,16 +66,16 @@ class StatsLine:
                 dhms_since = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_ntx_time)
-                dhms_since = helper.sec_to_dhms(sec_since, 3600)
+                dhms_since = helper.sec_to_dhms(sec_since)
             row.append(dhms_since)
             
             last_mined = ntx_stats[2]
 
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
             if ntx_utxo_count < 5:
-                ntx_utxo_count = '\033[31m' + f"    {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count < 10:
-                ntx_utxo_count = '\033[33m' + f"    {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[33m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count > 100:
                 ntx_utxo_count = '\033[31m' + "> 100" + '\033[0m'
             elif ntx_utxo_count > 40:
