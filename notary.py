@@ -56,7 +56,7 @@ class Notary():
                 })
                 else:
                     coins_data[coin].update({
-                        "address": self.config[f"addresses_3p"][coin],
+                        "address": self.config[f"addresses_3p"][coin.replace("_3P", "")],
                 })
         return coins_data
     
