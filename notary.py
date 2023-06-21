@@ -82,6 +82,8 @@ class Notary():
                 logger.error(e)
 
     def reset_wallet(self, coin: str) -> None:
+        if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
+            logger.info(f"Skipping {coin} reset - these are untested at the moment.")
         daemon = DaemonRPC(coin)
         server = helper.get_coin_server(coin)
         # Backup wallet
@@ -99,90 +101,113 @@ class Notary():
         # TODO: Electrums may be a viable alternative
         self.consolidate(coin, True)
 
-        
-    def consolidate(self, coin: str, reset=False) -> None:
-        if not self.configured:
-            return
-        address = self.coins_data[coin]["address"]
-        pubkey = self.coins_data[coin]["pubkey"]
-        daemon = self.coins_data[coin]["daemon"]
+    def get_vouts(self, coin: str, address: str, value: float) -> dict:
+        value = round(value/100000000, 8)
+        if coin in ["EMC", "CHIPS", "AYA"]:
+            # Got -26 error if not reducing amount
+            return {address: value - 0.001}
+        else:
+            return {address: value}
+
+    def get_utxos(self, coin: str, pubkey: str) -> list:
+        daemon = DaemonRPC(coin)
         utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             try:
                 utxos_data = daemon.listunspent()
             except Exception as e:
                 logger.error(f"Error getting UTXOs for {coin}: e")
-                return
-
-        utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True) 
+                return []
+        utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         if len(utxos) > 0:
             logger.info(f"Biggest {coin} UTXO: {utxos[0]['amount']}")
             logger.info(f"{len(utxos)} {coin} UTXOs")
-        else:
-            logger.debug(f"No UTXOs found for {coin}")
+        return utxos
 
-        inputs = []
+    def get_inputs(self, utxos: list, exclude_utxos: list) -> list:
         value = 0
-        skipped_inputs = 0
-        remaining_inputs = len(utxos)
-        merge_amount = 800
-        if len(utxos) < 20 and daemon.getbalance() > 0.001 and reset is False:
-            logger.debug(f"< 20 UTXOs to consolidate {coin}, skipping")
+        inputs = []
+        for utxo in utxos:
+            if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
+                # for daemon resp data
+                if "satoshis" not in utxo:
+                    utxo["satoshis"] = utxo["amount"] * 100000000
+                if utxo["confirmations"] < 100:
+                        continue
+                inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
+                value += utxo["satoshis"]
+        return [inputs, value]
+        
+
+    def consolidate(self, coin: str, reset=False) -> None:
+        if not self.configured:
             return
+        address = self.coins_data[coin]["address"]
+        pubkey = self.coins_data[coin]["pubkey"]
+        daemon = self.coins_data[coin]["daemon"]
+        utxos = self.get_utxos(coin, pubkey)
+        if not len(utxos) == 0:
+            logger.warning(f"No UTXOs found for {coin}")
+            return
+        if not reset:
+            if len(utxos) < 20 and daemon.getbalance() > 0.001:
+                logger.debug(f"< 20 UTXOs to consolidate {coin}, skipping")
+                return
 
         logger.info(f"consolidating {coin}...")
-        for utxo in utxos:
-            # for daemon resp data
-            if "satoshis" not in utxo:
-                utxo["satoshis"] = utxo["amount"] * 100000000
-            if utxo["confirmations"] < 100 and reset is False:
-                skipped_inputs += 1
-                remaining_inputs -= 1
-                if remaining_inputs > 0:
-                    continue
-            else:
-                remaining_inputs -= 1
-            input_utxo = {"txid": utxo["txid"], "vout": utxo["vout"]}
-            inputs.append(input_utxo)
+        utxo_chunks = helper.chunkify(utxos, 800)
+        for utxos in utxo_chunks:
+            inputs_data = self.get_inputs(utxos, [])
+            inputs = inputs_data[0]
+            value = inputs_data[1]
+            vouts = self.get_vouts(coin, address, value)
+            logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
+            try:
+                txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
+                logger.info(f"Sent {value} to {address}: {txid}")
+            except Exception as e:
+                logger.error(e)
+            time.sleep(1)
 
-            # logger.debug(f"inputs: {len(inputs)}")
-            # logger.debug(f"value: {value}")
-            # logger.debug(f"remaining_inputs: {remaining_inputs}")
-            value += utxo["satoshis"]
-            if len(inputs) > merge_amount or remaining_inputs < 1:
-                value = round(value/100000000, 8)
-                logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
-                if coin in ["EMC", "CHIPS", "AYA"]:
-                    # Got -26 error if not reducing amount
-                    vouts = {address: value - 0.001}
-                else:
-                    vouts = {address: value}
-                logger.debug(f"vouts: {vouts}")
-                try:
-                    unsignedhex = daemon.createrawtransaction(inputs, vouts)
-                    logger.debug(f"unsignedhex: {unsignedhex}")
-                    time.sleep(0.1)
-                    if coin in ["AYA"]:
-                        signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
+    def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict) -> str:
+        daemon = DaemonRPC(coin)
+        unsignedhex = daemon.createrawtransaction(inputs, vouts)
+        # logger.debug(f"unsignedhex: {unsignedhex}")
+        time.sleep(0.1)
+        if coin in ["AYA"]:
+            signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
+        else:
+            signedhex = daemon.signrawtransaction(unsignedhex)
+        # logger.debug(f"signedhex: {signedhex}")
+        time.sleep(0.1)
+        txid = daemon.sendrawtransaction(signedhex["hex"])
+        if txid is not None:
+            # TODO: add explorer URL
+            logger.info(f"txid: {txid}")
+            return txid
+        else:
+            # TODO: we should be able to remove the error utxo and retry here
+            if not signedhex['complete']:
+                errors = signedhex['errors']
+                error_utxos = []
+                for error in errors:
+                    if error['error'] == 'Input not found or already spent':
+                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                     else:
-                        signedhex = daemon.signrawtransaction(unsignedhex)
-                    logger.debug(f"signedhex: {signedhex}")
-                    time.sleep(0.1)
-                    txid = daemon.sendrawtransaction(signedhex["hex"])
-                    # TODO: add explorer URL
-                    logger.info(f"Sent {value} to {address}")
-                    logger.info(f"txid: {txid}")
-                    time.sleep(0.1)
-                except Exception as e:
-                    logger.error(e)
-                inputs = []
-                value = 0
-                if remaining_inputs < 0: remaining_inputs = 0
-                logger.info(f"{remaining_inputs} remaining {coin} utxos to process")
-                time.sleep(1)
-        if skipped_inputs > 0:
-            logger.debug(f"{skipped_inputs} {coin} UTXOs skipped due to < 100 confs")
-
+                        logger.error(f"{error['error']}")
+                if len(error_utxos) > 0:
+                    inputs_data = self.get_inputs(utxos, error_utxos)
+                    inputs = inputs_data[0]
+                    value = inputs_data[1]
+                    vouts = self.get_vouts(coin, address, value)
+                    logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
+                    try:
+                        txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
+                        logger.info(f"Sent {value} to {address}: {txid}")
+                    except Exception as e:
+                        logger.error(e)
+        return ""
+                    
     def sweep_kmd(self, coin: str) -> None:
         if not self.configured:
             return
@@ -233,6 +258,8 @@ class Notary():
     def stop(self, coin: str, docker=True) -> None:
         if not self.configured:
             return
+        # We shouldnt stop a chain until it is ready for RPCs
+        self.wait_for_start(coin)
         if docker:
              self.stop_container(coin)
         if not docker:

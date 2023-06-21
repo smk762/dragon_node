@@ -291,7 +291,10 @@ def get_ntx_stats(wallet_tx, coin):
 def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
-
+   
+def chunkify(data: list, chunk_size: int):
+    return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
+    
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)
