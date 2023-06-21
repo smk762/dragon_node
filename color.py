@@ -33,7 +33,7 @@ class ColorMsg():
         if color not in self.colors:
             return f"{msg}"
         else:
-            return f"{self.color(color)} {msg} {self.color('default')}"
+            return f"{self.color(color)}{msg}{self.color('default')}"
 
     def input(self, msg: str) -> str:
         return input(f'\n> {self.colorize(msg, "orange")}')

@@ -39,11 +39,11 @@ class StatsLine:
         filename = helper.get_wallet_path(self.coin)
         filesize = os.path.getsize(filename)
         if filesize > 10485760:
-            return '\033[31m' + "   > 10M" + '\033[0m' 
+            return '\033[31m' + "  > 10M " + '\033[0m' 
         elif filesize > 3145728:
-            return '\033[33m' + f"    > 3M" + '\033[0m' 
+            return '\033[33m' + f"   > 3M " + '\033[0m' 
         elif filesize < 1048576:
-            return '\033[92m' + f"    < 1M" + '\033[0m' 
+            return '\033[92m' + f"   < 1M " + '\033[0m' 
         else:
             return helper.bytes_to_unit(filesize)
 
@@ -63,7 +63,7 @@ class StatsLine:
             
             last_ntx_time = ntx_stats[1]
             if last_ntx_time == 0:
-                dhms_since = '\033[31m' + "   Never" + '\033[0m' 
+                dhms_since = '\033[31m' + "  Never " + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_ntx_time)
                 dhms_since = helper.sec_to_dhms(sec_since)
@@ -73,20 +73,20 @@ class StatsLine:
 
             ntx_utxo_count = self.ntx_utxo_count(self.coin)
             if ntx_utxo_count < 5:
-                ntx_utxo_count = '\033[31m' + f"     {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + f"    {ntx_utxo_count} " + '\033[0m'
             elif ntx_utxo_count < 10:
-                ntx_utxo_count = '\033[33m' + f"     {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[33m' + f"    {ntx_utxo_count} " + '\033[0m'
             elif ntx_utxo_count > 100:
-                ntx_utxo_count = '\033[31m' + "> 100" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + " > 100 " + '\033[0m'
             elif ntx_utxo_count > 40:
-                ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count} " + '\033[0m'
             elif ntx_utxo_count >= 10:
-                ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
+                ntx_utxo_count = '\033[92m' + f"   {ntx_utxo_count} " + '\033[0m'
             row.append(str(ntx_utxo_count))
 
             balance = self.daemon.getbalance()
             if balance < 0.1:
-                row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
+                row.append('\033[31m' + f"    {balance:.3f} " + '\033[0m')
             else:
                 row.append(f"{balance:.3f}")
 
@@ -95,7 +95,7 @@ class StatsLine:
             row.append(str(block_count))
             last_blocktime = self.daemon.last_block_time(block_count)
             if last_blocktime == 0:
-                dhms_since = '\033[31m' + "   Never" + '\033[0m' 
+                dhms_since = '\033[31m' + "  Never " + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
                 dhms_since = helper.sec_to_dhms(sec_since, True, 600, 1800, 7200)
