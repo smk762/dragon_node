@@ -206,7 +206,7 @@ class Notary():
                 logger.info(f"{len(error_utxos)} Error UTXOs from {len(inputs)} inputs")
                 if len(error_utxos) == len(inputs):
                     logger.error(f"All utxos errored, exiting...")
-                if len(error_utxos) > 0:
+                elif len(error_utxos) > 0:
                     logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
                     inputs_data = self.get_inputs(utxos, error_utxos)
                     inputs = inputs_data[0]
