@@ -203,6 +203,8 @@ class Notary():
                         error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                     else:
                         logger.error(f"{error['error']}")
+                if len(error_utxos) == len(utxos):
+                    logger.error(f"All utxos errored, exiting...")
                 if len(error_utxos) > 0:
                     logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
                     inputs_data = self.get_inputs(utxos, error_utxos)
