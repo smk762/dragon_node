@@ -52,6 +52,7 @@ class Config():
             "dragonhound_NA": "209.222.101.247",
             "dragonhound_DEV": "103.195.100.32"
         }
+        # We could move these to const.py
         self.readonly = ["userhome", "address_main", "addresses_3p", "config", "hidden"]
         self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
         self.config_path = f"{const.SCRIPT_PATH}/config.json"
@@ -193,46 +194,4 @@ class Config():
             if v not in self.addnode.values():
                 self.addnode.update({k: v})
 
-
-        '''
-        whitelist_addresses = color_input("Enter addresses to whitelist, separated by space: \n")
-        for addr in whitelist_addresses.split(" "):
-            if addr not in config["whitelist"]:
-                config["whitelist"].append(addr)
-
-
-        pubkey = color_input("Enter your pubkey: ")
-        config["pubkey"] = pubkey
-
-
-        sweep_address = color_input("Enter your sweep address: ")
-        config["sweep_address"] = sweep_address
-
-
-        msg = "[M]ain server or [3]rd Party?: "
-        server = color_input(msg)
-        while server.lower() not in ["m", "3"]:
-            error_print(f"Invalid option, try again. Options: {valid_options}")
-            server = color_input(msg)
-
-        if server.lower() == "m":
-            config["server"] = "main"
-        elif server == "3":
-            config["server"] = "3p"
-
-            for coin in config["non_antara_addresses"]:
-                non_antara_address = color_input(f"Enter your {coin} address: ")
-                config["non_antara_addresses"][coin] = non_antara_address
-
-
-        with open(f"{SCRIPT_PATH}/config.json", "w+") as f:
-            json.dump(config, f, indent=4)
-            status_print(f"{SCRIPT_PATH}/config.json file created.")
-
-
-    with open(f"{SCRIPT_PATH}/config.json", "r") as f:
-        config = json.load(f)
-
-    return config
-    '''
 
