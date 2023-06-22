@@ -62,7 +62,7 @@ class StatsLine:
             
             last_ntx_time = ntx_stats[1]
             if last_ntx_time == 0:
-                dhms_since_ntx = '\033[31m' + "  Never " + '\033[0m' 
+                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_ntx_time)
                 dhms_since_ntx = helper.sec_to_dhms(sec_since)
@@ -135,11 +135,13 @@ class Stats:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
-        self.col_widths = [11, 6, 8, 6, 10,
-                           8, 8, 6, 8, 8, 10]
+        self.col_widths = [11, 10, 6, 6,
+                           8, 8, 8, 6,
+                           6, 8, 8]
         self.columns = [
-            "COIN", "BALANCE", "UTXO", "NTX", "LASTNTX", "BLOCKS",
-            "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME"
+            "COIN", "BALANCE", "UTXO", "NTX",
+            "LASTNTX", "BLOCKS", "LASTBLK", "CONN",
+            "SIZE", "NUMTX", "TIME"
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
