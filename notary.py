@@ -168,16 +168,18 @@ class Notary():
             logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
             try:
                 txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
+                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                if explorer_url != "":
+                    txid = explorer_url
                 logger.info(f"Sent {value} to {address}: {txid}")
             except Exception as e:
                 logger.error(e)
-            time.sleep(1)
+            time.sleep(0.1)
 
     def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict) -> str:
         daemon = DaemonRPC(coin)
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
         # logger.debug(f"unsignedhex: {unsignedhex}")
-        time.sleep(0.1)
         if coin in ["AYA"]:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
         else:
@@ -190,7 +192,7 @@ class Notary():
             logger.info(f"txid: {txid}")
             return txid
         else:
-            # TODO: we should be able to remove the error utxo and retry here
+            # Remove error utxos and retry
             if not signedhex['complete']:
                 errors = signedhex['errors']
                 error_utxos = []
@@ -207,9 +209,13 @@ class Notary():
                     logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
                     try:
                         txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
+                        explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                        if explorer_url != "":
+                            txid = explorer_url
                         logger.info(f"Sent {value} to {address}: {txid}")
                     except Exception as e:
                         logger.error(e)
+                    time.sleep(0.1)
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
