@@ -102,7 +102,6 @@ class Notary():
         self.consolidate(coin, True)
 
     def get_vouts(self, coin: str, address: str, value: float) -> dict:
-        value = round(value/100000000, 8)
         if coin in ["EMC", "CHIPS", "AYA"]:
             # Got -26 error if not reducing amount
             return {address: value - 0.001}
@@ -140,6 +139,7 @@ class Notary():
                 value += utxo["satoshis"]
             else:
                 logger.debug(f"excluding {utxo['txid']}:{utxo['vout']}")
+        value = round(value/100000000, 8)
         return [inputs, value]
         
 
