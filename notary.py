@@ -199,20 +199,25 @@ class Notary():
                 for error in errors:
                     if error['error'] == 'Input not found or already spent':
                         error_utxos.append({"txid": error['txid'], "vout": error['vout']})
+                    elif error['error'] == 'Operation not valid with the current stack size':
+                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                     else:
                         logger.error(f"{error['error']}")
                 if len(error_utxos) > 0:
+                    logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
                     inputs_data = self.get_inputs(utxos, error_utxos)
                     inputs = inputs_data[0]
                     value = inputs_data[1]
                     vouts = self.get_vouts(coin, address, value)
-                    logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
                     try:
                         txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
-                        explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                        if explorer_url != "":
-                            txid = explorer_url
-                        logger.info(f"Sent {value} to {address}: {txid}")
+                        if txid != "":
+                            explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                            if explorer_url != "":
+                                txid = explorer_url
+                            logger.info(f"Sent {value} to {address}: {txid}")
+                        else:
+                            logger.error(f"Failed to send {value} to {address}")
                     except Exception as e:
                         logger.error(e)
                     time.sleep(0.1)
