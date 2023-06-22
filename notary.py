@@ -168,10 +168,11 @@ class Notary():
             logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
             try:
                 txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
-                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                if explorer_url != "":
-                    txid = explorer_url
-                logger.info(f"Sent {value} to {address}: {txid}")
+                if txid != "":
+                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                    if explorer_url != "":
+                        txid = explorer_url
+                    logger.info(f"Sent {value} to {address}: {txid}")
             except Exception as e:
                 logger.error(e)
             time.sleep(0.1)
