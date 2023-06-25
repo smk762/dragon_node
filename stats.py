@@ -166,7 +166,6 @@ class Stats:
     def show(self) -> None:
         print()
         print(self.header())
-        self.table_width = len(self.header())
         print(self.spacer())
         mined_str = ""
         for coin in self.coins:
@@ -180,7 +179,6 @@ class Stats:
                 print(self.format_line(row, "lightred"))
             else:
                 print(self.format_line(row))
-            
         print(self.spacer())
         
         date_str = f'| {mined_str}  | ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'

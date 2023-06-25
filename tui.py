@@ -25,7 +25,7 @@ class TUI():
                 # Check to see if already imported
                 address = based_58.get_addr_from_pubkey(pubkey, coin)
                 daemon = DaemonRPC(coin)
-                addr_validation = daemon.validateaddress(address)["result"]
+                addr_validation = daemon.validateaddress(address)
                 if not addr_validation["ismine"]:
                     logger.info(f"Importing {coin} private key...")
                     wif = helper.wif_convert(coin, wif)
