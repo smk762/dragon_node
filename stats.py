@@ -161,7 +161,7 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self) -> str:
-        return " " + "-" * (self.table_width  - 1)
+        return " " + "-" * (self.table_width)
 
     def show(self) -> None:
         print()
