@@ -33,7 +33,7 @@ class Notary():
 
     def get_coins_ntx_data(self) -> dict:
         if os.path.exists(const.COINS_NTX_DATA_PATH):
-            with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
+            with open(const.COINS_NTX_DATA_PATH) as file:
                 return json.load(file)
         else:
             data = self.get_coins_data()
