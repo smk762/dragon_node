@@ -113,9 +113,13 @@ class Notary():
         utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             try:
+                logger.info(f"Trying to get {coin} UTXOs from daemon...")
                 utxos_data = daemon.listunspent()
             except Exception as e:
-                utxos_data = helper.get_utxos(coin, pubkey)
+                logger.error(e)
+                return []
+        if utxos_data is None:
+            return []
         if len(utxos_data) == 0:
             return []
         for i in utxos_data:
