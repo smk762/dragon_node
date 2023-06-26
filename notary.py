@@ -6,6 +6,7 @@ import const
 import helper
 import subprocess
 import based_58
+from color import ColorMsg
 from daemon import DaemonRPC
 from configure import Config
 from logger import logger
@@ -14,6 +15,7 @@ from logger import logger
 class Notary():
     def __init__(self) -> None:
         self.config = Config().load()
+        self.msg = ColorMsg()
         self.configured = self.check_config()
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
@@ -25,7 +27,8 @@ class Notary():
     def welcome(self) -> None:
         notary_name = self.get_notary_from_pubkey(self.config[f"pubkey_main"])
         if notary_name != "":
-            print('{:^80}'.format(f'[{notary_name}]'))
+            msg = self.msg.colorize(notary_name, "status")
+            print('{:^80}'.format(msg))
     
     def get_notary_from_pubkey(self, pubkey: str) -> str:
         name = ""
