@@ -120,7 +120,7 @@ class Notary():
             return []
         for i in utxos_data:
             if "amount" not in i:
-                if ["satoshis"] in i:
+                if "satoshis" in i:
                     i["amount"] = i["satoshis"] / 100000000
                 else:
                     logger.error(f"UTXO data: {i}")
