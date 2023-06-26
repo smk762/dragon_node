@@ -190,15 +190,11 @@ class DaemonRPC():
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
             if not os.path.exists(self.coins_config_path):
-                logger.info("Downloading coins config")
                 data = requests.get(self.coins_config_url).json()
                 with open(self.coins_config_path, "w") as f:
-                    logger.info("Saving coins config")
                     json.dump(data, f, indent=4)    
             with open(self.coins_config_path, "r") as f:
-                logger.info("Loading coins config")
                 data = json.load(f)
-            logger.debug(f"coins config: {data}")
             baseurl = data[self.coin]["explorer_url"]
             endpoint = data[self.coin][endpoint]
             return baseurl + endpoint + txid
