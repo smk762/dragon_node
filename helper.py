@@ -18,24 +18,6 @@ from color import ColorMsg
 from logger import logger
 
 
-def get_launch_params():
-    if not os.path.exists("launch_params.json"):
-        r = requests.get("https://raw.githubusercontent.com/KomodoPlatform/coins/master/launch/smartchains.json")
-        data = r.json()
-        write_json_data("launch_params.json", data)
-    else:
-        data = read_json_data("launch_params.json")
-    data.update({
-        "AYA": "aya",
-        "EMC2": "emc2",
-        "MCL": "mcl",
-        "CHIPS": "chips",
-        "VRSC": "vrsc",
-        "MIL": "mil",
-        "TOKEL": "tokel",
-        "KMD_3P": "kmd"
-    })
-    return data
 
 def get_base58_params():
     url = "https://stats.kmd.io/api/info/base_58/"
@@ -291,6 +273,24 @@ def get_ntx_stats(wallet_tx, coin):
 
     ntx_count = len(ntx)
     return [ntx_count, last_ntx_time, last_mined_time]
+
+def get_tx_fee(coin):
+    coins_config = get_coins_config()
+    if coin in coins_config:
+        if "txfee" in coins_config[coin]:
+            return coins_config[coin]["txfee"]
+    if coin in const.LARGE_UTXO_COINS:
+        return 0.00010000
+    else:
+        return 0.00001000
+
+def get_coins_config():
+    if not os.path.exists(const.COINS_CONFIG_PATH):
+        data = requests.get(const.COINS_CONFIG_URL).json()
+        with open(const.COINS_CONFIG_PATH, "w") as f:
+            json.dump(data, f, indent=4)    
+    with open(const.COINS_CONFIG_PATH, "r") as f:
+        return json.load(f)
 
 
 def get_assetchains():

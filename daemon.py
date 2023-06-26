@@ -20,8 +20,6 @@ class DaemonRPC():
         self.rpcuser = self.creds[0]
         self.rpcpass = self.creds[1]
         self.rpcport = self.creds[2]
-        self.coins_config_url = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
-        self.coins_config_path = f"{const.SCRIPT_PATH}/coins_config.json"
 
     def get_creds(self):
         rpcport = 0
@@ -189,12 +187,7 @@ class DaemonRPC():
         # Param value can be a txid, address, or block
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
-            if not os.path.exists(self.coins_config_path):
-                data = requests.get(self.coins_config_url).json()
-                with open(self.coins_config_path, "w") as f:
-                    json.dump(data, f, indent=4)    
-            with open(self.coins_config_path, "r") as f:
-                data = json.load(f)
+            data = helper.get_coins_config()
             baseurl = data[self.coin]["explorer_url"]
             endpoint = data[self.coin][endpoint]
             return baseurl + endpoint + txid
