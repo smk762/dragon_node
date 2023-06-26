@@ -185,7 +185,7 @@ class DaemonRPC():
             if not utxo["spendable"]:
                 logger.info(utxo)
 
-    def get_explorer_url(self, param, endpoint: str='explorer_tx_url') -> str:
+    def get_explorer_url(self, txid, endpoint: str='explorer_tx_url') -> str:
         # Param value can be a txid, address, or block
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
@@ -197,7 +197,7 @@ class DaemonRPC():
                 data = json.load(f)
             baseurl = data[self.coin]["explorer_url"]
             endpoint = data[self.coin][endpoint]
-            return baseurl + endpoint
+            return baseurl + endpoint + txid
         except json.decoder.JSONDecodeError:
             return ""
         except Exception as e:

@@ -127,7 +127,7 @@ class Notary():
                 if "satoshis" in i:
                     i["amount"] = i["satoshis"] / 100000000
                 else:
-                    logger.error(f"UTXO data: {i}")
+                    logger.error(f"{coin} UTXO data: {i}")
             
         utxos_data = [i for i in utxos_data if "amount" in i]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
@@ -177,14 +177,14 @@ class Notary():
             inputs = inputs_data[0]
             value = inputs_data[1]
             vouts = self.get_vouts(coin, address, value)
-            logger.info(f"consolidating {len(inputs)} UTXOs, value: {value}")
+            logger.info(f"consolidating {len(inputs)} {coin} UTXOs, value: {value}")
             try:
                 txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
                 if txid != "":
                     explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                     if explorer_url != "":
                         txid = explorer_url
-                    logger.info(f"Sent {value} to {address}: {txid}")
+                    logger.info(f"Sent {value} {coin} to {address}: {txid}")
             except Exception as e:
                 logger.error(e)
             time.sleep(0.1)
