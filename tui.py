@@ -20,8 +20,9 @@ class TUI():
         coins_ntx_data = nn.get_coins_ntx_data()
         coins = list(coins_ntx_data.keys())
         coins.sort()
+        print()
         for coin in coins:
-            self.msg.status(f"{coin:>16}: {coins_ntx_data[coin]['address']:<40}")
+            self.msg.status(f"{coin:>12}: {coins_ntx_data[coin]['address']:<40}")
     
     def import_privkey(self):
         config = self.config.load()
