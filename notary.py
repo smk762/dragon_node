@@ -4,6 +4,7 @@ import time
 import json
 import const
 import helper
+import requests
 import subprocess
 import based_58
 from color import ColorMsg
@@ -397,6 +398,30 @@ class Notary():
             except Exception as e:
                 logger.debug(f"Waiting for {coin} daemon to start...{e}")
             time.sleep(5)
-                
+    
+    def get_dpow_commit_hashes(self) -> dict:
+        if os.path.exists(const.COMMIT_HASHES_PATH):
+            with open(const.COMMIT_HASHES_PATH) as file:
+                return json.load(file)
+        else:
+            data = self.parse_dpow_commit_hashes()
+            with open(const.COMMIT_HASHES_PATH, "w") as file:
+                json.dump(data, file, indent=4)
+            return data
 
-
+    def parse_dpow_commit_hashes(self) -> dict:
+        data = {}
+        try:
+            r = requests.get(const.COMMIT_HASHES_URL)
+            for line in r.text.splitlines():
+                last_word = line.split()[-1].lower()
+                if last_word in ["dpow-3p", "dpow-mainnet"]:
+                    for coin in const.DPOW_COINS:
+                        if line.startswith(coin):
+                            parts = [i.strip() for i in line.split("|")]
+                            commit = parts[2].replace("[", "").split("]")[0]
+                            data[coin] = commit
+        except Exception as e:
+            logger.error(e)
+        return data
+    

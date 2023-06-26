@@ -27,6 +27,9 @@ COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
+COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/season-seven/README.md"
+COMMIT_HASHES_PATH = f"{SCRIPT_PATH}/commit_hashes.json"
+
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
 CONF_PATHS = {
