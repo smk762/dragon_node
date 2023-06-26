@@ -191,17 +191,19 @@ class Notary():
 
     def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict) -> str:
         daemon = DaemonRPC(coin)
+        logger.debug(f"creating rawtx...")
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
         # logger.debug(f"unsignedhex: {unsignedhex}")
+        logger.debug(f"signing rawtx...")
         if coin in ["AYA"]:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
         else:
             signedhex = daemon.signrawtransaction(unsignedhex)
         # logger.debug(f"signedhex: {signedhex}")
         time.sleep(0.1)
+        logger.debug(f"sending signedtx...")
         txid = daemon.sendrawtransaction(signedhex["hex"])
         if txid is not None:
-            # TODO: add explorer URL
             logger.info(f"txid: {txid}")
             return txid
         else:
@@ -237,6 +239,8 @@ class Notary():
                     except Exception as e:
                         logger.error(e)
                     time.sleep(0.1)
+            else:
+                logger.error(f"Failed with signedhex {signedhex}")
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
