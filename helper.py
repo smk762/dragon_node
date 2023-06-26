@@ -202,14 +202,14 @@ def get_utxos(coin: str, pubkey: str) -> list:
     try:
         coin = coin.split("_")[0]
         url += f"?coin={coin}&pubkey={pubkey}"
-        logger.info(f"Getting UTXOs from {url}")
+        logger.info(f"{coin} Getting UTXOs from {url}")
         r = requests.get(url)
         return r.json()["results"]["utxos"]
     except Exception as e:
         if coin in ["AYA", "EMC2", "MIL", "CHIPS"]:
-            logger.warning(f"Utxo API not available for {coin}")
+            logger.warning(f"{coin} Utxo API not available")
         else:
-            logger.error(f"Error getting UTXOs for {coin} with pubkey {pubkey}")
+            logger.error(f"{coin} Error getting UTXOs with pubkey {pubkey}")
             logger.error(e)
         return []
 

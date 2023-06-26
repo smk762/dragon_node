@@ -145,13 +145,15 @@ class Notary():
                     utxo["vout"] = utxo["tx_pos"]
                 if "tx_hash" in utxo:
                     utxo["txid"] = utxo["tx_hash"]
-                
+                if "value" in utxo:
+                    utxo["satoshis"] = utxo["value"]
+
                 if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
                     if "satoshis" not in utxo:
-                        utxo["satoshis"] = utxo["amount"] * 100000000
-                    if utxo["confirmations"] < 100 and not force:
-                        logger.debug(f"excluding {utxo['txid']}:{utxo['vout']} - {utxo['confirmations']} confirmations")
-                        continue
+                        if "amount" in utxo:
+                            utxo["satoshis"] = utxo["amount"] * 100000000
+                        else:
+                            logger.error(f"UTXO has no satoshis: {utxo}")
                     inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
                     value += utxo["satoshis"]
                 else:
@@ -164,6 +166,7 @@ class Notary():
         
 
     def consolidate(self, coin: str, reset=False, force: bool=False) -> None:
+        print()
         if not self.configured:
             return
         address = self.coins_data[coin]["address"]
@@ -188,12 +191,11 @@ class Notary():
                 logger.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                 try:
                     txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
-                    logger.debug(f"{coin} txid: {txid}")
                     if txid != "":
                         explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                         if explorer_url != "":
                             txid = explorer_url
-                        logger.info(f"{coin} Sent {value} to {address}: {txid}")
+                        logger.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
                 except Exception as e:
                     logger.error(e)
                     logger.error(f"{coin} utxos: {utxos}")
@@ -217,52 +219,45 @@ class Notary():
         txid = daemon.sendrawtransaction(signedhex["hex"])
 
         if txid is not None:
-            logger.info(f"txid: {txid}")
             return txid
-        else:
-            # Remove error utxos and retry
-            if not signedhex['complete']:
-                if 'errors' in signedhex:
-                    errors = signedhex['errors']
-                    error_utxos = []
-                    for error in errors:
-                        if error['error'] == 'Input not found or already spent':
-                            error_utxos.append({"txid": error['txid'], "vout": error['vout']})
-                        elif error['error'] == 'Operation not valid with the current stack size':
-                            error_utxos.append({"txid": error['txid'], "vout": error['vout']})
-                        else:
-                            logger.debug(f"Removing spent utxo: {error['txid']}:{error['error']}")
-                    if len(error_utxos) == len(inputs):
-                        logger.debug(f"All utxos errored, wont send.")
-                    elif len(error_utxos) > 0:
-                        logger.debug(f"Removing {len(error_utxos)} Error UTXOs to try again...")
-                        inputs_data = self.get_inputs(utxos, error_utxos, force)
-                        inputs = inputs_data[0]
-                        value = inputs_data[1]
-                        vouts = self.get_vouts(coin, address, value)
-                        if len(inputs) > 0 and len(vouts) > 0:
-                            try:
-                                txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
-                                if txid != "":
-                                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                                    if explorer_url != "":
-                                        txid = explorer_url
-                                    logger.info(f"Sent {value} to {address}: {txid}")
-                                else:
-                                    logger.error(f"Failed to send {value} to {address}")
-                            except Exception as e:
-                                logger.error(e)
-                            time.sleep(0.1)
-                        else:
-                            logger.debug(f"Nothing to send!")                            
-                else:
-                    logger.error(f"Failed with signedhex {signedhex}")
-                    
-                    
-            else:
-                logger.error(f"Failed with signedhex {signedhex}")
-                logger.error(f"inputs {inputs}")
-                logger.error(f"vouts {vouts}")
+        # Remove error utxos and retry
+        if not signedhex['complete']:
+            if 'errors' in signedhex:
+                errors = signedhex['errors']
+                error_utxos = []
+                for error in errors:
+                    if error['error'] == 'Input not found or already spent':
+                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
+                    elif error['error'] == 'Operation not valid with the current stack size':
+                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
+                    else:
+                        logger.debug(f"Removing spent utxo: {error['txid']}:{error['error']}")
+                if len(error_utxos) == len(inputs):
+                    logger.debug(f"All utxos errored, wont send.")
+                elif len(error_utxos) > 0:
+                    logger.debug(f"Removing {len(error_utxos)} Error UTXOs to try again...")
+                    inputs_data = self.get_inputs(utxos, error_utxos, force)
+                    inputs = inputs_data[0]
+                    value = inputs_data[1]
+                    vouts = self.get_vouts(coin, address, value)
+                    if len(inputs) > 0 and len(vouts) > 0:
+                        try:
+                            txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                            if txid != "":
+                                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                                if explorer_url != "":
+                                    txid = explorer_url
+                                logger.info(f"Sent {value} to {address}: {txid}")
+                            else:
+                                logger.error(f"Failed to send {value} to {address}")
+                        except Exception as e:
+                            logger.error(e)
+                        time.sleep(0.1)
+                    else:
+                        logger.debug(f"Nothing to send!")
+        logger.error(f"Failed with signedhex {signedhex}")
+        logger.error(f"inputs {inputs}")
+        logger.error(f"vouts {vouts}")
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
