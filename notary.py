@@ -22,6 +22,23 @@ class Notary():
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
 
+    def welcome(self) -> None:
+        notary_name = self.get_notary_from_pubkey(self.config[f"pubkey_main"])
+        if notary_name != "":
+            print('{:^80}'.format(f'[{notary_name}]'))
+    
+    def get_notary_from_pubkey(self, pubkey: str) -> str:
+        name = ""
+        matches_main = [k for k, v in const.PUBKEYS_MAIN.items() if v == pubkey]
+        if len(matches_main) > 0:
+            name = matches_main[0]
+        matches_3p = [k for k, v in const.PUBKEYS_MAIN.items() if v == pubkey]
+        if len(matches_3p) > 0:
+            name = matches_3p[0]
+        if name != "":
+            name = name[0].upper() + name[1:]
+        return name
+
     def check_config(self):
         if "pubkey_main" not in self.config:
             return False
@@ -55,11 +72,11 @@ class Notary():
                         "min_utxo_count": 20,
                         "split_count": 20,
                         "server": server,
-                        "launch_params": server,
                         "address": based_58.get_addr_from_pubkey(
                             self.config[f"pubkey_{server}"],
                             coin
                         ),
+                        "txfee": helper.get_tx_fee(coin),
                         "pubkey": self.config[f"pubkey_{server}"]
                     }
                 })
@@ -109,9 +126,11 @@ class Notary():
         self.consolidate(coin, True, True)
 
     def get_vouts(self, coin: str, address: str, value: float) -> dict:
-        if coin in ["EMC", "CHIPS", "AYA"]:
-            # Got -26 error if not reducing amount
-            return {address: value - 0.001}
+        if coin in ["EMC", "CHIPS", "AYA", "LTC"]:
+            fee = helper.get_tx_fee(coin) / 100000000
+            if fee == 0:
+                fee = 0.0001
+            return {address: value - fee}
         else:
             return {address: value}
 
@@ -294,29 +313,7 @@ class Notary():
     def start(self, coin: str, docker=True) -> None:
         if not self.configured:
             return
-        if docker:
-             self.start_container(coin)
-        if not docker:
-            coins_data = self.get_coins_ntx_data()
-            daemon = DaemonRPC(coin)
-            server = coins_data[coin]["server"]
-            if server == "main":
-                launch_params = coins_data[coin]["launch_params"]
-                # check if already running
-                try:
-                    block_height = daemon.getblockcount()
-                    if block_height:
-                        logger.debug(f"{coin} daemon is already running.")
-                        return
-                except Exception as e:
-                    logger.error(e)
-
-                log_output = open(f"{self.log_path}/{coin}_daemon.log",'w+')
-                subprocess.Popen(launch_params.split(" "), stdout=log_output, stderr=log_output, universal_newlines=True)
-                time.sleep(3)
-                logger.info('{:^60}'.format( f"{coin} daemon starting."))
-                logger.info('{:^60}'.format( f"Use 'tail -f {coin}_daemon.log' for mm2 console messages."))
-            # TODO: add non docker 3p server start
+        self.start_container(coin)
         self.wait_for_start(coin)
 
     def stop(self, coin: str, docker=True) -> None:
@@ -324,16 +321,10 @@ class Notary():
             return
         # We shouldnt stop a chain until it is ready for RPCs
         self.wait_for_start(coin)
-        if docker:
-             self.stop_container(coin)
-        if not docker:
-            daemon = DaemonRPC(coin)
-            try:
-                daemon.stop()
-                self.wait_for_stop(coin)
-            except Exception as e:
-                logger.error(e)
-            self.wait_for_stop(coin)
+        daemon = DaemonRPC(coin)
+        daemon.stop()
+        self.wait_for_stop(coin)
+        self.stop_container(coin)
         
     def start_container(self, coin):
         coins_data = self.get_coins_ntx_data()

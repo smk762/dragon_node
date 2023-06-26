@@ -3,6 +3,7 @@ import const
 import helper
 from configure import Config
 from daemon import DaemonRPC
+from notary import Notary
 from logger import logger
 import based_58
 
@@ -11,6 +12,12 @@ class TUI():
     def __init__(self):
         self.config = Config()
         self.servers = const.DPOW_SERVERS
+    
+    def list_addresses(self):
+        nn = Notary()
+        coins_ntx_data = nn.get_coins_ntx_data()
+        for coin in coins_ntx_data:
+            logger.info(f"{coin}: {coins_ntx_data[coin]['address']}")        
     
     def import_privkey(self):
         config = self.config.load()

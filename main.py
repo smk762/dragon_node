@@ -23,10 +23,15 @@ print('''
   /_____/ /_/    `__,_/  `__, / `____//_/ /_/      /_/ |_/  `____/`__,_/  `___/  
                         /____/                                                   
 ''' + '{:^80}'.format('Dragon Node TUI v0.2 by Dragonhound'))
+print()
+notary = Notary()
+if notary.configured:
+    notary.welcome()
+
 
 options = ["configure", "consolidate", "stats", "convert_privkey",
            "import_privkey", "reset_wallet", "start_coin", "stop_coin",
-           "restart_coin"]
+           "restart_coin", "list_addresses"]
 while True:
     color_msg.status(f"\n  ==== Main Menu ====")
     for i in range(len(options)):
@@ -94,6 +99,9 @@ while True:
 
         elif options[q] == "import_privkey":
             tui.import_privkey()
+
+        elif options[q] == "list_addresses":
+            tui.list_addresses()
 
         elif options[q] == "start_coin":
             notary = Notary()
