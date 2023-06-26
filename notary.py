@@ -17,7 +17,7 @@ class Notary():
         self.configured = self.check_config()
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
-        self.coins_data = self.get_coins_ntx_data()
+
         self.log_path = f"{const.HOME}/logs"
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
@@ -69,8 +69,9 @@ class Notary():
         if not self.configured:
             return
         try:
+            coins_data = self.get_coins_ntx_data()
             now = int(time.time())
-            wallet = self.coins_data[coin]["wallet"]
+            wallet = coins_data[coin]["wallet"]
             wallet_bk = wallet.replace("wallet.dat", f"wallet_{now}.dat")
             os.rename(wallet, wallet_bk)
         except Exception as e:
@@ -79,7 +80,8 @@ class Notary():
     def rm_komodoevents(self, coin) -> None:
         if not self.configured:
             return
-        data_dir = os.path.split(self.coins_data[coin]["wallet"])
+        coins_data = self.get_coins_ntx_data()
+        data_dir = os.path.split(coins_data[coin]["wallet"])
         for filename in ["komodoevents", "komodoevents.ind"]:
             try:
                 os.remove(f"{data_dir}{filename}")
@@ -174,8 +176,9 @@ class Notary():
         print()
         if not self.configured:
             return
-        address = self.coins_data[coin]["address"]
-        pubkey = self.coins_data[coin]["pubkey"]
+        coins_data = self.get_coins_ntx_data()
+        address = coins_data[coin]["address"]
+        pubkey = coins_data[coin]["pubkey"]
         daemon = DaemonRPC(coin)
         utxos = self.get_utxos(coin, pubkey)
         if len(utxos) == 0:
@@ -290,10 +293,11 @@ class Notary():
         if docker:
              self.start_container(coin)
         if not docker:
+            coins_data = self.get_coins_ntx_data()
             daemon = DaemonRPC(coin)
-            server = self.coins_data[coin]["server"]
+            server = coins_data[coin]["server"]
             if server == "main":
-                launch_params = self.coins_data[coin]["launch_params"]
+                launch_params = coins_data[coin]["launch_params"]
                 # check if already running
                 try:
                     block_height = daemon.getblockcount()
@@ -328,7 +332,8 @@ class Notary():
             self.wait_for_stop(coin)
         
     def start_container(self, coin):
-        server = self.coins_data[coin]["server"]
+        coins_data = self.get_coins_ntx_data()
+        server = coins_data[coin]["server"]
         if server == "main":
             compose = const.COMPOSE_PATH_MAIN
         else:
@@ -339,7 +344,8 @@ class Notary():
             logger.error(e)
 
     def stop_container(self, coin):
-        server = self.coins_data[coin]["server"]
+        coins_data = self.get_coins_ntx_data()
+        server = coins_data[coin]["server"]
         if server == "main":
             compose = const.COMPOSE_PATH_MAIN
         else:
