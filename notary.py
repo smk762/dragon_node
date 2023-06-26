@@ -189,18 +189,12 @@ class Notary():
             vouts = self.get_vouts(coin, address, value)
             if len(inputs) > 0 and len(vouts) > 0:
                 logger.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
-                try:
-                    txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
-                    if txid != "":
-                        explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                        if explorer_url != "":
-                            txid = explorer_url
-                        logger.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
-                except Exception as e:
-                    logger.error(e)
-                    logger.error(f"{coin} utxos: {utxos}")
-                    logger.error(f"{coin} inputs: {inputs}")
-                    logger.error(f"{coin} vouts: {vouts}")
+                txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                if txid != "":
+                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                    if explorer_url != "":
+                        txid = explorer_url
+                    logger.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
                 time.sleep(0.1)
             else:
                 logger.debug(f"{coin} no valid inputs or vouts for")
@@ -213,8 +207,12 @@ class Notary():
         # others dont have signrawtransactionwithwallet.
         # So we try both
         signedhex = daemon.signrawtransaction(unsignedhex)
-        if not signedhex:
+        if signedhex is None:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
+        if signedhex is None:
+            logger.error(f"{coin} Could not signrawtransaction")
+            logger.debug(f"{coin} unsignedhex {unsignedhex}")
+            return ""
         time.sleep(0.1)
         txid = daemon.sendrawtransaction(signedhex["hex"])
 
