@@ -118,14 +118,21 @@ class Notary():
                 utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             return []
-        utxos_data = [i for i in utxos_data if "amount" in i else logger.error(i))]
+        for i in utxos_data:
+            if "amount" not in i:
+                if ["satoshis"] in i:
+                    i["amount"] = i["satoshis"] / 100000000
+                else:
+                    logger.error(f"UTXO data: {i}")
+            
+        utxos_data = [i for i in utxos_data if "amount" in i]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         if len(utxos) > 0:
             logger.info(f"Biggest {coin} UTXO: {utxos[0]['amount']}")
             logger.info(f"{len(utxos)} {coin} UTXOs")
         return utxos
 
-    def get_inputs(self, utxos: list, exclude_utxos: list) -> list:
+    def get_inputs(self, utxos: list, exclude_utxos: list, force: bool=False) -> list:
         value = 0
         inputs = []
         for utxo in utxos:
@@ -133,7 +140,7 @@ class Notary():
                 # for daemon resp data
                 if "satoshis" not in utxo:
                     utxo["satoshis"] = utxo["amount"] * 100000000
-                if utxo["confirmations"] < 100:
+                if utxo["confirmations"] < 100 and not force:
                     logger.debug(f"excluding {utxo['txid']}:{utxo['vout']} - {utxo['confirmations']} confirmations")
                     continue
                 inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
@@ -144,7 +151,7 @@ class Notary():
         return [inputs, value]
         
 
-    def consolidate(self, coin: str, reset=False) -> None:
+    def consolidate(self, coin: str, reset=False, force: bool=False) -> None:
         if not self.configured:
             return
         address = self.coins_data[coin]["address"]
@@ -155,14 +162,14 @@ class Notary():
             logger.warning(f"No UTXOs found for {coin}")
             return
         if not reset:
-            if len(utxos) < 20 and daemon.getbalance() > 0.001:
+            if len(utxos) < 20 and daemon.getbalance() > 0.001 and not force:
                 logger.debug(f"< 20 UTXOs to consolidate {coin}, skipping")
                 return
 
         logger.info(f"consolidating {coin}...")
         utxo_chunks = helper.chunkify(utxos, 800)
         for utxos in utxo_chunks:
-            inputs_data = self.get_inputs(utxos, [])
+            inputs_data = self.get_inputs(utxos, [], force)
             inputs = inputs_data[0]
             value = inputs_data[1]
             vouts = self.get_vouts(coin, address, value)

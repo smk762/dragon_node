@@ -50,11 +50,16 @@ while True:
             notary = Notary()
             if notary.configured:
                 coin = input("Enter coin to consolidate (or ALL): ")
+                q = input("Force consolidation? (y/n): ")
+                if q.lower() == "y":
+                    force = True
+                else:
+                    force = False                    
                 if coin.lower() == "all":
                     for coin in const.DPOW_COINS:
-                        notary.consolidate(coin)
+                        notary.consolidate(coin, force)
                 elif coin.upper() in const.DPOW_COINS:
-                    notary.consolidate(coin)
+                    notary.consolidate(coin, force)
                 else:
                     color_msg.error(f"Invalid coin '{coin}', try again.")
             else:
