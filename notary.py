@@ -189,9 +189,9 @@ class Notary():
                         logger.info(f"Sent {value} {coin} to {address}: {txid}")
                 except Exception as e:
                     logger.error(e)
-                    logger.error(f"inputs: {utxos}")
+                    logger.error(f"utxos: {utxos}")
                     logger.error(f"inputs: {inputs}")
-                    logger.error(f"inputs: {vouts}")
+                    logger.error(f"vouts: {vouts}")
                 time.sleep(0.1)
             else:
                 logger.debug(f"no valid inputs or vouts for {coin}")
@@ -200,13 +200,13 @@ class Notary():
         daemon = DaemonRPC(coin)
         logger.debug(f"creating rawtx...")
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
-        # logger.debug(f"unsignedhex: {unsignedhex}")
+        logger.debug(f"unsignedhex: {unsignedhex}")
         logger.debug(f"signing rawtx...")
         if coin in ["AYA"]:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
         else:
             signedhex = daemon.signrawtransaction(unsignedhex)
-        # logger.debug(f"signedhex: {signedhex}")
+        logger.debug(f"signedhex: {signedhex}")
         time.sleep(0.1)
         logger.debug(f"sending signedtx...")
         txid = daemon.sendrawtransaction(signedhex["hex"])
