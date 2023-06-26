@@ -126,6 +126,8 @@ class Notary():
             if "amount" not in i:
                 if "satoshis" in i:
                     i["amount"] = i["satoshis"] / 100000000
+                elif "value" in i:
+                    i["amount"] = i["value"] / 100000000
                 else:
                     logger.error(f"{coin} UTXO data: {i}")
             
@@ -185,9 +187,9 @@ class Notary():
                         logger.info(f"{coin} Sent {value} to {address}: {txid}")
                 except Exception as e:
                     logger.error(e)
-                    # logger.error(f"{coin} utxos: {utxos}")
-                    # logger.error(f"{coin} inputs: {inputs}")
-                    # logger.error(f"{coin} vouts: {vouts}")
+                    logger.error(f"{coin} utxos: {utxos}")
+                    logger.error(f"{coin} inputs: {inputs}")
+                    logger.error(f"{coin} vouts: {vouts}")
                 time.sleep(0.1)
             else:
                 logger.debug(f"{coin} no valid inputs or vouts for")
