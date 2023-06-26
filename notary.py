@@ -181,6 +181,7 @@ class Notary():
                 logger.info(f"consolidating {len(inputs)} {coin} UTXOs, value: {value}")
                 try:
                     txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                    logger.debug(f"txid: {txid}")
                     if txid != "":
                         explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                         if explorer_url != "":
@@ -188,6 +189,9 @@ class Notary():
                         logger.info(f"Sent {value} {coin} to {address}: {txid}")
                 except Exception as e:
                     logger.error(e)
+                    logger.error(f"inputs: {utxos}")
+                    logger.error(f"inputs: {inputs}")
+                    logger.error(f"inputs: {vouts}")
                 time.sleep(0.1)
             else:
                 logger.debug(f"no valid inputs or vouts for {coin}")

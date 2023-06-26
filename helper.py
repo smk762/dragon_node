@@ -200,6 +200,7 @@ def get_wallet_path(coin: str) -> str:
 def get_utxos(coin: str, pubkey: str) -> list:
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
+        coin = coin.split("_")[0]
         url += f"?coin={coin}&pubkey={pubkey}"
         logger.info(f"Getting UTXOs from {url}")
         r = requests.get(url)
