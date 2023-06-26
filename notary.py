@@ -50,7 +50,6 @@ class Notary():
                     coin: {
                         "conf": const.CONF_PATHS[server][coin],
                         "wallet": helper.get_wallet_path(coin),
-                        "daemon": DaemonRPC(coin),
                         "utxo_value": helper.get_utxo_value(coin),
                         "min_utxo_count": 20,
                         "split_count": 20,
