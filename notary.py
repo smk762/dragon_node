@@ -110,7 +110,7 @@ class Notary():
 
     def reset_wallet(self, coin: str) -> None:
         if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
-            logger.info(f"Skipping {coin} reset - these are untested at the moment.")
+            self.msg.status(f"Skipping {coin} reset - these are untested at the moment.")
         daemon = DaemonRPC(coin)
         server = helper.get_coin_server(coin)
         # Backup wallet
@@ -142,7 +142,6 @@ class Notary():
         utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             try:
-                logger.info(f"Trying to get {coin} UTXOs from daemon...")
                 utxos_data = daemon.listunspent()
             except Exception as e:
                 logger.error(e)
@@ -218,13 +217,13 @@ class Notary():
             value = inputs_data[1]
             vouts = self.get_vouts(coin, address, value)
             if len(inputs) > 0 and len(vouts) > 0:
-                logger.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
+                self.msg.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                 txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
                 if txid != "":
                     explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                     if explorer_url != "":
                         txid = explorer_url
-                    logger.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
+                    self.msg.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
                 else:
                     logger.error(f"{coin} Failed to send {value} to {address} from {len(inputs)} input UTXOs")
                     logger.debug(f"{coin} inputs {inputs}")
@@ -280,7 +279,7 @@ class Notary():
                                 explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                                 if explorer_url != "":
                                     txid = explorer_url
-                                logger.info(f"Sent {value} to {address}: {txid}")
+                                self.msg.info(f"Sent {value} to {address}: {txid}")
                             else:
                                 logger.error(f"Failed to send {value} to {address}")
                         except Exception as e:
@@ -298,16 +297,16 @@ class Notary():
             return
         daemon = DaemonRPC(coin)
         unspent = daemon.listunspent()
-        logger.info(f"{len(unspent)} unspent utxos detected")
+        self.msg.info(f"{len(unspent)} unspent utxos detected")
         balance = 0
         for utxo in unspent:
             if utxo["amount"] != 0.00010000 and utxo["spendable"]:
                 balance += utxo["amount"]
         if balance > 100:
-            logger.info(f"{balance} KMD in non-split UTXOs")
-            logger.info(daemon.sendtoaddress(const.SWEEP_ADDR, round(balance-5, 4)))
+            self.msg.info(f"{balance} KMD in non-split UTXOs")
+            self.msg.info(daemon.sendtoaddress(const.SWEEP_ADDR, round(balance-5, 4)))
         else:
-            logger.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
+            self.msg.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
 
     def restart(self, coin: str, docker=True) -> None:
         self.stop(coin, docker)
@@ -385,7 +384,7 @@ class Notary():
             try:
                 i += 1
                 if i == 180:
-                    logger.info(f"Looks like there might be an issue with loading {coin}...")
+                    self.msg.warning(f"Looks like there might be an issue with loading {coin}...")
                     # TODO: Send an alert if this happens
                     return False
                 resp = daemon.is_responding()

@@ -122,6 +122,9 @@ class DaemonRPC():
 
     def validateaddress(self, address: str) -> dict:
         return self.rpc("validateaddress", [address])["result"]
+    
+    def getaddressinfo(self, address: str) -> dict:
+        return self.rpc("getaddressinfo", [address])["result"]
 
     ## Blocks
     def getblock(self, block) -> dict:
@@ -179,6 +182,7 @@ class DaemonRPC():
 
     # komodo-cli lockunspent true "[{\"txid\":\"a08e6907dbbd3d809776dbfc5d82e371b764ed838b5655e72f463568df1aadf0\",\"vout\":1}]"
     def get_unspendable(self, unspent):
+        # TODO: Unused, remove?
         for utxo in unspent:
             if not utxo["spendable"]:
                 logger.info(utxo)
@@ -187,9 +191,13 @@ class DaemonRPC():
         # Param value can be a txid, address, or block
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
+            if self.coin == "TOKEL":
+                coin = "TKL"
+            else:
+                coin = self.coin
             data = helper.get_coins_config()
-            baseurl = data[self.coin]["explorer_url"]
-            endpoint = data[self.coin][endpoint]
+            baseurl = data[coin]["explorer_url"]
+            endpoint = data[coin][endpoint]
             return baseurl + endpoint + txid
         except json.decoder.JSONDecodeError:
             return ""

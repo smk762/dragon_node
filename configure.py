@@ -125,7 +125,7 @@ class Config():
                 for i in range(len(options)):
                     self.color_msg.option(f"  [{i}] Update {options[i]}")
                 self.color_msg.option(f"  [{len(options)}] Return to Main Menu")
-                q = self.color_msg.input("Select an option: ")
+                q = self.color_msg.input("Select Config option: ")
                 try:
                     q = int(q)
                 except ValueError:

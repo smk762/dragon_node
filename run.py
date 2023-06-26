@@ -41,7 +41,7 @@ while True:
         for i in range(len(menu)):
             for k, v in menu[i].items():
                 color_msg.option(f'  [{i}] {k.title().replace("_", " ")}')
-        q = color_msg.input("Select an option: ")
+        q = color_msg.input("Select an action: ")
         try:
             q = int(q)
         except ValueError:

@@ -25,8 +25,8 @@ class TUI():
     def consolidate(self):
         self.notary = Notary()
         if self.notary.configured:
-            coin = input("Enter coin to consolidate (or ALL): ")
-            q = input("Force consolidation? (y/n): ")
+            coin = self.msg.input("Enter coin to consolidate (or ALL): ")
+            q = self.msg.input("Force consolidation? (y/n): ")
             if q.lower() == "y":
                 force = True
             else:
@@ -42,7 +42,7 @@ class TUI():
             self.msg.error(f"Node configuration missing. Select 'Configure' from the main menu to set your node config.")
 
     def convert_privkey(self):
-        wif = input("Enter private key: ")
+        wif = self.msg.input("Enter private key: ")
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
                 print(f"{coin}: {helper.wif_convert(coin, wif)}")       
@@ -50,7 +50,7 @@ class TUI():
     def reset_wallet(self):
         notary = Notary()
         if notary.configured:
-            coin = input("Enter coin to reset wallet (or ALL): ")
+            coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
                 for coin in const.DPOW_COINS:
                     notary.reset_wallet(coin)                        
@@ -79,9 +79,11 @@ class TUI():
             self.msg.status(f"{coin:>12}: {coins_ntx_data[coin]['address']:<40}")
 
     def import_privkey(self):
+        nn = Notary()
         config = self.config.load()
-        server = input(f"Select server {self.servers}: ")
-        wif = input("Enter private key: ")
+        server = self.msg.input(f"Select server {self.servers}: ")
+        notary_name = nn.get_notary_from_pubkey(config[f"pubkey_{server}"])
+        wif = self.msg.input(f"Enter {notary_name} {server} private key: ")
         # Does it match the pubkey for this server?
         pubkey = config[f"pubkey_{server}"]
         if not helper.validate_wif(pubkey, wif):
@@ -91,25 +93,27 @@ class TUI():
                 # Check to see if already imported
                 address = based_58.get_addr_from_pubkey(pubkey, coin)
                 daemon = DaemonRPC(coin)
+                self.msg.info(f"{coin} Validating {address}...")
                 addr_validation = daemon.validateaddress(address)
-                logger.info(f"Validating {address}...")
-                logger.info(f"Address: {addr_validation}")
                 if "ismine" not in addr_validation:
-                    logger.info(f"Importing {coin} private key...")
+                    addr_validation = daemon.getaddressinfo(address)
+                self.msg.info(f"{coin} Address: {addr_validation}")
+                if "ismine" not in addr_validation:
+                    self.msg.info(f"{coin} Importing private key...")
                     wif = helper.wif_convert(coin, wif)
                     r = daemon.importprivkey(wif)
-                    logger.info(f"Address: {r}")
+                    self.msg.info(f"{coin} Address: {r}")
                 elif not addr_validation["ismine"]:
-                    logger.info(f"Importing {coin} private key...")
+                    self.msg.info(f"{coin} Importing private key...")
                     wif = helper.wif_convert(coin, wif)
                     r = daemon.importprivkey(wif)
-                    logger.info(f"Address: {r}")
+                    self.msg.info(f"Address: {r}")
                 else:
-                    logger.info(f"Address {address} already imported.")
+                    self.msg.info(f"Address {address} already imported.")
 
     def start_coin(self):
         notary = Notary()
-        coin = input("Enter coin to start (or ALL): ")
+        coin = self.msg.input("Enter coin to start (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
                 notary.start(coin)
@@ -120,7 +124,7 @@ class TUI():
 
     def restart_coin(self):
         notary = Notary()
-        coin = input("Enter coin to restart (or ALL): ")
+        coin = self.msg.input("Enter coin to restart (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
                 notary.restart(coin)
@@ -131,7 +135,7 @@ class TUI():
 
     def stop_coin(self):
         notary = Notary()
-        coin = input("Enter coin to stop (or ALL): ")
+        coin = self.msg.input("Enter coin to stop (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
                 notary.stop(coin)
