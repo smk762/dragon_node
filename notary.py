@@ -99,7 +99,7 @@ class Notary():
         # Consolidate
         # TODO: This relies on access to explorer APIs, which may not be available for all coins
         # TODO: Electrums may be a viable alternative
-        self.consolidate(coin, True)
+        self.consolidate(coin, True, True)
 
     def get_vouts(self, coin: str, address: str, value: float) -> dict:
         if coin in ["EMC", "CHIPS", "AYA"]:
@@ -132,8 +132,8 @@ class Notary():
         utxos_data = [i for i in utxos_data if "amount" in i]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         if len(utxos) > 0:
-            logger.info(f"Biggest {coin} UTXO: {utxos[0]['amount']}")
-            logger.info(f"{len(utxos)} {coin} UTXOs")
+            logger.info(f"{coin} Biggest UTXO: {utxos[0]['amount']}")
+            logger.info(f"{coin} {len(utxos)} UTXOs")
         return utxos
 
     def get_inputs(self, utxos: list, exclude_utxos: list, force: bool=False) -> list:
@@ -163,14 +163,14 @@ class Notary():
         daemon = self.coins_data[coin]["daemon"]
         utxos = self.get_utxos(coin, pubkey)
         if len(utxos) == 0:
-            logger.warning(f"No UTXOs found for {coin}")
+            logger.warning(f"{coin} No UTXOs found for")
             return
         if not reset:
             if len(utxos) < 20 and daemon.getbalance() > 0.001 and not force:
-                logger.debug(f"< 20 UTXOs to consolidate {coin}, skipping")
+                logger.debug(f"{coin} < 20 UTXOs to consolidate, skipping")
                 return
 
-        logger.info(f"consolidating {coin}...")
+        logger.info(f"{coin} consolidating...")
         utxo_chunks = helper.chunkify(utxos, 800)
         for utxos in utxo_chunks:
             inputs_data = self.get_inputs(utxos, [], force)
@@ -178,37 +178,38 @@ class Notary():
             value = inputs_data[1]
             vouts = self.get_vouts(coin, address, value)
             if len(inputs) > 0 and len(vouts) > 0:
-                logger.info(f"consolidating {len(inputs)} {coin} UTXOs, value: {value}")
+                logger.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                 try:
                     txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
-                    logger.debug(f"txid: {txid}")
+                    logger.debug(f"{coin} txid: {txid}")
                     if txid != "":
                         explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
                         if explorer_url != "":
                             txid = explorer_url
-                        logger.info(f"Sent {value} {coin} to {address}: {txid}")
+                        logger.info(f"{coin} Sent {value} to {address}: {txid}")
                 except Exception as e:
                     logger.error(e)
-                    logger.error(f"utxos: {utxos}")
-                    logger.error(f"inputs: {inputs}")
-                    logger.error(f"vouts: {vouts}")
+                    logger.error(f"{coin} utxos: {utxos}")
+                    logger.error(f"{coin} inputs: {inputs}")
+                    logger.error(f"{coin} vouts: {vouts}")
                 time.sleep(0.1)
             else:
-                logger.debug(f"no valid inputs or vouts for {coin}")
+                logger.debug(f"{coin} no valid inputs or vouts for")
 
     def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict, force=False) -> str:
         daemon = DaemonRPC(coin)
-        logger.debug(f"creating rawtx...")
+        logger.debug(f"{coin} creating rawtx...")
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
-        logger.debug(f"unsignedhex: {unsignedhex}")
-        logger.debug(f"signing rawtx...")
-        if coin in ["AYA"]:
+        logger.debug(f"{coin} unsignedhex: {unsignedhex}")
+        logger.debug(f"{coin} signing rawtx...")
+        signedhex = daemon.signrawtransaction(unsignedhex)
+        if not signedhex:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
-        else:
-            signedhex = daemon.signrawtransaction(unsignedhex)
-        logger.debug(f"signedhex: {signedhex}")
+            # if coin in ["AYA", "CHIPS"]:
+            # some coins dont allow signrawtransaction, others dont have signrawtransactionwithwallet
+        logger.debug(f"{coin} signedhex: {signedhex}")
         time.sleep(0.1)
-        logger.debug(f"sending signedtx...")
+        logger.debug(f"{coin} sending signedtx...")
         txid = daemon.sendrawtransaction(signedhex["hex"])
         if txid is not None:
             logger.info(f"txid: {txid}")

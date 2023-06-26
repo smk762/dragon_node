@@ -57,9 +57,9 @@ while True:
                     force = False                    
                 if coin.lower() == "all":
                     for coin in const.DPOW_COINS:
-                        notary.consolidate(coin, force)
+                        notary.consolidate(coin, force, force)
                 elif coin.upper() in const.DPOW_COINS:
-                    notary.consolidate(coin, force)
+                    notary.consolidate(coin, force, force)
                 else:
                     color_msg.error(f"Invalid coin '{coin}', try again.")
             else:
