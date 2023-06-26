@@ -18,8 +18,10 @@ class TUI():
     def list_addresses(self):
         nn = Notary()
         coins_ntx_data = nn.get_coins_ntx_data()
-        for coin in coins_ntx_data:
-            self.msg.status(f"{coin}: {coins_ntx_data[coin]['address']}")
+        coins = list(coins_ntx_data.keys())
+        coins.sort()
+        for coin in coins:
+            self.msg.status(f"{coin:>16}: {coins_ntx_data[coin]['address']:>40}")
     
     def import_privkey(self):
         config = self.config.load()

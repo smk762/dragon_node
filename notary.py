@@ -27,7 +27,7 @@ class Notary():
     def welcome(self) -> None:
         notary_name = self.get_notary_from_pubkey(self.config[f"pubkey_main"])
         if notary_name != "":
-            msg = self.msg.colorize(notary_name, "status")
+            msg = self.msg.colorize(f"-[{notary_name}]-", "status")
             print('{:^80}'.format(msg))
     
     def get_notary_from_pubkey(self, pubkey: str) -> str:
