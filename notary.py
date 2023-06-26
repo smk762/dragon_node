@@ -140,8 +140,13 @@ class Notary():
         inputs = []
         for utxo in utxos:
             try:
+                # Remap utxo data from APIs
+                if "tx_pos" in utxo:
+                    utxo["vout"] = utxo["tx_pos"]
+                if "tx_hash" in utxo:
+                    utxo["txid"] = utxo["tx_hash"]
+                
                 if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
-                    # for daemon resp data
                     if "satoshis" not in utxo:
                         utxo["satoshis"] = utxo["amount"] * 100000000
                     if utxo["confirmations"] < 100 and not force:
