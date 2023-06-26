@@ -201,11 +201,15 @@ def get_utxos(coin: str, pubkey: str) -> list:
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
         url += f"?coin={coin}&pubkey={pubkey}"
+        logger.info(f"Getting UTXOs from {url}")
         r = requests.get(url)
         return r.json()["results"]["utxos"]
     except Exception as e:
-        logger.error(f"Error getting UTXOs for {coin} with pubkey {pubkey}")
-        logger.error(e)
+        if coin in ["AYA", "EMC2", "MIL", "CHIPS"]:
+            logger.warning(f"Utxo API not available for {coin}")
+        else:
+            logger.error(f"Error getting UTXOs for {coin} with pubkey {pubkey}")
+            logger.error(e)
         return []
 
 def format_param(param, value):
