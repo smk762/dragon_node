@@ -164,6 +164,14 @@ class DaemonRPC():
     # Wallet
     def listunspent(self) -> dict:
         return self.rpc("listunspent")["result"]
+    
+    def rescanblockchain(self, start=1, end=None) -> dict:
+        # TODO: AYA uses this, not sure which other chains.
+        # Can be used to scan for transactions after importing 
+        # a private key without rescan
+        if end is None:
+            end = self.getblockcount()
+        return self.rpc("rescanblockchain", [start, end])["result"]
 
     def unlock_unspent(self):
         locked_unspent = self.get_locked_unspent()
