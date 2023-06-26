@@ -211,6 +211,8 @@ class Notary():
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
         if signedhex is None:
             logger.error(f"{coin} Could not signrawtransaction")
+            logger.debug(f"{coin} inputs {inputs}")
+            logger.debug(f"{coin} vouts {vouts}")
             logger.debug(f"{coin} unsignedhex {unsignedhex}")
             return ""
         time.sleep(0.1)
@@ -228,8 +230,7 @@ class Notary():
                         error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                     elif error['error'] == 'Operation not valid with the current stack size':
                         error_utxos.append({"txid": error['txid'], "vout": error['vout']})
-                    else:
-                        logger.debug(f"Removing spent utxo: {error['txid']}:{error['error']}")
+                    logger.debug(f"Removing spent utxo: {error['txid']}:{error['error']}")
                 if len(error_utxos) == len(inputs):
                     logger.debug(f"All utxos errored, wont send.")
                 elif len(error_utxos) > 0:
@@ -253,9 +254,9 @@ class Notary():
                         time.sleep(0.1)
                     else:
                         logger.debug(f"Nothing to send!")
-        logger.error(f"Failed with signedhex {signedhex}")
-        logger.error(f"inputs {inputs}")
-        logger.error(f"vouts {vouts}")
+        # logger.error(f"Failed with signedhex {signedhex}")
+        # logger.error(f"inputs {inputs}")
+        # logger.error(f"vouts {vouts}")
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
