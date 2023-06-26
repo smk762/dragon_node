@@ -118,24 +118,27 @@ class Config():
         
     def create(self):
         while True:
-            self.show_config()
-            self.color_msg.status(f"\n  ==== Config Options ====")
-            options = self.get_options()
-            for i in range(len(options)):
-                self.color_msg.option(f"  [{i}] Update {options[i]}")
-            self.color_msg.option(f"  [{len(options)}] Exit")
-            q = self.color_msg.input("Select an option: ")
             try:
-                q = int(q)
-            except ValueError:
-                self.color_msg.error("Invalid option, try again.")
-                continue
-            if q == len(options):
+                self.show_config()
+                self.color_msg.status(f"\n  ==== Config Options ====")
+                options = self.get_options()
+                for i in range(len(options)):
+                    self.color_msg.option(f"  [{i}] Update {options[i]}")
+                self.color_msg.option(f"  [{len(options)}] Return to Main Menu")
+                q = self.color_msg.input("Select an option: ")
+                try:
+                    q = int(q)
+                except ValueError:
+                    self.color_msg.error("Invalid option, try again.")
+                    continue
+                if q == len(options):
+                    break
+                elif q > len(options):
+                    self.color_msg.error("Invalid option, try again.")
+                else:
+                    self.update(options[q])
+            except KeyboardInterrupt:
                 break
-            elif q > len(options):
-                self.color_msg.error("Invalid option, try again.")
-            else:
-                self.update(options[q])
     
     def update(self, option):
         options = self.get_options()

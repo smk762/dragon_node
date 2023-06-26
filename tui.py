@@ -1,10 +1,14 @@
+#!/usr/bin/env python3
 
+import sys
+import time
 import const
 import helper
 from color import ColorMsg
 from configure import Config
 from daemon import DaemonRPC
 from notary import Notary
+from stats import Stats
 from logger import logger
 import based_58
 
@@ -15,6 +19,56 @@ class TUI():
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
     
+    def configure(self):
+        self.config.create()
+
+    def consolidate(self):
+        self.notary = Notary()
+        if self.notary.configured:
+            coin = input("Enter coin to consolidate (or ALL): ")
+            q = input("Force consolidation? (y/n): ")
+            if q.lower() == "y":
+                force = True
+            else:
+                force = False                    
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    self.notary.consolidate(coin, force, force)
+            elif coin.upper() in const.DPOW_COINS:
+                self.notary.consolidate(coin, force, force)
+            else:
+                self.msg.error(f"Invalid coin '{coin}', try again.")
+        else:
+            self.msg.error(f"Node configuration missing. Select 'Configure' from the main menu to set your node config.")
+
+    def convert_privkey(self):
+        wif = input("Enter private key: ")
+        for coin in const.DPOW_COINS:
+            if coin != "KMD_3P":
+                print(f"{coin}: {helper.wif_convert(coin, wif)}")       
+
+    def reset_wallet(self):
+        notary = Notary()
+        if notary.configured:
+            coin = input("Enter coin to reset wallet (or ALL): ")
+            if coin.lower() == "all":
+                for coin in const.DPOW_COINS:
+                    notary.reset_wallet(coin)                        
+            elif coin.upper() in const.DPOW_COINS:
+                notary.reset_wallet(coin)                    
+            else:
+                self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def stats(self):
+        nnstats = Stats(const.DPOW_COINS)
+        while True:
+            try:
+                nnstats.show()
+                print("Ctrl+C to exit to main menu.")
+                time.sleep(600)
+            except KeyboardInterrupt:
+                break
+
     def list_addresses(self):
         nn = Notary()
         coins_ntx_data = nn.get_coins_ntx_data()
@@ -23,7 +77,7 @@ class TUI():
         print()
         for coin in coins:
             self.msg.status(f"{coin:>12}: {coins_ntx_data[coin]['address']:<40}")
-    
+
     def import_privkey(self):
         config = self.config.load()
         server = input(f"Select server {self.servers}: ")
@@ -52,3 +106,39 @@ class TUI():
                     logger.info(f"Address: {r}")
                 else:
                     logger.info(f"Address {address} already imported.")
+
+    def start_coin(self):
+        notary = Notary()
+        coin = input("Enter coin to start (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.start(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.start(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def restart_coin(self):
+        notary = Notary()
+        coin = input("Enter coin to restart (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.restart(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.restart(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def stop_coin(self):
+        notary = Notary()
+        coin = input("Enter coin to stop (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.stop(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.stop(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def exit(self):
+        sys.exit()
