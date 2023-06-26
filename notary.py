@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 import os
 import time
+import json
 import const
 import helper
 import subprocess
@@ -13,11 +14,9 @@ class Notary():
     def __init__(self) -> None:
         self.config = Config().load()
         self.configured = self.check_config()
-        if self.configured is False:
-            return
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
-        self.coins_data = self.get_coins_data()
+        self.coins_data = self.get_coins_ntx_data()
         self.log_path = f"{const.HOME}/logs"
         if not os.path.exists(self.log_path):
             os.makedirs(self.log_path)
@@ -30,6 +29,16 @@ class Notary():
         if "sweep_address" not in self.config:
             return False
         return True
+
+    def get_coins_ntx_data(self) -> dict:
+        if os.path.exists(const.COINS_NTX_DATA_PATH):
+            with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
+                return json.load(file)
+        else:
+            data = self.get_coins_data()
+            with open(const.COINS_NTX_DATA_PATH, "w") as file:
+                json.dump(data, file, indent=4)
+            return data
 
     def get_coins_data(self) -> dict:
         coins_data = {}
@@ -171,7 +180,7 @@ class Notary():
             return
         address = self.coins_data[coin]["address"]
         pubkey = self.coins_data[coin]["pubkey"]
-        daemon = self.coins_data[coin]["daemon"]
+        daemon = DaemonRPC(coin)
         utxos = self.get_utxos(coin, pubkey)
         if len(utxos) == 0:
             logger.warning(f"{coin} No UTXOs found")
@@ -262,7 +271,7 @@ class Notary():
     def sweep_kmd(self, coin: str) -> None:
         if not self.configured:
             return
-        daemon = self.coins_data[coin]["daemon"]
+        daemon = DaemonRPC(coin)
         unspent = daemon.listunspent()
         logger.info(f"{len(unspent)} unspent utxos detected")
         balance = 0
@@ -285,7 +294,7 @@ class Notary():
         if docker:
              self.start_container(coin)
         if not docker:
-            daemon = self.coins_data[coin]["daemon"]
+            daemon = DaemonRPC(coin)
             server = self.coins_data[coin]["server"]
             if server == "main":
                 launch_params = self.coins_data[coin]["launch_params"]
@@ -314,7 +323,7 @@ class Notary():
         if docker:
              self.stop_container(coin)
         if not docker:
-            daemon = self.coins_data[coin]["daemon"]
+            daemon = DaemonRPC(coin)
             try:
                 daemon.stop()
                 self.wait_for_stop(coin)
@@ -347,7 +356,7 @@ class Notary():
     def wait_for_stop(self, coin: str) -> bool:
         if not self.configured:
             return False
-        daemon = self.coins_data[coin]["daemon"]
+        daemon = DaemonRPC(coin)
         i = 0
         while True:
             try:
@@ -370,7 +379,7 @@ class Notary():
         if not self.configured:
             return False
         time.sleep(5)
-        daemon = self.coins_data[coin]["daemon"]
+        daemon = DaemonRPC(coin)
         i = 0
         while True:
             try:
