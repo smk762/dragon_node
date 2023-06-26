@@ -203,6 +203,10 @@ class Notary():
                     if explorer_url != "":
                         txid = explorer_url
                     logger.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
+                else:
+                    logger.error(f"{coin} Failed to send {value} to {address} from {len(inputs)} input UTXOs")
+                    logger.debug(f"{coin} inputs {inputs}")
+                    logger.debug(f"{coin} vouts {vouts}")
                 time.sleep(0.1)
             else:
                 logger.debug(f"{coin} no valid inputs or vouts for")
@@ -262,9 +266,9 @@ class Notary():
                         time.sleep(0.1)
                     else:
                         logger.debug(f"Nothing to send!")
-        # logger.error(f"Failed with signedhex {signedhex}")
-        # logger.error(f"inputs {inputs}")
-        # logger.error(f"vouts {vouts}")
+        logger.error(f"{coin} Failed with signedhex {signedhex}")
+        logger.error(f"{coin} inputs {inputs}")
+        logger.error(f"{coin} vouts {vouts}")
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
