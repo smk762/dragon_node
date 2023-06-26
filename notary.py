@@ -5,6 +5,7 @@ import json
 import const
 import helper
 import subprocess
+import based_58
 from daemon import DaemonRPC
 from configure import Config
 from logger import logger
@@ -55,16 +56,12 @@ class Notary():
                         "split_count": 20,
                         "server": server,
                         "launch_params": server,
+                        "address": based_58.get_addr_from_pubkey(
+                            self.config[f"pubkey_{server}"],
+                            coin
+                        ),
                         "pubkey": self.config[f"pubkey_{server}"]
                     }
-                })
-                if server == "main":
-                    coins_data[coin].update({
-                        "address": self.config[f"address_main"],
-                })
-                else:
-                    coins_data[coin].update({
-                        "address": self.config[f"addresses_3p"][coin.replace("_3P", "")],
                 })
         return coins_data
     
