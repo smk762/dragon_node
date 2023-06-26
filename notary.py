@@ -118,8 +118,7 @@ class Notary():
                 utxos_data = helper.get_utxos(coin, pubkey)
         if len(utxos_data) == 0:
             return []
-        utxos_data = [i for i in utxos_data if "amount" in i]
-        utxos_data = [i for i in utxos_data if i["spendable"] is True]
+        utxos_data = [i for i in utxos_data if "amount" in i else logger.error(i))]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         if len(utxos) > 0:
             logger.info(f"Biggest {coin} UTXO: {utxos[0]['amount']}")
