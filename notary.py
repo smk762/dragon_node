@@ -109,15 +109,14 @@ class Notary():
                 logger.error(e)
 
     def reset_wallet(self, coin: str) -> None:
+        # TODO: Add support for 3P coins
+        # See https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742
         if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
             self.msg.status(f"Skipping {coin} reset - these are untested at the moment.")
         daemon = DaemonRPC(coin)
         server = helper.get_coin_server(coin)
-        # Backup wallet
         self.move_wallet(coin)
-        # Stop coin
         self.stop(coin)
-        # Restart coin
         self.start(coin)
         # Import wallet without rescan
         pk = input(f"Enter {server.upper()} KMD private key: ")
@@ -125,6 +124,7 @@ class Notary():
         daemon.importprivkey(pk, False)
         # Consolidate
         # TODO: This relies on access to explorer APIs, which may not be available for all coins
+        # AYA block explorer API has no usable endpoints
         # TODO: Electrums may be a viable alternative
         self.consolidate(coin, True, True)
 
