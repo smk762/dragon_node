@@ -177,19 +177,22 @@ class Notary():
             inputs = inputs_data[0]
             value = inputs_data[1]
             vouts = self.get_vouts(coin, address, value)
-            logger.info(f"consolidating {len(inputs)} {coin} UTXOs, value: {value}")
-            try:
-                txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
-                if txid != "":
-                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                    if explorer_url != "":
-                        txid = explorer_url
-                    logger.info(f"Sent {value} {coin} to {address}: {txid}")
-            except Exception as e:
-                logger.error(e)
-            time.sleep(0.1)
+            if len(inputs) > 0 and len(vouts) > 0:
+                logger.info(f"consolidating {len(inputs)} {coin} UTXOs, value: {value}")
+                try:
+                    txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                    if txid != "":
+                        explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                        if explorer_url != "":
+                            txid = explorer_url
+                        logger.info(f"Sent {value} {coin} to {address}: {txid}")
+                except Exception as e:
+                    logger.error(e)
+                time.sleep(0.1)
+            else:
+                logger.debug(f"no valid inputs or vouts for {coin}")
 
-    def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict) -> str:
+    def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict, force=False) -> str:
         daemon = DaemonRPC(coin)
         logger.debug(f"creating rawtx...")
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
@@ -209,38 +212,45 @@ class Notary():
         else:
             # Remove error utxos and retry
             if not signedhex['complete']:
-                errors = signedhex['errors']
-                error_utxos = []
-                for error in errors:
-                    if error['error'] == 'Input not found or already spent':
-                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
-                    elif error['error'] == 'Operation not valid with the current stack size':
-                        error_utxos.append({"txid": error['txid'], "vout": error['vout']})
-                    else:
-                        logger.error(f"{error['error']}")
-                logger.info(f"{len(error_utxos)} Error UTXOs from {len(inputs)} inputs")
-                if len(error_utxos) == len(inputs):
-                    logger.error(f"All utxos errored, exiting...")
-                elif len(error_utxos) > 0:
-                    logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
-                    inputs_data = self.get_inputs(utxos, error_utxos)
-                    inputs = inputs_data[0]
-                    value = inputs_data[1]
-                    vouts = self.get_vouts(coin, address, value)
-                    try:
-                        txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts)
-                        if txid != "":
-                            explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                            if explorer_url != "":
-                                txid = explorer_url
-                            logger.info(f"Sent {value} to {address}: {txid}")
+                if 'errors' in signedhex:
+                    errors = signedhex['errors']
+                    error_utxos = []
+                    for error in errors:
+                        if error['error'] == 'Input not found or already spent':
+                            error_utxos.append({"txid": error['txid'], "vout": error['vout']})
+                        elif error['error'] == 'Operation not valid with the current stack size':
+                            error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                         else:
-                            logger.error(f"Failed to send {value} to {address}")
-                    except Exception as e:
-                        logger.error(e)
-                    time.sleep(0.1)
+                            logger.error(f"{error['error']}")
+                    logger.info(f"{len(error_utxos)} Error {coin} UTXOs from {len(inputs)} inputs")
+                    if len(error_utxos) == len(inputs):
+                        logger.error(f"All utxos errored, exiting...")
+                    elif len(error_utxos) > 0:
+                        logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
+                        inputs_data = self.get_inputs(utxos, error_utxos, force)
+                        inputs = inputs_data[0]
+                        value = inputs_data[1]
+                        vouts = self.get_vouts(coin, address, value)
+                        try:
+                            txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                            if txid != "":
+                                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                                if explorer_url != "":
+                                    txid = explorer_url
+                                logger.info(f"Sent {value} to {address}: {txid}")
+                            else:
+                                logger.error(f"Failed to send {value} to {address}")
+                        except Exception as e:
+                            logger.error(e)
+                        time.sleep(0.1)
+                else:
+                    logger.error(f"Failed with signedhex {signedhex}")
+                    
+                    
             else:
                 logger.error(f"Failed with signedhex {signedhex}")
+                logger.error(f"inputs {inputs}")
+                logger.error(f"vouts {vouts}")
         return ""
                     
     def sweep_kmd(self, coin: str) -> None:
