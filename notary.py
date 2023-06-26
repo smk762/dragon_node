@@ -131,9 +131,6 @@ class Notary():
             
         utxos_data = [i for i in utxos_data if "amount" in i]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
-        if len(utxos) > 0:
-            logger.info(f"{coin} Biggest UTXO: {utxos[0]['amount']}")
-            logger.info(f"{coin} {len(utxos)} UTXOs")
         return utxos
 
     def get_inputs(self, utxos: list, exclude_utxos: list, force: bool=False) -> list:
@@ -163,14 +160,13 @@ class Notary():
         daemon = self.coins_data[coin]["daemon"]
         utxos = self.get_utxos(coin, pubkey)
         if len(utxos) == 0:
-            logger.warning(f"{coin} No UTXOs found for")
+            logger.warning(f"{coin} No UTXOs found")
             return
         if not reset:
             if len(utxos) < 20 and daemon.getbalance() > 0.001 and not force:
                 logger.debug(f"{coin} < 20 UTXOs to consolidate, skipping")
                 return
 
-        logger.info(f"{coin} consolidating...")
         utxo_chunks = helper.chunkify(utxos, 800)
         for utxos in utxo_chunks:
             inputs_data = self.get_inputs(utxos, [], force)
@@ -189,28 +185,26 @@ class Notary():
                         logger.info(f"{coin} Sent {value} to {address}: {txid}")
                 except Exception as e:
                     logger.error(e)
-                    logger.error(f"{coin} utxos: {utxos}")
-                    logger.error(f"{coin} inputs: {inputs}")
-                    logger.error(f"{coin} vouts: {vouts}")
+                    # logger.error(f"{coin} utxos: {utxos}")
+                    # logger.error(f"{coin} inputs: {inputs}")
+                    # logger.error(f"{coin} vouts: {vouts}")
                 time.sleep(0.1)
             else:
                 logger.debug(f"{coin} no valid inputs or vouts for")
 
     def process_raw_transaction(self, coin: str, address: str, utxos: list, inputs: list, vouts: dict, force=False) -> str:
         daemon = DaemonRPC(coin)
-        logger.debug(f"{coin} creating rawtx...")
         unsignedhex = daemon.createrawtransaction(inputs, vouts)
-        logger.debug(f"{coin} unsignedhex: {unsignedhex}")
-        logger.debug(f"{coin} signing rawtx...")
+
+        # Some coins dont allow signrawtransaction,
+        # others dont have signrawtransactionwithwallet.
+        # So we try both
         signedhex = daemon.signrawtransaction(unsignedhex)
         if not signedhex:
             signedhex = daemon.signrawtransactionwithwallet(unsignedhex)
-            # if coin in ["AYA", "CHIPS"]:
-            # some coins dont allow signrawtransaction, others dont have signrawtransactionwithwallet
-        logger.debug(f"{coin} signedhex: {signedhex}")
         time.sleep(0.1)
-        logger.debug(f"{coin} sending signedtx...")
         txid = daemon.sendrawtransaction(signedhex["hex"])
+
         if txid is not None:
             logger.info(f"txid: {txid}")
             return txid
@@ -226,28 +220,30 @@ class Notary():
                         elif error['error'] == 'Operation not valid with the current stack size':
                             error_utxos.append({"txid": error['txid'], "vout": error['vout']})
                         else:
-                            logger.error(f"{error['error']}")
-                    logger.info(f"{len(error_utxos)} Error {coin} UTXOs from {len(inputs)} inputs")
+                            logger.debug(f"Removing spent utxo: {error['txid']}:{error['error']}")
                     if len(error_utxos) == len(inputs):
-                        logger.error(f"All utxos errored, exiting...")
+                        logger.debug(f"All utxos errored, wont send.")
                     elif len(error_utxos) > 0:
-                        logger.info(f"Removing {len(error_utxos)} Error UTXOs to try again...")
+                        logger.debug(f"Removing {len(error_utxos)} Error UTXOs to try again...")
                         inputs_data = self.get_inputs(utxos, error_utxos, force)
                         inputs = inputs_data[0]
                         value = inputs_data[1]
                         vouts = self.get_vouts(coin, address, value)
-                        try:
-                            txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
-                            if txid != "":
-                                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
-                                if explorer_url != "":
-                                    txid = explorer_url
-                                logger.info(f"Sent {value} to {address}: {txid}")
-                            else:
-                                logger.error(f"Failed to send {value} to {address}")
-                        except Exception as e:
-                            logger.error(e)
-                        time.sleep(0.1)
+                        if len(inputs) > 0 and len(vouts) > 0:
+                            try:
+                                txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
+                                if txid != "":
+                                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                                    if explorer_url != "":
+                                        txid = explorer_url
+                                    logger.info(f"Sent {value} to {address}: {txid}")
+                                else:
+                                    logger.error(f"Failed to send {value} to {address}")
+                            except Exception as e:
+                                logger.error(e)
+                            time.sleep(0.1)
+                        else:
+                            logger.debug(f"Nothing to send!")                            
                 else:
                     logger.error(f"Failed with signedhex {signedhex}")
                     
