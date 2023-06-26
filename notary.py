@@ -139,17 +139,21 @@ class Notary():
         value = 0
         inputs = []
         for utxo in utxos:
-            if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
-                # for daemon resp data
-                if "satoshis" not in utxo:
-                    utxo["satoshis"] = utxo["amount"] * 100000000
-                if utxo["confirmations"] < 100 and not force:
-                    logger.debug(f"excluding {utxo['txid']}:{utxo['vout']} - {utxo['confirmations']} confirmations")
-                    continue
-                inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
-                value += utxo["satoshis"]
-            else:
-                logger.debug(f"excluding {utxo['txid']}:{utxo['vout']}")
+            try:
+                if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
+                    # for daemon resp data
+                    if "satoshis" not in utxo:
+                        utxo["satoshis"] = utxo["amount"] * 100000000
+                    if utxo["confirmations"] < 100 and not force:
+                        logger.debug(f"excluding {utxo['txid']}:{utxo['vout']} - {utxo['confirmations']} confirmations")
+                        continue
+                    inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
+                    value += utxo["satoshis"]
+                else:
+                    logger.debug(f"excluding {utxo['txid']}:{utxo['vout']}")
+            except Exception as e:
+                logger.debug(e)
+                logger.debug(utxo)
         value = round(value/100000000, 8)
         return [inputs, value]
         
