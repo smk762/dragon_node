@@ -2,6 +2,7 @@
 #!/usr/bin/env python3
 import os
 import sys
+import csv
 import json
 import time
 import const
@@ -13,9 +14,11 @@ import hashlib
 import secrets
 import requests
 import binascii
+import subprocess
 import helper
 from color import ColorMsg
 from logger import logger
+
 
 
 
@@ -155,10 +158,16 @@ def int_to_hexstr(x):
     return hex_string
 
 
+def get_server_pubkey(server):
+    with open(const.APP_CONFIG_PATH, "r") as f:
+        return json.load(f)[f"pubkey_{server}"]
+    
+
 def get_ntx_address(coin):
     if coin in const.NTX_ADDR:
         return const.NTX_ADDR[coin]
     return const.NTX_ADDR["KMD"]
+
 
 def get_coin_server(coin):
     for server in const.CONF_PATHS:
@@ -245,11 +254,15 @@ def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_thre
     return result
 
 
-def get_utxo_value(coin):
-    if coin in const.LARGE_UTXO_COINS:
-        return 0.00100000
+def get_utxo_value(coin: str, sats=False) -> float:
+    if sats:
+        factor = 100000000
     else:
-        return 0.00010000
+        factor = 1
+    if coin in const.LARGE_UTXO_COINS:
+        return 0.00100000 * factor
+    else:
+        return 0.00010000 * factor
 
 
 def get_ntx_stats(wallet_tx, coin):
@@ -299,6 +312,61 @@ def get_assetchains():
    
 def chunkify(data: list, chunk_size: int):
     return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
+
+
+# simple key sort
+def sort_json_files():
+    for i in os.listdir("."):
+        if i.endswith(".json"):
+            with open(i, "r") as f:
+                data = json.load(f)
+            with open(i, "w") as f:
+                json.dump(data, f, indent=4, sort_keys=True)
+
+
+
+def convert_csv(file, has_headers=False):
+    for i in os.listdir("."):
+        if i.endswith(".csv"):
+            with open(i, "r") as f:
+                csv_reader = csv.DictReader(f)
+                line_count = 0
+                data = []
+                for row in csv_reader:
+                    data.append(row)
+                    line_count += 1
+                print(f'Processed {line_count} lines.')
+            with open(i, "w") as f:
+                json.dump(data, f, indent=4, sort_keys=True)
+
+
+def download_progress(url, fn):
+    with open(fn, 'wb') as f:
+        r = requests.get(url, stream=True)
+        total = r.headers.get('content-length')
+
+        if total is None:
+            f.write(r.content)
+        else:
+            downloaded = 0
+            total = int(total)
+            for data in r.iter_content(chunk_size=max(int(total/1000), 1024*1024)):
+                downloaded += len(data)
+                f.write(data)
+                done = int(50*downloaded/total)
+                sys.stdout.write(f"\rDownloading {fn}: [{'#' * done}{'.' * (50-done)}] {done*2}%")
+                sys.stdout.flush()
+    sys.stdout.write('\n')
+    return r
+
+# Not used in docker env, but left for future reference
+def preexec(): # Don't forward signals.
+    os.setpgrp()
+
+# Not used in docker env, but left for future reference
+def launch(launch_params, log_output):
+    subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
+
     
 if __name__ == '__main__':
     wif = input("Enter WIF: ")

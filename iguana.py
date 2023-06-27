@@ -3,20 +3,18 @@ import os
 import json
 import socket
 import requests
+import const
+import helper
 
 class Iguana():
-    def __init__(self, server, pubkey):
+    def __init__(self, server):
         self.server = server
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
-        self.igauna_configs = {
-            "main": f"dPoW/iguana/elected",
-            "3p": f"dPoW/iguana/3rd_party"
-        }
         self.config = self.get_config()
-        self.pubkey = pubkey
+        self.pubkey = helper.get_server_pubkey(self.server)
         if self.pubkey not in self.config["notaries"]:
-            self.addcoin(pubkey)
+            self.addcoin(self.pubkey)
         self.add_notaries()
         self.rpcport = self.config["rpcport"]
     
@@ -25,7 +23,7 @@ class Iguana():
             self.addnotary(ip)
         
     def get_config(self):
-        with open(self.igauna_configs[self.server], "r") as f:
+        with open(const.IGUANA_CONFIGS[self.server], "r") as f:
             data = json.load(f)
             data["rpcport"] = 7776
             if self.server == "3p":
@@ -39,7 +37,7 @@ class Iguana():
         except Exception as e:
             return {"txid": f"Error! Iguana down? {e}"}
 
-    def split(self, coin, utxos=40, sats=10000):
+    def splitfunds(self, coin: str, utxos: int=40, sats: int=10000) -> dict:
         params={
             "agent": "iguana",
             "method": "splitfunds",

@@ -7,14 +7,17 @@ import datetime
 from daemon import DaemonRPC
 from logger import logger
 from color import ColorMsg
+from notary import Notary
+from iguana import Iguana
 
 class StatsLine:
-    def __init__(self, column_widths, coin="KMD"):
+    def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
         # Todo: last mined KMD since
         self.msg = ColorMsg()
         self.coin = coin
         self.col_widths = column_widths
         self.daemon = DaemonRPC(self.coin)
+        self.replenish_utxos = replenish_utxos
         
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
@@ -23,12 +26,23 @@ class StatsLine:
         return last_block
 
     def ntx_utxo_count(self, utxo_value):
-        utxo_value = helper.get_utxo_value(self.coin)
         unspent = self.daemon.listunspent()
         count = 0
         for utxo in unspent:
             if utxo["amount"] == utxo_value:
                 count += 1
+        if self.replenish_utxos:
+            nn = Notary()
+            if count < nn.get_utxo_threshold(self.coin):
+                server = helper.get_coin_server(self.coin)
+                split_amount = nn.get_split_amount(self.coin)
+                sats = int(helper.get_utxo_value(self.coin, True))
+                iguana = Iguana(server)
+                iguana.splitfunds(self.coin, split_amount, sats)
+                
+                # Do a split
+                pass
+                
         return count
 
     def connections(self):
@@ -131,7 +145,7 @@ class StatsLine:
 
 
 class Stats:
-    def __init__(self, coins: list) -> None:
+    def __init__(self, coins: list=const.DPOW_COINS) -> None:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
@@ -163,13 +177,13 @@ class Stats:
     def spacer(self) -> str:
         return " " + "-" * (self.table_width)
 
-    def show(self) -> None:
+    def show(self, replenish_utxos=True) -> None:
         print()
         print(self.header())
         print(self.spacer())
         mined_str = ""
         for coin in self.coins:
-            line = StatsLine(self.col_widths, coin)
+            line = StatsLine(self.col_widths, coin, replenish_utxos)
             row = line.get()
             if coin == "KMD":
                 last_mined = row[-1]
