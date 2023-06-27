@@ -15,9 +15,13 @@ from logger import logger
 
 class Notary():
     def __init__(self) -> None:
-        self.config = Config().load()
+        self.cfg = Config()
         self.msg = ColorMsg()
+        self.config = self.cfg.load()
         self.configured = self.check_config()
+        if not self.configured:
+            self.cfg.create()
+            self.config = self.cfg.load()
         self.addnotary = self.config["addnotary"]
         self.sweep_address = self.config["sweep_address"]
 
@@ -49,6 +53,14 @@ class Notary():
         if "pubkey_3p" not in self.config:
             return False
         if "sweep_address" not in self.config:
+            return False
+        if self.config["pubkey_main"] is None:
+            return False
+        if self.config["pubkey_3p"] is None:
+            return False
+        if len(self.config["pubkey_main"]) == 0:
+            return False
+        if len(self.config["pubkey_3p"]) == 0:
             return False
         return True
 
@@ -399,8 +411,8 @@ class Notary():
                 logger.debug(f"Waiting for {coin} daemon to start...{e}")
             time.sleep(5)
     
-    def get_dpow_commit_hashes(self) -> dict:
-        if os.path.exists(const.COMMIT_HASHES_PATH):
+    def get_dpow_commit_hashes(self, refresh=False) -> dict:
+        if os.path.exists(const.COMMIT_HASHES_PATH) and not refresh:
             with open(const.COMMIT_HASHES_PATH) as file:
                 return json.load(file)
         else:
@@ -414,14 +426,20 @@ class Notary():
         try:
             r = requests.get(const.COMMIT_HASHES_URL)
             for line in r.text.splitlines():
-                last_word = line.split()[-1].lower()
-                if last_word in ["dpow-3p", "dpow-mainnet"]:
-                    for coin in const.DPOW_COINS:
-                        if line.startswith(coin):
-                            parts = [i.strip() for i in line.split("|")]
-                            commit = parts[2].replace("[", "").split("]")[0]
-                            data[coin] = commit
+                if len(line) > 0:
+                    last_word = line.split()[-1].lower()
+                    if last_word in ["dpow-3p", "dpow-mainnet"]:
+                        for coin in const.DPOW_COINS:
+                            if line.startswith(coin):
+                                parts = [i.strip() for i in line.split("|")]
+                                commit = parts[2].replace("[", "").split("]")[0]
+                                print(f"{coin}: {commit}")
+                                data[coin] = commit
+                                break
         except Exception as e:
             logger.error(e)
         return data
-    
+
+if __name__ == '__main__':
+    nn = Notary()
+    nn.get_dpow_commit_hashes(True)

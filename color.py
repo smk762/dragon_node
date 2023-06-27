@@ -58,6 +58,9 @@ class ColorMsg():
 
     def error(self, msg: str) -> None:
         print(self.colorize(msg, "error"))
+        
+    def green(self, msg: str) -> None:
+        print(self.colorize(msg, "green"))
 
     def confirm(self) -> None:
         self.input("Press [Enter] to continue...")

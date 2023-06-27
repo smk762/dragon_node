@@ -3,10 +3,12 @@ import sys
 from color import ColorMsg
 from tui import TUI
 from notary import Notary
+from configure import Config
 
 color_msg = ColorMsg()
 tui = TUI()
 notary = Notary()
+cfg = Config()
 
 print('''
   ________                                         _____   __     _________      
