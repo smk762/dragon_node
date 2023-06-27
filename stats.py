@@ -42,7 +42,7 @@ class StatsLine:
                 if 'txid' not in r:
                     logger.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
                 else:
-                    
+                    logger.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
         return count
 
     def connections(self):
