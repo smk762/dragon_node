@@ -39,7 +39,7 @@ class StatsLine:
                 sats = int(helper.get_utxo_value(self.coin, True))
                 iguana = Iguana(server)
                 r = iguana.splitfunds(self.coin, split_amount, sats)
-                if 'txid' not in r:
+                if 'txid' in r:
                     logger.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
                 else:
                     logger.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
