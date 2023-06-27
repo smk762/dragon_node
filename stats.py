@@ -14,7 +14,7 @@ class StatsLine:
         self.msg = ColorMsg()
         self.coin = coin
         self.col_widths = column_widths
-        self.daemon = DaemonRPC(self.coin)   
+        self.daemon = DaemonRPC(self.coin)
         
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
@@ -39,7 +39,7 @@ class StatsLine:
         filename = helper.get_wallet_path(self.coin)
         filesize = os.path.getsize(filename)
         if filesize > 10485760:
-            return '\033[31m' + "  > 10M" + '\033[0m' 
+            return '\033[31m' + " > 10M" + '\033[0m' 
         elif filesize > 3145728:
             return '\033[33m' + f"  > 3M" + '\033[0m' 
         elif filesize < 1048576:
@@ -59,15 +59,13 @@ class StatsLine:
             wallet_tx = self.daemon.listtransactions()
             ntx_stats = helper.get_ntx_stats(wallet_tx, self.coin)
             ntx_count = ntx_stats[0]
-            row.append(str(ntx_count))
             
             last_ntx_time = ntx_stats[1]
             if last_ntx_time == 0:
-                dhms_since = '\033[31m' + "  Never " + '\033[0m' 
+                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_ntx_time)
-                dhms_since = helper.sec_to_dhms(sec_since)
-            row.append(dhms_since)
+                dhms_since_ntx = helper.sec_to_dhms(sec_since)
             
             # Last Mined
             last_mined = ntx_stats[2]
@@ -81,44 +79,48 @@ class StatsLine:
             elif ntx_utxo_count < 10:
                 ntx_utxo_count = '\033[33m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count > 100:
-                ntx_utxo_count = '\033[31m' + "  > 100" + '\033[0m'
+                ntx_utxo_count = '\033[31m' + " > 100" + '\033[0m'
             elif ntx_utxo_count > 40:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count >= 10:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
-            row.append(str(ntx_utxo_count))
 
             # Blocks
             block_count = self.daemon.getblockcount()
-            row.append(str(block_count))
             last_blocktime = self.daemon.last_block_time(block_count)
             if last_blocktime == 0:
-                dhms_since = '\033[31m' + "  Never " + '\033[0m' 
+                dhms_since_block = '\033[31m' + "  Never " + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
-                dhms_since = helper.sec_to_dhms(sec_since, True, 600, 1800, 7200)
-            row.append(str(dhms_since))
+                dhms_since_block = helper.sec_to_dhms(sec_since, True, 600, 1800, 7200)
 
             connections = self.connections()
-            row.append(str(connections))
             
             wallet_size = self.wallet_size()
-            row.append(str(wallet_size))
             
             tx_count = len(wallet_tx)
-            row.append(str(tx_count))
             
             start = time.perf_counter()
             r = self.daemon.rpc("listunspent")
             response_time = time.perf_counter() - start
-            row.append(f"{response_time:.4f}")
 
             # Balance
             balance = self.daemon.getbalance()
             if balance < 0.1:
-                row.append('\033[31m' + f"     {balance:.3f}" + '\033[0m')
+                balance = '\033[31m' + f"     {balance:.3f}" + '\033[0m'
             else:
-                row.append(f"{balance:.3f}")
+                balance = f"{balance:.3f}"
+                
+            row.append(balance)
+            row.append(str(ntx_utxo_count))
+            row.append(str(ntx_count))
+            row.append(dhms_since_ntx)
+            row.append(str(block_count))
+            row.append(dhms_since_block)
+            row.append(str(connections))
+            row.append(str(wallet_size))
+            row.append(str(tx_count))
+            row.append(f"{response_time:.4f}")
                 
             if self.coin == "KMD":
                 row.append(last_mined)
@@ -133,11 +135,13 @@ class Stats:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
-        self.col_widths = [11, 6, 8, 6, 10,
-                           8, 8, 6, 8, 8, 10]
+        self.col_widths = [11, 10, 6, 6,
+                           8, 8, 8, 6,
+                           6, 8, 8]
         self.columns = [
-            "COIN", "NTX", "LASTNTX", "UTXO", "BLOCKS",
-            "LASTBLK", "CONN", "SIZE", "NUMTX", "TIME", "BALANCE"
+            "COIN", "BALANCE", "UTXO", "NTX",
+            "LASTNTX", "BLOCKS", "LASTBLK", "CONN",
+            "SIZE", "NUMTX", "TIME"
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
         
@@ -157,12 +161,11 @@ class Stats:
         return self.format_line(self.columns)
     
     def spacer(self) -> str:
-        return " " + "-" * (self.table_width  - 1)
+        return " " + "-" * (self.table_width)
 
     def show(self) -> None:
         print()
         print(self.header())
-        self.table_width = len(self.header())
         print(self.spacer())
         mined_str = ""
         for coin in self.coins:
@@ -176,9 +179,8 @@ class Stats:
                 print(self.format_line(row, "lightred"))
             else:
                 print(self.format_line(row))
-            
         print(self.spacer())
         
         date_str = f'| {mined_str}  | ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
-        fmt_date_str = str(date_str).rjust(self.table_width + 9)
+        fmt_date_str = str(date_str).rjust(self.table_width)
         print(fmt_date_str)

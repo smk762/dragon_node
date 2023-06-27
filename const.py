@@ -20,8 +20,15 @@ load_dotenv()
 HOME = expanduser('~')
 SCRIPT_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
 SWEEP_ADDR = os.getenv("SWEEP_ADDR")
+COMPOSE_PATH_MAIN = f'{HOME}/notary_docker_main/docker-compose.yml'
+COMPOSE_PATH_3P = f'{HOME}/notary_docker_3p/docker-compose.yml'
+COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
 
+COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
+COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
+COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/season-seven/README.md"
+COMMIT_HASHES_PATH = f"{SCRIPT_PATH}/commit_hashes.json"
 
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD"]
@@ -39,7 +46,7 @@ CONF_PATHS = {
         "EMC2": f"{HOME}/.einsteinium/einsteinium.conf",
         "MIL": f"{HOME}/.mil/mil.conf",
         "CHIPS": f"{HOME}/.chips/chips.conf"
-    }    
+    }
 }
 # Autopopulate conf paths for all main coins
 [CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC"]]
@@ -61,10 +68,5 @@ NTX_ADDR = {
     "MIL": "MVx1hSH9WqwQurgqR7HBDRCu3ESkuhQC8r"
 }
 
-'''
-PRICES_API = "https://prices.cipig.net:1717/api/v2/tickers?expire_at=600"
-ACTIVATE_COMMANDS = requests.get("https://stats.kmd.io/api/atomicdex/activation_commands/").json()["commands"]
-LAUNCH_PARAMS = requests.get("https://stats.kmd.io/api/info/launch_params/").json()["results"]
-BASE58_PARAMS = requests.get("https://stats.kmd.io/api/info/base_58/").json()["results"]
-'''
-
+PUBKEYS_MAIN = json.load(open("notary_pubkeys.json", "r"))
+PUBKEYS_3P = json.load(open("notary_pubkeys_3p.json", "r"))

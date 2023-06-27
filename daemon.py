@@ -60,6 +60,7 @@ class DaemonRPC():
         try:
             # logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
+            # logger.debug(f"response: {resp}")
             return resp
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
@@ -88,13 +89,26 @@ class DaemonRPC():
     def importprunedfunds(self, raw_tx, txoutproof):
         return self.rpc("importprunedfunds", [raw_tx, txoutproof])["result"]
 
+    def createrawtransaction(self, inputs, vouts):
+        return self.rpc("createrawtransaction", [inputs, vouts])["result"]
+
+    def signrawtransaction(self, unsignedhex):
+        return self.rpc("signrawtransaction", [unsignedhex])["result"]
+
+    def signrawtransactionwithwallet(self, unsignedhex):
+        return self.rpc("signrawtransactionwithwallet", [unsignedhex])["result"]
+
+    def sendrawtransaction(self, signedhex):
+        return self.rpc("sendrawtransaction", [signedhex])["result"]
+
     def getrawtransaction(self, txid):
         return self.rpc("getrawtransaction", [txid])["result"]
 
-    def importprivkey(self, pk, height=None):
-        if height: 
-            return self.rpc("importprivkey", [pk, "", True, height])["result"]
-        return self.rpc("importprivkey", [pk, "", False])["result"]
+    def importprivkey(self, pk, rescan=False, height=None):
+        if height:
+            # Not all coins support this, but it mimght come in handy later
+            return self.rpc("importprivkey", [pk, "", rescan, height])["result"]
+        return self.rpc("importprivkey", [pk, "", rescan])["result"]
 
     def stop(self):
         return self.rpc("stop")["result"]
@@ -108,10 +122,16 @@ class DaemonRPC():
 
     def validateaddress(self, address: str) -> dict:
         return self.rpc("validateaddress", [address])["result"]
+    
+    def getaddressinfo(self, address: str) -> dict:
+        return self.rpc("getaddressinfo", [address])["result"]
 
     ## Blocks
     def getblock(self, block) -> dict:
         return self.rpc("getblock", [f"{block}"])["result"]
+    
+    def is_responding(self) -> dict:
+        return self.rpc("getblockcount")
     
     def getblockcount(self) -> int:
         return self.rpc("getblockcount")["result"]
@@ -144,6 +164,14 @@ class DaemonRPC():
     # Wallet
     def listunspent(self) -> dict:
         return self.rpc("listunspent")["result"]
+    
+    def rescanblockchain(self, start=1, end=None) -> dict:
+        # TODO: AYA uses this, not sure which other chains.
+        # Can be used to scan for transactions after importing 
+        # a private key without rescan
+        if end is None:
+            end = self.getblockcount()
+        return self.rpc("rescanblockchain", [start, end])["result"]
 
     def unlock_unspent(self):
         locked_unspent = self.get_locked_unspent()
@@ -162,6 +190,25 @@ class DaemonRPC():
 
     # komodo-cli lockunspent true "[{\"txid\":\"a08e6907dbbd3d809776dbfc5d82e371b764ed838b5655e72f463568df1aadf0\",\"vout\":1}]"
     def get_unspendable(self, unspent):
+        # TODO: Unused, remove?
         for utxo in unspent:
             if not utxo["spendable"]:
                 logger.info(utxo)
+
+    def get_explorer_url(self, txid, endpoint: str='explorer_tx_url') -> str:
+        # Param value can be a txid, address, or block
+        # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
+        try:
+            if self.coin == "TOKEL":
+                coin = "TKL"
+            else:
+                coin = self.coin
+            data = helper.get_coins_config()
+            baseurl = data[coin]["explorer_url"]
+            endpoint = data[coin][endpoint]
+            return baseurl + endpoint + txid
+        except json.decoder.JSONDecodeError:
+            return ""
+        except Exception as e:
+            logger.error(f"Error getting explorers: {e}")
+            return ""

@@ -4,6 +4,8 @@ mm2*
 *.log
 coins
 *.json
+!notary_pubkeys.json
+!notary_pubkeys_3p.json
 .env
 libmm2*
 *.csv

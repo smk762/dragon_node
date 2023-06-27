@@ -13,7 +13,7 @@ BASE58_PARAMS = {
     "AYA": {"pubtype": 23, "wiftype": 176, "p2shtype": 5},
     "EMC2": {"pubtype": 33, "wiftype": 176, "p2shtype": 5},
     "KMD": {"pubtype": 60, "wiftype": 188, "p2shtype": 85},
-    "MIL": {"pubtype": 23, "wiftype": 176, "p2shtype": 5}
+    "MIL": {"pubtype": 50, "wiftype": 239, "p2shtype": 196}
 }
 
 

@@ -21,7 +21,8 @@ class Config():
         self.userhome = os.environ['HOME']
         self.sweep_address = os.getenv("SWEEP_ADDR")
         self.pubkey_main = ""
-        self.address_main = ""
+        self.address_main_kmd = ""
+        self.address_main_ltc = ""
         self.pubkey_3p = ""
         self.addresses_3p = {
             "AYA":"",
@@ -52,7 +53,8 @@ class Config():
             "dragonhound_NA": "209.222.101.247",
             "dragonhound_DEV": "103.195.100.32"
         }
-        self.readonly = ["userhome", "address_main", "addresses_3p", "config", "hidden"]
+        # We could move these to const.py
+        self.readonly = ["userhome", "address_main_kmd", "address_main_ltc", "addresses_3p", "config", "hidden"]
         self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
         self.config_path = f"{const.SCRIPT_PATH}/config.json"
         self.config = self.load()
@@ -75,8 +77,8 @@ class Config():
     
     def options_legend(self):
         readonly = self.color_msg.colorize("[read only]", "orange")
-        missing = self.color_msg.colorize("[missing]", "warning")
-        print(f"Legend: {readonly} {missing}")
+        required = self.color_msg.colorize("[required]", "warning")
+        print(f"Legend: {readonly} {required}")
 
     def display(self):
         for i in self.config:
@@ -95,13 +97,13 @@ class Config():
                             self.color_msg.table(f"    {j}: {self.config[i][j]}")
                 elif i in self.readonly:
                     self.color_msg.info(f"{i}: {self.config[i]}")
-                elif self.config[i] is None:
-                    self.color_msg.warning(f"{i}: {self.config[i]}")
                 elif isinstance(self.config[i], list):
                     if len(self.config[i]) == 0:
                         self.color_msg.warning(f"{i}: {self.config[i]}")
                     else:
                         self.color_msg.table(f"{i}: {self.config[i]}")
+                elif self.config[i] in [None, ""]:
+                    self.color_msg.warning(f"{i}: {self.config[i]}")
                 else:
                     self.color_msg.table(f"{i}: {self.config[i]}")
         self.options_legend()        
@@ -117,24 +119,35 @@ class Config():
         
     def create(self):
         while True:
-            self.show_config()
-            self.color_msg.status(f"\n==== Options ====")
-            options = self.get_options()
-            for i in range(len(options)):
-                self.color_msg.option(f"[{i}] Update {options[i]}")
-            self.color_msg.option(f"[{len(options)}] Exit")
-            q = self.color_msg.input("Select an option:")
             try:
-                q = int(q)
-            except ValueError:
-                self.color_msg.error("Invalid option, try again.")
-                continue
-            if q == len(options):
+                self.show_config()
+                self.color_msg.status(f"\n  ==== Config Options ====")
+                options = self.get_options()
+                print(options)
+                for i in range(len(options)):
+                    if options[i] not in self.config:
+                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
+                    elif self.config[options[i]] is None:
+                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
+                    elif len(self.config[options[i]]) == 0:
+                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
+                    else:
+                        self.color_msg.option(f"  [{i}] Update {options[i]}")
+                self.color_msg.option(f"  [{len(options)}] Return to Main Menu")
+                q = self.color_msg.input("Select Config option: ")
+                try:
+                    q = int(q)
+                except ValueError:
+                    self.color_msg.error("Invalid option, try again.")
+                    continue
+                if q == len(options):
+                    break
+                elif q > len(options):
+                    self.color_msg.error("Invalid option, try again.")
+                else:
+                    self.update(options[q])
+            except KeyboardInterrupt:
                 break
-            elif q > len(options):
-                self.color_msg.error("Invalid option, try again.")
-            else:
-                self.update(options[q])
     
     def update(self, option):
         options = self.get_options()
@@ -167,12 +180,14 @@ class Config():
 
     def calculate_addresses(self):
         if self.config["pubkey_main"] != "":
-            address = based_58.get_addr_from_pubkey(self.config["pubkey_main"])
-            if not address:
+            kmd_address = based_58.get_addr_from_pubkey(self.config["pubkey_main"], "KMD")
+            ltc_address = based_58.get_addr_from_pubkey(self.config["pubkey_main"], "LTC")
+            if not kmd_address:
                 self.color_msg.warning("Unable to calculate address from pubkey.")
                 self.config["pubkey_main"] = ""
             else:
-                self.config["address_main"] = address
+                self.config["address_main_kmd"] = kmd_address
+                self.config["address_main_ltc"] = ltc_address
              
         if self.config["pubkey_3p"] != "":
             for coin in const.COINS_3P:
@@ -193,46 +208,4 @@ class Config():
             if v not in self.addnode.values():
                 self.addnode.update({k: v})
 
-
-        '''
-        whitelist_addresses = color_input("Enter addresses to whitelist, separated by space: \n")
-        for addr in whitelist_addresses.split(" "):
-            if addr not in config["whitelist"]:
-                config["whitelist"].append(addr)
-
-
-        pubkey = color_input("Enter your pubkey: ")
-        config["pubkey"] = pubkey
-
-
-        sweep_address = color_input("Enter your sweep address: ")
-        config["sweep_address"] = sweep_address
-
-
-        msg = "[M]ain server or [3]rd Party?: "
-        server = color_input(msg)
-        while server.lower() not in ["m", "3"]:
-            error_print(f"Invalid option, try again. Options: {valid_options}")
-            server = color_input(msg)
-
-        if server.lower() == "m":
-            config["server"] = "main"
-        elif server == "3":
-            config["server"] = "3p"
-
-            for coin in config["non_antara_addresses"]:
-                non_antara_address = color_input(f"Enter your {coin} address: ")
-                config["non_antara_addresses"][coin] = non_antara_address
-
-
-        with open(f"{SCRIPT_PATH}/config.json", "w+") as f:
-            json.dump(config, f, indent=4)
-            status_print(f"{SCRIPT_PATH}/config.json file created.")
-
-
-    with open(f"{SCRIPT_PATH}/config.json", "r") as f:
-        config = json.load(f)
-
-    return config
-    '''
 

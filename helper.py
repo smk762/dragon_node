@@ -18,24 +18,6 @@ from color import ColorMsg
 from logger import logger
 
 
-def get_launch_params():
-    if not os.path.exists("launch_params.json"):
-        r = requests.get("https://raw.githubusercontent.com/KomodoPlatform/coins/master/launch/smartchains.json")
-        data = r.json()
-        write_json_data("launch_params.json", data)
-    else:
-        data = read_json_data("launch_params.json")
-    data.update({
-        "AYA": "aya",
-        "EMC2": "emc2",
-        "MCL": "mcl",
-        "CHIPS": "chips",
-        "VRSC": "vrsc",
-        "MIL": "mil",
-        "TOKEL": "tokel",
-        "KMD_3P": "kmd"
-    })
-    return data
 
 def get_base58_params():
     url = "https://stats.kmd.io/api/info/base_58/"
@@ -77,8 +59,8 @@ def addr_from_ripemd(prefix, ripemd):
 def get_wiftype(coin):
     params = get_base58_params()
     if coin not in params:
-        logger.error(f"Coin {coin} not found in base 58 params")
-        sys.exit(1)
+        logger.error(f"Coin {coin} not found in base 58 params, using KMD params...")
+        return params["KMD"]["wiftype"]
     else:
         return params[coin]["wiftype"]
 
@@ -200,12 +182,17 @@ def get_wallet_path(coin: str) -> str:
 def get_utxos(coin: str, pubkey: str) -> list:
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
+        coin = coin.split("_")[0]
         url += f"?coin={coin}&pubkey={pubkey}"
+        logger.info(f"{coin} Getting UTXOs from {url}")
         r = requests.get(url)
         return r.json()["results"]["utxos"]
     except Exception as e:
-        logger.error(f"Error getting UTXOs for {coin} with pubkey {pubkey}")
-        logger.error(e)
+        if coin in ["AYA", "EMC2", "MIL", "CHIPS"]:
+            logger.warning(f"{coin} Utxo API not available")
+        else:
+            logger.error(f"{coin} Error getting UTXOs with pubkey {pubkey}")
+            logger.error(e)
         return []
 
 def format_param(param, value):
@@ -287,11 +274,32 @@ def get_ntx_stats(wallet_tx, coin):
     ntx_count = len(ntx)
     return [ntx_count, last_ntx_time, last_mined_time]
 
+def get_tx_fee(coin):
+    coins_config = get_coins_config()
+    if coin in coins_config:
+        if "txfee" in coins_config[coin]:
+            return coins_config[coin]["txfee"]
+    if coin in const.LARGE_UTXO_COINS:
+        return 0.00010000
+    else:
+        return 0.00001000
+
+def get_coins_config():
+    if not os.path.exists(const.COINS_CONFIG_PATH):
+        data = requests.get(const.COINS_CONFIG_URL).json()
+        with open(const.COINS_CONFIG_PATH, "w") as f:
+            json.dump(data, f, indent=4)    
+    with open(const.COINS_CONFIG_PATH, "r") as f:
+        return json.load(f)
+
 
 def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
-
+   
+def chunkify(data: list, chunk_size: int):
+    return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
+    
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)
