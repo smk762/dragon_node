@@ -6,9 +6,11 @@ import requests
 import const
 import helper
 from logger import logger
+from color import ColorMsg
 
 class Iguana():
     def __init__(self, server):
+        self.msg = ColorMsg()
         self.server = server
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")

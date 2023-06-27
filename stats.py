@@ -41,9 +41,9 @@ class StatsLine:
                 iguana = Iguana(server)
                 r = iguana.splitfunds(self.coin, split_amount, sats)
                 if 'txid' in r:
-                    logger.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
+                    self.msg.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
                 else:
-                    logger.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
+                    self.msg.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
         return count
 
     def connections(self):
