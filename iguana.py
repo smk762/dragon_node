@@ -11,15 +11,18 @@ class Iguana():
         self.server = server
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
-        self.config = self.get_config()
         self.pubkey = helper.get_server_pubkey(self.server)
-        if self.pubkey not in self.config["notaries"]:
-            self.addcoin(self.pubkey)
         self.add_notaries()
-        self.rpcport = self.config["rpcport"]
+        self.server_coins = helper.get_server_coins(self.server)
+        self.add_coins()
     
+    def add_coins(self):
+        for coin in self.server_coins:
+            self.addcoin(coin)
+        
     def add_notaries(self):
-        for ip in self.config["seeds"]:
+        config = self.get_config()
+        for ip in config["seeds"]:
             self.addnotary(ip)
         
     def get_config(self):
@@ -32,7 +35,10 @@ class Iguana():
 
     def rpc(self, params):
         try:
-            resp = requests.post(f"http://127.0.0.1:{self.config['rpcport']}", json=params).json()
+            config = self.get_config()
+            iguana_url = f"http://127.0.0.1:{config['rpcport']}"
+            print(iguana_url)
+            resp = requests.post(iguana_url, json=params).json()
             return resp
         except Exception as e:
             return {"txid": f"Error! Iguana down? {e}"}
@@ -66,7 +72,8 @@ class Iguana():
         return self.rpc(params)
     
     def get_coin_params(self, coin):
-        filename = f"{coin.lower()}_{self.rpcport}.json"
+        config = self.get_config()
+        filename = f"{coin.lower()}_{config['rpcport']}.json"
         path = f"iguana_coins/{filename}"
         if os.path.exists(path):
             with open(path, "r") as f:

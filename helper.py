@@ -158,10 +158,18 @@ def int_to_hexstr(x):
     return hex_string
 
 
+def get_server_coins(server: str) -> list:
+    if server == "main":
+        return const.COINS_MAIN
+    elif server == "3p":
+        return const.COINS_3P
+    return []
+
+
 def get_server_pubkey(server):
     with open(const.APP_CONFIG_PATH, "r") as f:
         return json.load(f)[f"pubkey_{server}"]
-    
+
 
 def get_ntx_address(coin):
     if coin in const.NTX_ADDR:
