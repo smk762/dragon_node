@@ -38,11 +38,7 @@ class StatsLine:
                 split_amount = nn.get_split_amount(self.coin)
                 sats = int(helper.get_utxo_value(self.coin, True))
                 iguana = Iguana(server)
-                iguana.splitfunds(self.coin, split_amount, sats)
-                
-                # Do a split
-                pass
-                
+                print(iguana.splitfunds(self.coin, split_amount, sats))
         return count
 
     def connections(self):

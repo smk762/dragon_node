@@ -5,6 +5,7 @@ import socket
 import requests
 import const
 import helper
+from logger import logger
 
 class Iguana():
     def __init__(self, server):
@@ -37,13 +38,13 @@ class Iguana():
         try:
             config = self.get_config()
             iguana_url = f"http://127.0.0.1:{config['rpcport']}"
-            print(iguana_url)
             resp = requests.post(iguana_url, json=params).json()
             return resp
         except Exception as e:
             return {"txid": f"Error! Iguana down? {e}"}
 
     def splitfunds(self, coin: str, utxos: int=40, sats: int=10000) -> dict:
+        coin = coin.split("_")[0]
         params={
             "agent": "iguana",
             "method": "splitfunds",
@@ -63,6 +64,7 @@ class Iguana():
         return self.rpc(params)
 
     def dpow(self, coin):
+        coin = coin.split("_")[0]
         params ={
             "agent": "iguana",
             "method": "dpow",
@@ -73,7 +75,8 @@ class Iguana():
     
     def get_coin_params(self, coin):
         config = self.get_config()
-        filename = f"{coin.lower()}_{config['rpcport']}.json"
+        coin = coin.split("_")[0]
+        filename = f"{coin.lower()}_{config['rpcport']}"
         path = f"iguana_coins/{filename}"
         if os.path.exists(path):
             with open(path, "r") as f:
@@ -85,7 +88,7 @@ class Iguana():
     def addcoin(self, coin):
         params = self.get_coin_params(coin)
         if not params:
-            raise Exception(f"Error! Coin {coin} not found in iguana_coins")
+            logger.error(f"Error! Coin {coin} not found in iguana_coins")
         return self.rpc(params)
     
     def myipaddr(self):
@@ -96,7 +99,7 @@ class Iguana():
         }
         return self.rpc(params)
 
-    def help(self, coin):
+    def help(self):
         params = {
             "agent": "SuperNET",
             "method": "help"
@@ -104,6 +107,7 @@ class Iguana():
         return self.rpc(params)
 
     def notarizations(self, coin, height, numblocks=1000):
+        coin = coin.split("_")[0]
         params = {
             "pubkey": self.pubkey,
             "agent": "dpow",
