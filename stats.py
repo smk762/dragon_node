@@ -38,7 +38,11 @@ class StatsLine:
                 split_amount = nn.get_split_amount(self.coin)
                 sats = int(helper.get_utxo_value(self.coin, True))
                 iguana = Iguana(server)
-                print(iguana.splitfunds(self.coin, split_amount, sats))
+                r = iguana.splitfunds(self.coin, split_amount, sats)
+                if 'txid' not in r:
+                    logger.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
+                else:
+                    
         return count
 
     def connections(self):
