@@ -25,8 +25,9 @@ class StatsLine:
         last_block = best_blk_info["time"]
         return last_block
 
-    def ntx_utxo_count(self, utxo_value):
+    def ntx_utxo_count(self):
         unspent = self.daemon.listunspent()
+        utxo_value =helper.get_utxo_value(self.coin)
         count = 0
         for utxo in unspent:
             if utxo["amount"] == utxo_value:
@@ -87,7 +88,7 @@ class StatsLine:
             last_mined = helper.sec_to_dhms(last_mined)
 
             # UTXOS
-            ntx_utxo_count = self.ntx_utxo_count(self.coin)
+            ntx_utxo_count = self.ntx_utxo_count()
             if ntx_utxo_count < 5:
                 ntx_utxo_count = '\033[31m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count < 10:
