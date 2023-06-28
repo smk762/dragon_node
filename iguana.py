@@ -18,6 +18,12 @@ class Iguana():
         self.add_notaries()
         self.server_coins = helper.get_server_coins(self.server)
         self.add_coins()
+        
+    def test_connection(self):
+        r = self.help()
+        if "error" in r:
+            return False
+        return True       
     
     def add_coins(self):
         for coin in self.server_coins:
@@ -43,7 +49,7 @@ class Iguana():
             resp = requests.post(iguana_url, json=params).json()
             return resp
         except Exception as e:
-            return {"txid": f"Error! Iguana down? {e}"}
+            return {"error": f"Error! Iguana down? {e}"}
 
     def splitfunds(self, coin: str, utxos: int=40, sats: int=10000) -> dict:
         coin = coin.split("_")[0]
@@ -127,4 +133,6 @@ class Iguana():
         }
         return self.rpc(params)
 
-
+if __name__ == "__main__":
+    pass
+    
