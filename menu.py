@@ -8,13 +8,13 @@ from color import ColorMsg
 from configure import Config
 from daemon import DaemonRPC
 from notary import Notary
-from stats import Stats
+from stats_table import Stats
 from iguana import Iguana
 from logger import logger
 import based_58
 
 
-class TUI():
+class Menu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import time
-from stats import Stats
+from stats_table import Stats
 from color import ColorMsg
 from iguana import Iguana
 
