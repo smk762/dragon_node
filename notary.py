@@ -435,7 +435,7 @@ class Notary():
                 logger.debug(f"Waiting for {coin} daemon to start...{e}")
             except Exception as e:
                 logger.debug(f"Waiting for {coin} daemon to start...{e}")
-            time.sleep(5)
+            time.sleep(10)
     
     def get_dpow_commit_hashes(self, refresh=False) -> dict:
         if os.path.exists(const.COMMIT_HASHES_PATH) and not refresh:

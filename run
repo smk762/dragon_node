@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 import sys
 from color import ColorMsg
-from menu import Menu
+from menu import MainMenu, WalletMenu
 from notary import Notary
 from configure import Config
 
 color_msg = ColorMsg()
-menu = Menu()
+menu = MainMenu()
+wallet_menu = WalletMenu()
 notary = Notary()
 cfg = Config()
 
@@ -23,36 +24,4 @@ if notary.configured:
     notary.welcome()
 
 
-menu = [
-    {"configure": menu.configure},
-    {"consolidate": menu.consolidate},
-    {"convert_privkey": menu.convert_privkey},
-    {"reset_wallet": menu.reset_wallet},
-    {"stats": menu.stats},
-    {"import_privkey": menu.import_privkey},
-    {"list_addresses": menu.list_addresses},
-    {"start_coin": menu.start_coin},
-    {"restart_coin": menu.restart_coin},
-    {"stop_coin": menu.stop_coin},
-    {"exit": menu.exit}
-]
-
-while True:
-    try:
-        color_msg.status(f"\n  ==== Main Menu ====")
-        for i in range(len(menu)):
-            for k, v in menu[i].items():
-                color_msg.option(f'  [{i}] {k.title().replace("_", " ")}')
-        q = color_msg.input("Select an action: ")
-        try:
-            q = int(q)
-        except ValueError:
-            color_msg.error("Invalid option, try again.")
-            continue
-        if q > len(menu):
-            color_msg.error("Invalid option, try again.")
-        else:
-            for k, v in menu[q].items():
-                v()
-    except KeyboardInterrupt:
-        sys.exit(0)
+menu.show()
