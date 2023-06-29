@@ -161,6 +161,7 @@ class Notary():
         # See https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742
         if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
             self.msg.status(f"Skipping {coin} reset - these are untested at the moment.")
+            return
         daemon = DaemonRPC(coin)
         server = helper.get_coin_server(coin)
         self.move_wallet(coin)

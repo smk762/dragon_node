@@ -10,7 +10,7 @@ A node management tool for Komodo Platform Notary Node Operations
 ---
 ## Setup
 
-1. Clone this repository: `git clone https://github.com/smk762/dragon_node`
+1. Clone this repository: `git clone https://github.com/smk762/dragon_node --recurse-submodules`
 2. Run `./setup` to install dependencies and initialize the dPoW submodule.
 3. Use `./run` to launch the TUI
 4. Use `./stats` to enter a stats display loop
