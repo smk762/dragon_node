@@ -1,0 +1,28 @@
+#!/bin/bash
+
+git pull
+
+if [ $# -eq 0 ]; then
+    echo "No arguments provided. You need to add a valid branch as a parameter"
+    echo "For example: ./update.sh dev"
+    echo "Defaulting to master"
+    branch="master"
+else
+    echo "Updating dPoW branch to $1"
+    branch="$1"
+fi
+
+git submodule init
+
+echo "Existing submodule settings:"
+git config --file=../.gitmodules -l
+echo
+echo "Updating submodule branch to $branch"
+git config --file=../.gitmodules submodule.dPoW.branch $branch
+git submodule sync
+git submodule update --init --recursive --remote
+echo
+echo "Updated submodule settings:"
+git config --file=../.gitmodules -l
+
+git submodule update --remote

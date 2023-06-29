@@ -64,8 +64,8 @@ class Notary():
             return False
         return True
 
-    def get_coins_ntx_data(self) -> dict:
-        if os.path.exists(const.COINS_NTX_DATA_PATH):
+    def get_coins_ntx_data(self, refresh=False) -> dict:
+        if os.path.exists(const.COINS_NTX_DATA_PATH) and not refresh:
             with open(const.COINS_NTX_DATA_PATH) as file:
                 return json.load(file)
         else:
@@ -73,6 +73,31 @@ class Notary():
             with open(const.COINS_NTX_DATA_PATH, "w") as file:
                 json.dump(data, file, indent=4)
             return data
+        
+    def get_utxo_threshold(self, coin: str) -> int:
+        coins_ntx_data = self.get_coins_ntx_data()
+        if coin in coins_ntx_data:
+            return coins_ntx_data[coin]["min_utxo_count"]
+        else:
+            return coins_ntx_data["KMD"]["min_utxo_count"]
+    
+    def get_split_amount(self, coin: str) -> int:
+        coins_ntx_data = self.get_coins_ntx_data()
+        if coin in coins_ntx_data:
+            return coins_ntx_data[coin]["split_count"]
+        else:
+            return coins_ntx_data["KMD"]["split_count"]
+        
+    def get_utxo_value(self, coin: str, sats=False) -> float:
+        coins_ntx_data = self.get_coins_ntx_data()
+        if sats:
+            factor = 100000000
+        else:
+            factor = 1
+        if coin in coins_ntx_data:
+            return coins_ntx_data[coin]["utxo_value"] * factor
+        else:
+            return coins_ntx_data["KMD"]["utxo_value"] * factor
 
     def get_coins_data(self) -> dict:
         coins_data = {}
@@ -85,6 +110,7 @@ class Notary():
                         "conf": const.CONF_PATHS[server][coin],
                         "wallet": helper.get_wallet_path(coin),
                         "utxo_value": helper.get_utxo_value(coin),
+                        "utxo_value_sats": helper.get_utxo_value(coin, True),
                         "min_utxo_count": 20,
                         "split_count": 20,
                         "server": server,

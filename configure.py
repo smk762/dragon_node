@@ -56,20 +56,19 @@ class Config():
         # We could move these to const.py
         self.readonly = ["userhome", "address_main_kmd", "address_main_ltc", "addresses_3p", "config", "hidden"]
         self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
-        self.config_path = f"{const.SCRIPT_PATH}/config.json"
         self.config = self.load()
 
     def load(self):
         try:
-            if os.path.exists(self.config_path):
-                with open(self.config_path, "r") as f:
+            if os.path.exists(const.APP_CONFIG_PATH):
+                with open(const.APP_CONFIG_PATH, "r") as f:
                     return json.load(f)
         except json.decoder.JSONDecodeError:
             pass
         return self.__dict__.copy()
     
     def save(self):
-        with open(self.config_path, "w") as f:
+        with open(const.APP_CONFIG_PATH, "w") as f:
             for i in self.hidden:
                 if i in self.config:
                     self.config.pop(i)

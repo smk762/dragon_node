@@ -8,12 +8,13 @@ from color import ColorMsg
 from configure import Config
 from daemon import DaemonRPC
 from notary import Notary
-from stats import Stats
+from stats_table import Stats
+from iguana import Iguana
 from logger import logger
 import based_58
 
 
-class TUI():
+class Menu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()
@@ -64,7 +65,17 @@ class TUI():
         while True:
             try:
                 nnstats.show()
-                print("Ctrl+C to exit to main menu.")
+                err = []
+                iguana = Iguana("main")
+                if not iguana.test_connection():
+                    err.append("[Main Iguana down!]")
+                iguana = Iguana("3p")
+                if not iguana.test_connection():
+                    err.append("[3P Iguana down!]")
+                if len(err) > 0:
+                    self.msg.error(" " + '   '.join(err))
+                print()
+                self.msg.status(" Ctrl+C to exit to main menu.")
                 time.sleep(600)
             except KeyboardInterrupt:
                 break

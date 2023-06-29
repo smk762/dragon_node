@@ -3,29 +3,39 @@ import os
 import json
 import socket
 import requests
+import const
+import helper
+from logger import logger
+from color import ColorMsg
 
 class Iguana():
-    def __init__(self, server, pubkey):
+    def __init__(self, server):
+        self.msg = ColorMsg()
         self.server = server
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
-        self.igauna_configs = {
-            "main": f"dPoW/iguana/elected",
-            "3p": f"dPoW/iguana/3rd_party"
-        }
-        self.config = self.get_config()
-        self.pubkey = pubkey
-        if self.pubkey not in self.config["notaries"]:
-            self.addcoin(pubkey)
+        self.pubkey = helper.get_server_pubkey(self.server)
         self.add_notaries()
-        self.rpcport = self.config["rpcport"]
+        self.server_coins = helper.get_server_coins(self.server)
+        self.add_coins()
+        
+    def test_connection(self):
+        r = self.help()
+        if "error" in r:
+            return False
+        return True       
     
+    def add_coins(self):
+        for coin in self.server_coins:
+            self.addcoin(coin)
+        
     def add_notaries(self):
-        for ip in self.config["seeds"]:
+        config = self.get_config()
+        for ip in config["seeds"]:
             self.addnotary(ip)
         
     def get_config(self):
-        with open(self.igauna_configs[self.server], "r") as f:
+        with open(const.IGUANA_CONFIGS[self.server], "r") as f:
             data = json.load(f)
             data["rpcport"] = 7776
             if self.server == "3p":
@@ -34,12 +44,15 @@ class Iguana():
 
     def rpc(self, params):
         try:
-            resp = requests.post(f"http://127.0.0.1:{self.config['rpcport']}", json=params).json()
+            config = self.get_config()
+            iguana_url = f"http://127.0.0.1:{config['rpcport']}"
+            resp = requests.post(iguana_url, json=params).json()
             return resp
         except Exception as e:
-            return {"txid": f"Error! Iguana down? {e}"}
+            return {"error": f"Error! Iguana down? {e}"}
 
-    def split(self, coin, utxos=40, sats=10000):
+    def splitfunds(self, coin: str, utxos: int=40, sats: int=10000) -> dict:
+        coin = coin.split("_")[0]
         params={
             "agent": "iguana",
             "method": "splitfunds",
@@ -59,6 +72,7 @@ class Iguana():
         return self.rpc(params)
 
     def dpow(self, coin):
+        coin = coin.split("_")[0]
         params ={
             "agent": "iguana",
             "method": "dpow",
@@ -68,7 +82,9 @@ class Iguana():
         return self.rpc(params)
     
     def get_coin_params(self, coin):
-        filename = f"{coin.lower()}_{self.rpcport}.json"
+        config = self.get_config()
+        coin = coin.split("_")[0]
+        filename = f"{coin.lower()}_{config['rpcport']}"
         path = f"iguana_coins/{filename}"
         if os.path.exists(path):
             with open(path, "r") as f:
@@ -80,7 +96,7 @@ class Iguana():
     def addcoin(self, coin):
         params = self.get_coin_params(coin)
         if not params:
-            raise Exception(f"Error! Coin {coin} not found in iguana_coins")
+            logger.error(f"Error! Coin {coin} not found in iguana_coins")
         return self.rpc(params)
     
     def myipaddr(self):
@@ -91,7 +107,7 @@ class Iguana():
         }
         return self.rpc(params)
 
-    def help(self, coin):
+    def help(self):
         params = {
             "agent": "SuperNET",
             "method": "help"
@@ -99,6 +115,7 @@ class Iguana():
         return self.rpc(params)
 
     def notarizations(self, coin, height, numblocks=1000):
+        coin = coin.split("_")[0]
         params = {
             "pubkey": self.pubkey,
             "agent": "dpow",
@@ -116,4 +133,6 @@ class Iguana():
         }
         return self.rpc(params)
 
-
+if __name__ == "__main__":
+    pass
+    

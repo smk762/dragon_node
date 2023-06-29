@@ -7,14 +7,17 @@ import datetime
 from daemon import DaemonRPC
 from logger import logger
 from color import ColorMsg
+from notary import Notary
+from iguana import Iguana
 
 class StatsLine:
-    def __init__(self, column_widths, coin="KMD"):
+    def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
         # Todo: last mined KMD since
         self.msg = ColorMsg()
         self.coin = coin
         self.col_widths = column_widths
         self.daemon = DaemonRPC(self.coin)
+        self.replenish_utxos = replenish_utxos
         
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
@@ -22,13 +25,26 @@ class StatsLine:
         last_block = best_blk_info["time"]
         return last_block
 
-    def ntx_utxo_count(self, utxo_value):
-        utxo_value = helper.get_utxo_value(self.coin)
+    def ntx_utxo_count(self):
         unspent = self.daemon.listunspent()
+        utxo_value =helper.get_utxo_value(self.coin)
         count = 0
         for utxo in unspent:
             if utxo["amount"] == utxo_value:
                 count += 1
+        if self.replenish_utxos:
+            nn = Notary()
+            if count < nn.get_utxo_threshold(self.coin):
+                server = helper.get_coin_server(self.coin)
+                split_amount = nn.get_split_amount(self.coin)
+                sats = int(helper.get_utxo_value(self.coin, True))
+                iguana = Iguana(server)
+                if iguana.test_connection():
+                    r = iguana.splitfunds(self.coin, split_amount, sats)
+                    if 'txid' in r:
+                        self.msg.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
+                    else:
+                        self.msg.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
         return count
 
     def connections(self):
@@ -73,7 +89,7 @@ class StatsLine:
             last_mined = helper.sec_to_dhms(last_mined)
 
             # UTXOS
-            ntx_utxo_count = self.ntx_utxo_count(self.coin)
+            ntx_utxo_count = self.ntx_utxo_count()
             if ntx_utxo_count < 5:
                 ntx_utxo_count = '\033[31m' + f"     {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count < 10:
@@ -131,7 +147,7 @@ class StatsLine:
 
 
 class Stats:
-    def __init__(self, coins: list) -> None:
+    def __init__(self, coins: list=const.DPOW_COINS) -> None:
         self.coins = coins
         self.coins.sort()
         self.msg = ColorMsg()
@@ -163,13 +179,13 @@ class Stats:
     def spacer(self) -> str:
         return " " + "-" * (self.table_width)
 
-    def show(self) -> None:
+    def show(self, replenish_utxos=True) -> None:
         print()
         print(self.header())
         print(self.spacer())
         mined_str = ""
         for coin in self.coins:
-            line = StatsLine(self.col_widths, coin)
+            line = StatsLine(self.col_widths, coin, replenish_utxos)
             row = line.get()
             if coin == "KMD":
                 last_mined = row[-1]
