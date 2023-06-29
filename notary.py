@@ -147,7 +147,16 @@ class Notary():
             except Exception as e:
                 logger.error(e)
 
-    def reset_wallet(self, coin: str) -> None:
+    def reset_wallet_all(self) -> None:
+        pk = self.msg.input(f"Enter 3P KMD private key: ")
+        for coin in const.COINS_3P:
+            self.reset_wallet(coin, pk)
+        pk = self.msg.input(f"Enter MAIN KMD private key: ")
+        for coin in const.COINS_MAIN:
+            self.reset_wallet(coin, pk)
+
+        
+    def reset_wallet(self, coin: str, pk=None) -> None:
         # TODO: Add support for 3P coins
         # See https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742
         if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
@@ -158,7 +167,8 @@ class Notary():
         self.stop(coin)
         self.start(coin)
         # Import wallet without rescan
-        pk = input(f"Enter {server.upper()} KMD private key: ")
+        if not pk:
+            pk = input(f"Enter {server.upper()} KMD private key: ")
         pk = helper.wif_convert(coin, pk)
         daemon.importprivkey(pk, False)
         # Consolidate

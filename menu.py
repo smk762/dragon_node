@@ -182,8 +182,7 @@ class WalletMenu():
         if notary.configured:
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
-                for coin in const.DPOW_COINS:
-                    notary.reset_wallet(coin)                        
+                    notary.reset_wallet_all()                        
             elif coin.upper() in const.DPOW_COINS:
                 notary.reset_wallet(coin)                    
             else:
