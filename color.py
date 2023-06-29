@@ -68,5 +68,8 @@ class ColorMsg():
     def ltgrey(self, msg: str) -> None:
         print(self.colorize(msg, "lightgrey"))
 
+    def darkgrey(self, msg: str) -> None:
+        print(self.colorize(msg, "darkgrey"))
+
     def confirm(self) -> None:
         self.input("Press [Enter] to continue...")
