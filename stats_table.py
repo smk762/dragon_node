@@ -42,9 +42,9 @@ class StatsLine:
                 if iguana.test_connection():
                     r = iguana.splitfunds(self.coin, split_amount, sats)
                     if 'txid' in r:
-                        self.msg.info(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
+                        self.msg.darkgrey(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
                     else:
-                        self.msg.warning(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
+                        self.msg.darkgrey(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
         return count
 
     def connections(self):
@@ -71,23 +71,14 @@ class StatsLine:
         else:
             row = [self.coin]
         try:
-            # Notarizations        
-            wallet_tx = self.daemon.listtransactions()
-            ntx_stats = helper.get_ntx_stats(wallet_tx, self.coin)
-            ntx_count = ntx_stats[0]
-            
-            last_ntx_time = ntx_stats[1]
-            if last_ntx_time == 0:
-                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m' 
+            # Balance
+            balance = self.daemon.getbalance()
+            if balance < 0.1:
+                balance = '\033[31m' + f"     {balance:.3f}" + '\033[0m'
             else:
-                sec_since = helper.sec_since(last_ntx_time)
-                dhms_since_ntx = helper.sec_to_dhms(sec_since)
+                balance = f"{balance:.3f}"
+            row.append(balance)
             
-            # Last Mined
-            last_mined = ntx_stats[2]
-            last_mined = helper.sec_since(last_mined)
-            last_mined = helper.sec_to_dhms(last_mined)
-
             # UTXOS
             ntx_utxo_count = self.ntx_utxo_count()
             if ntx_utxo_count < 5:
@@ -100,49 +91,62 @@ class StatsLine:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
             elif ntx_utxo_count >= 10:
                 ntx_utxo_count = '\033[92m' + f"    {ntx_utxo_count}" + '\033[0m'
+            row.append(str(ntx_utxo_count))
 
+            # Notarizations        
+            wallet_tx = self.daemon.listtransactions()
+            ntx_stats = helper.get_ntx_stats(wallet_tx, self.coin)
+            ntx_count = ntx_stats[0]
+            row.append(str(ntx_count))
+            
+            # Since NTX
+            last_ntx_time = ntx_stats[1]
+            if last_ntx_time == 0:
+                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m' 
+            else:
+                sec_since = helper.sec_since(last_ntx_time)
+                dhms_since_ntx = helper.sec_to_dhms(sec_since)
+            row.append(dhms_since_ntx)
+            
             # Blocks
             block_count = self.daemon.getblockcount()
+            row.append(str(block_count))
             last_blocktime = self.daemon.last_block_time(block_count)
             if last_blocktime == 0:
                 dhms_since_block = '\033[31m' + "  Never " + '\033[0m' 
             else:
                 sec_since = helper.sec_since(last_blocktime)
                 dhms_since_block = helper.sec_to_dhms(sec_since, True, 600, 1800, 7200)
+            row.append(dhms_since_block)
 
+            # Connections
             connections = self.connections()
+            row.append(str(connections))
             
+            # Wallet size
             wallet_size = self.wallet_size()
+            row.append(str(wallet_size))
             
+            # TX Count
             tx_count = len(wallet_tx)
+            row.append(str(tx_count))
             
+            # Response time
             start = time.perf_counter()
             r = self.daemon.rpc("listunspent")
             response_time = time.perf_counter() - start
-
-            # Balance
-            balance = self.daemon.getbalance()
-            if balance < 0.1:
-                balance = '\033[31m' + f"     {balance:.3f}" + '\033[0m'
-            else:
-                balance = f"{balance:.3f}"
-                
-            row.append(balance)
-            row.append(str(ntx_utxo_count))
-            row.append(str(ntx_count))
-            row.append(dhms_since_ntx)
-            row.append(str(block_count))
-            row.append(dhms_since_block)
-            row.append(str(connections))
-            row.append(str(wallet_size))
-            row.append(str(tx_count))
             row.append(f"{response_time:.4f}")
                 
             if self.coin == "KMD":
+                # Last Mined
+                last_mined = ntx_stats[2]
+                last_mined = helper.sec_since(last_mined)
+                last_mined = helper.sec_to_dhms(last_mined)
                 row.append(last_mined)
         except Exception as e:
-            return [self.coin, "-", "-", "-", "-",
-                    "-", "-", "-", "-", "-", "-"]
+            # print(e)
+            while len(row) < 11:
+                row.append("-")
         return row
 
 

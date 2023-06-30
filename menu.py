@@ -13,16 +13,145 @@ from iguana import Iguana
 from logger import logger
 import based_58
 
+msg = ColorMsg()
 
-class Menu():
+def show_menu(menu, menu_name):
+    while True:
+        try:
+            if menu_name == "Main Menu":
+                msg.status(f"\n  ==== {menu_name} ====")
+            else:
+                msg.ltgreen(f"\n  ==== {menu_name} ====")
+            for i in range(len(menu)):
+                for k, v in menu[i].items():
+                    msg.option(f'  [{i}] {k.title().replace("_", " ")}')
+            q = msg.input("Select an option: ")
+            try:
+                q = int(q)
+            except ValueError:
+                msg.error("Invalid option, try again.")
+                continue
+            if q > len(menu):
+                msg.error("Invalid option, try again.")
+            else:
+                for k, v in menu[q].items():
+                    v()
+        except KeyboardInterrupt:
+            break
+
+
+class MainMenu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
+            
+        self.menu = [
+            {"configure": self.configure},
+            {"stats": self.stats},
+            {"Node_menu": NodeMenu().show},
+            {"wallet_menu": WalletMenu().show},
+            {"exit": self.exit}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Main Menu")
     
     def configure(self):
         self.config.create()
 
+    def stats(self):
+        nnstats = Stats(const.DPOW_COINS)
+        while True:
+            try:
+                nnstats.show()
+                err = []
+                iguana = Iguana("main")
+                if not iguana.test_connection():
+                    err.append("[Main Iguana down!]")
+                iguana = Iguana("3p")
+                if not iguana.test_connection():
+                    err.append("[3P Iguana down!]")
+                if len(err) > 0:
+                    self.msg.error(" " + '   '.join(err))
+                print()
+                self.msg.status(" Ctrl+C to exit to main menu.")
+                time.sleep(600)
+            except KeyboardInterrupt:
+                break
+
+    def exit(self):
+        sys.exit()
+
+class NodeMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.servers = const.DPOW_SERVERS
+        self.menu = [
+            {"start_coin": self.start_coin},
+            {"restart_coin": self.restart_coin},
+            {"stop_coin": self.stop_coin},
+            {"main_menu": self.exit}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Wallet Menu")
+   
+    def start_coin(self):
+        notary = Notary()
+        coin = self.msg.input("Enter coin to start (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.start(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.start(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def restart_coin(self):
+        notary = Notary()
+        coin = self.msg.input("Enter coin to restart (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.restart(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.restart(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def stop_coin(self):
+        notary = Notary()
+        coin = self.msg.input("Enter coin to stop (or ALL): ")
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                notary.stop(coin)
+        elif coin.upper() in const.DPOW_COINS:
+            notary.stop(coin)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def exit(self):
+        raise KeyboardInterrupt
+
+
+class WalletMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.servers = const.DPOW_SERVERS
+        self.menu = [
+            {"consolidate": self.consolidate},
+            {"convert_privkey": self.convert_privkey},
+            {"reset_wallet": self.reset_wallet},
+            {"import_privkey": self.import_privkey},
+            {"list_addresses": self.list_addresses},
+            {"main_menu": self.exit}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Wallet Menu")
+        
     def consolidate(self):
         self.notary = Notary()
         if self.notary.configured:
@@ -53,32 +182,11 @@ class Menu():
         if notary.configured:
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
-                for coin in const.DPOW_COINS:
-                    notary.reset_wallet(coin)                        
+                    notary.reset_wallet_all()                        
             elif coin.upper() in const.DPOW_COINS:
                 notary.reset_wallet(coin)                    
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
-
-    def stats(self):
-        nnstats = Stats(const.DPOW_COINS)
-        while True:
-            try:
-                nnstats.show()
-                err = []
-                iguana = Iguana("main")
-                if not iguana.test_connection():
-                    err.append("[Main Iguana down!]")
-                iguana = Iguana("3p")
-                if not iguana.test_connection():
-                    err.append("[3P Iguana down!]")
-                if len(err) > 0:
-                    self.msg.error(" " + '   '.join(err))
-                print()
-                self.msg.status(" Ctrl+C to exit to main menu.")
-                time.sleep(600)
-            except KeyboardInterrupt:
-                break
 
     def list_addresses(self):
         nn = Notary()
@@ -121,39 +229,6 @@ class Menu():
                     self.msg.info(f"Address: {r}")
                 else:
                     self.msg.info(f"Address {address} already imported.")
-
-    def start_coin(self):
-        notary = Notary()
-        coin = self.msg.input("Enter coin to start (or ALL): ")
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                notary.start(coin)
-        elif coin.upper() in const.DPOW_COINS:
-            notary.start(coin)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
-
-    def restart_coin(self):
-        notary = Notary()
-        coin = self.msg.input("Enter coin to restart (or ALL): ")
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                notary.restart(coin)
-        elif coin.upper() in const.DPOW_COINS:
-            notary.restart(coin)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
-
-    def stop_coin(self):
-        notary = Notary()
-        coin = self.msg.input("Enter coin to stop (or ALL): ")
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                notary.stop(coin)
-        elif coin.upper() in const.DPOW_COINS:
-            notary.stop(coin)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
-
+        
     def exit(self):
-        sys.exit()
+        raise KeyboardInterrupt
