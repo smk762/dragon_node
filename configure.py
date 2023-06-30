@@ -69,6 +69,8 @@ class Config():
     
     def save(self):
         with open(const.APP_CONFIG_PATH, "w") as f:
+            if "address_main" in self.config:
+                self.config.pop("address_main")
             for i in self.hidden:
                 if i in self.config:
                     self.config.pop(i)
