@@ -77,3 +77,5 @@ IGUANA_CONFIGS = {
     "main": f"dPoW/iguana/elected",
     "3p": f"dPoW/iguana/3rd_party"
 }
+
+AUTO_SPLIT = False

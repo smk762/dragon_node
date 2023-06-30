@@ -358,6 +358,15 @@ class Notary():
         else:
             self.msg.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
 
+    def check_pubkey_files(self, coin: str, docker=True) -> None:
+        with open(f"{const.HOME}/dPoW/iguana/pubkey.txt", "r") as f:
+            for line in f.readlines():
+                if line.startswith(coin):
+                    pubkey = line.split("=")[1].strip()
+                    break
+            
+        
+
     def restart(self, coin: str, docker=True) -> None:
         self.stop(coin, docker)
         self.start(coin, docker)

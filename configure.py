@@ -58,16 +58,19 @@ class Config():
         self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
         self.config = self.load()
 
-    def load(self):
-        try:
-            if os.path.exists(const.APP_CONFIG_PATH):
-                with open(const.APP_CONFIG_PATH, "r") as f:
-                    return json.load(f)
-        except json.decoder.JSONDecodeError:
-            pass
+    def load(self, refresh=False):
+        if not refresh:
+            try:
+                if os.path.exists(const.APP_CONFIG_PATH):
+                    with open(const.APP_CONFIG_PATH, "r") as f:
+                        return json.load(f)
+            except json.decoder.JSONDecodeError:
+                pass
         return self.__dict__.copy()
     
-    def save(self):
+    def save(self, refresh=False):
+        if refresh:
+            self.config = self.load(refresh=True)
         with open(const.APP_CONFIG_PATH, "w") as f:
             if "address_main" in self.config:
                 self.config.pop("address_main")
@@ -177,7 +180,7 @@ class Config():
             self.calculate_addresses()
         elif option == "addnotary":
             self.add_notaries_to_addnodes()
-        self.save()
+        self.save(True)
 
     def calculate_addresses(self):
         if self.config["pubkey_main"] != "":
