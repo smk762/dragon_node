@@ -33,6 +33,7 @@ def show_menu(menu, menu_name):
                 continue
             if q > len(menu):
                 msg.error("Invalid option, try again.")
+                continue
             else:
                 for k, v in menu[q].items():
                     v()
@@ -47,8 +48,8 @@ class MainMenu():
         self.servers = const.DPOW_SERVERS
             
         self.menu = [
-            {"configure": self.configure},
             {"stats": self.stats},
+            {"config_menu": ConfigMenu().show},
             {"notary_menu": NotaryMenu().show},
             {"wallet_menu": WalletMenu().show},
             {"exit": self.exit}
@@ -56,9 +57,6 @@ class MainMenu():
 
     def show(self):
         show_menu(self.menu, "Main Menu")
-    
-    def configure(self):
-        self.config.create()
 
     def stats(self):
         nnstats = Stats(const.DPOW_COINS)
@@ -147,20 +145,21 @@ class WalletMenu():
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
         self.menu = [
+            {"main_menu": self.exit},
             {"consolidate": self.consolidate},
             {"convert_privkey": self.convert_privkey},
             {"reset_wallet": self.reset_wallet},
             {"import_privkey": self.import_privkey},
-            {"list_addresses": self.list_addresses},
-            {"main_menu": self.exit}
+            {"list_addresses": self.list_addresses}
         ]
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
         
     def consolidate(self):
-        self.notary = Notary()
-        if self.notary.configured:
+        config = Config().load()
+        if helper.is_configured(config):
+            self.notary = Notary()
             coin = self.msg.input("Enter coin to consolidate (or ALL): ")
             q = self.msg.input("Force consolidation? (y/n): ")
             if q.lower() == "y":
@@ -184,8 +183,9 @@ class WalletMenu():
                 print(f"{coin}: {helper.wif_convert(coin, wif)}")       
 
     def reset_wallet(self):
-        notary = Notary()
-        if notary.configured:
+        config = Config().load()
+        if helper.is_configured(config):
+            notary = Notary()
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
                     notary.reset_wallet_all()                        
@@ -243,3 +243,26 @@ class WalletMenu():
     def exit(self):
         raise KeyboardInterrupt
 
+
+class ConfigMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.menu = [
+            {"main_menu": self.exit},
+            {"show_config": self.show_config},
+            {"update_config": self.update_config}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Configuration Menu")
+
+    def show_config(self):
+        self.config.show()
+
+    def update_config(self):
+        self.config.menu()
+
+
+    def exit(self):
+        raise KeyboardInterrupt

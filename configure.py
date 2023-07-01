@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
 import os
-import sys
 import json
 import const
 import color
 import based_58
 from logger import logger
-from dotenv import load_dotenv
-
-load_dotenv()
+import helper
+from daemon import DaemonRPC
 
 # Run this to configure your dragon node
 # It will create a config.json file and a .env file,
@@ -17,48 +15,15 @@ load_dotenv()
 
 class Config():
     def __init__(self):
-        self.color_msg = color.ColorMsg()
-        self.userhome = os.environ['HOME']
-        self.sweep_address = os.getenv("SWEEP_ADDR")
-        self.pubkey_main = ""
-        self.address_main_kmd = ""
-        self.address_main_ltc = ""
-        self.pubkey_3p = ""
-        self.addresses_3p = {
-            "AYA":"",
-            "CHIPS":"",
-            "EMC2":"",
-            "KMD":"",
-            "MCL":"",
-            "MIL":"",
-            "TOKEL":"",
-            "VRSC":""
-        }
-        # We can add these to the daemon conf files
-        self.addnode = {
-            "komodostats": "seed.komodostats.com",
-            "webworker": "seed.webworker.sh",
-        }
-        # We can add these to the daemon conf files
-        self.whitelist = {
-            "s6_dragonhound_DEV_main": "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN",
-            "s6_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq",
-            "s7_dragonhound_DEV_main": "RHi882Amab35uXjqBZjVxgEgmkkMu454KK",
-            "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ"
-        }
-        # We can add these to the daemon conf files as addnodes,
-        # and with Iguana.addnotary()
-        self.addnotary = {
-            "dragonhound_AR": "15.235.204.174",
-            "dragonhound_NA": "209.222.101.247",
-            "dragonhound_DEV": "103.195.100.32"
-        }
-        # We could move these to const.py
-        self.readonly = ["userhome", "address_main_kmd", "address_main_ltc", "addresses_3p", "config", "hidden"]
-        self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
-        self.config = self.load(True)
+        self.msg = color.ColorMsg()
+        config = self.load()
+        self.readonly = [
+            "userhome", "addresses", "addresses_3p", "address_main_kmd",
+            "address_main_ltc", "whitelist", "addnotary", "addnode",
+        ]
+        self.required = ["sweep_address", "pubkey_main", "pubkey_3p"]
 
-    def load(self, refresh=False):
+    def load(self, refresh=False) -> dict:
         if not refresh:
             try:
                 if os.path.exists(const.APP_CONFIG_PATH):
@@ -66,150 +31,162 @@ class Config():
                         return json.load(f)
             except json.decoder.JSONDecodeError:
                 pass
-        return self.__dict__.copy()
-    
-    def save(self):
-        self.config = self.load(True)
+        return self.get_config_template()
+
+    def save(self, data):
+        logger.debug(f"Saving config to {const.APP_CONFIG_PATH}")
+        for i in list(data.keys()):
+            if i in ["address_main_kmd", "address_main_ltc", "addresses_3p"]:
+                del data[i]
         with open(const.APP_CONFIG_PATH, "w") as f:
-            if "address_main" in self.config:
-                self.config.pop("address_main")
-            for i in self.hidden:
-                if i in self.config:
-                    self.config.pop(i)
-            json.dump(self.config, f, indent=4)
-    
-    def options_legend(self):
-        readonly = self.color_msg.colorize("[read only]", "orange")
-        required = self.color_msg.colorize("[required]", "warning")
-        print(f"Legend: {readonly} {required}")
+            json.dump(data, f, indent=4)
 
-    def display(self):
-        for i in self.config:
-            if i not in self.hidden:
-                if isinstance(self.config[i], dict):
-                    if i in self.readonly:
-                        self.color_msg.info(f"{i}:")
-                    else:
-                        self.color_msg.table(f"{i}:")
-                    for j in self.config[i]:
-                        if len(self.config[i][j]) == 0:
-                            self.color_msg.warning(f"    {j}: {self.config[i][j]}")
-                        elif i in self.readonly:
-                            self.color_msg.info(f"    {j}: {self.config[i][j]}")
-                        else:
-                            self.color_msg.table(f"    {j}: {self.config[i][j]}")
-                elif i in self.readonly:
-                    self.color_msg.info(f"{i}: {self.config[i]}")
-                elif isinstance(self.config[i], list):
-                    if len(self.config[i]) == 0:
-                        self.color_msg.warning(f"{i}: {self.config[i]}")
-                    else:
-                        self.color_msg.table(f"{i}: {self.config[i]}")
-                elif self.config[i] in [None, ""]:
-                    self.color_msg.warning(f"{i}: {self.config[i]}")
-                else:
-                    self.color_msg.table(f"{i}: {self.config[i]}")
-        self.options_legend()        
-
-    def show_config(self):
-        self.color_msg.status(f"\n==== Existing Config ====")
-        self.display()
-
-    def get_options(self):
-        options = list(set(self.__dict__.keys()) - set(self.readonly) - set(self.hidden))
-        options.sort()
-        return options
-        
-    def create(self):
+    def menu(self):
         while True:
             try:
-                self.show_config()
-                self.color_msg.status(f"\n  ==== Config Options ====")
-                options = self.get_options()
-                print(options)
-                for i in range(len(options)):
-                    if options[i] not in self.config:
-                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
-                    elif self.config[options[i]] is None:
-                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
-                    elif len(self.config[options[i]]) == 0:
-                        self.color_msg.warning(f"  [{i}] Update {options[i]}")
+                config = self.load()
+                options = list(set(config.keys()) - set(self.readonly))
+                options.sort()
+                options.insert(0, "Return to Config Menu")
+                self.msg.status(f"\n  ==== Config Options ====")
+                for i in options:
+                    idx = options.index(i)
+                    if i == "Return to Config Menu":
+                        self.msg.option(f"  [{idx}] {i}")
+                    elif config[i] is None:
+                        self.msg.warning(f"  [{idx}] Update {i}")
+                    elif len(config[i]) == 0:
+                        self.msg.warning(f"  [{idx}] Update {i}")
+                    elif len(config[i]) == "":
+                        self.msg.warning(f"  [{idx}] Update {i}")
                     else:
-                        self.color_msg.option(f"  [{i}] Update {options[i]}")
-                self.color_msg.option(f"  [{len(options)}] Return to Main Menu")
-                q = self.color_msg.input("Select Config option: ")
+                        self.msg.option(f"  [{idx}] Update {i}")
+                q = self.msg.input("Select Config option: ")
                 try:
                     q = int(q)
                 except ValueError:
-                    self.color_msg.error("Invalid option, try again.")
+                    self.msg.error("Invalid option, try again.")
                     continue
-                if q == len(options):
+                if q > len(options):
+                    self.msg.error("Invalid option, try again.")
+                elif q == 0:
                     break
-                elif q > len(options):
-                    self.color_msg.error("Invalid option, try again.")
                 else:
                     self.update(options[q])
             except KeyboardInterrupt:
                 break
-    
+
+    def calculate_addresses(self, config: dict) -> dict:
+        for i in ["pubkey_main", "pubkey_3p"]:
+            pubkey = config[i]
+            if i == "pubkey_main":
+                coins = const.COINS_MAIN
+            else:
+                coins = const.COINS_3P
+
+            if pubkey != "":
+                for coin in coins:
+                    address = based_58.get_addr_from_pubkey(pubkey, coin)
+                    if not address:
+                        self.msg.warning("Unable to calculate {coin} address from pubkey {pubkey}.")
+                        break
+                    else:
+                        if "addresses" not in config:
+                            config["addresses"] = {}
+                        config["addresses"].update({f"{coin}": address})
+        return config
+
+    ### Menu Options ###
+    def legend(self) -> None:
+        readonly = self.msg.colorize("[read only]", "lightblue")
+        required = self.msg.colorize("[required]", "warning")
+        print(f"Legend: {readonly} {required}")
+
+    def show(self) -> None:
+        self.msg.status(f"\n==== Existing Config ====")
+        config = self.load()
+        for i in config:
+            if isinstance(config[i], dict):
+                # All dict options are readonly, and one level deep
+                self.msg.ltblue(f"{i}: ")
+                for j in config[i]:
+                    self.msg.ltcyan(f"    {j}: {config[i][j]}")
+            elif isinstance(config[i], list):
+                self.msg.ltblue(f"{i}: ")
+                for j in config[i]:
+                    self.msg.ltcyan(f"    {j}")
+            elif i in self.readonly:
+                k = self.msg.colorize(i, "lightblue")
+                v = self.msg.colorize(config[i], "lightcyan")
+                print(f"{k}: {v}")
+            elif config[i] in [None, ""]:
+                self.msg.warning(f"{i}: {config[i]}")
+            else:
+                self.msg.ltgreen(f"{i}: {config[i]}")
+        self.legend()
+
     def update(self, option):
-        options = self.get_options()
+        config = self.load()
+        options = list(config.keys())
         if option not in options:
-            self.color_msg.error("Invalid option, will not update.")
+            self.msg.error("Invalid option, will not update.")
             return
-        if isinstance(self.config[option], dict):
-            if option in ["addnode", "addnotary"]:
-                k = self.color_msg.input(f"Enter notary: ")
-                v = self.color_msg.input(f"Enter IP address: ")
-            elif option in ["whitelist"]:
-                k = self.color_msg.input(f"Enter notary: ")
-                v = self.color_msg.input(f"Enter address: ")
-            else:
-                k = self.color_msg.input(f"Enter {option} key: ")
-                v = self.color_msg.input(f"Enter {option} value: ")
-            self.config[option].update({k: v})
-        else:
-            v = self.color_msg.input(f"Enter {option} value: ")
-            if isinstance(self.config[option], list):
-                self.config[option].append(v)
-            else:
-                self.config[option] = v
-
-        if option in ["pubkey_main", "pubkey_3p"]:
-            self.calculate_addresses()
-        elif option == "addnotary":
-            self.add_notaries_to_addnodes()
-        self.save()
-
-    def calculate_addresses(self):
-        if self.config["pubkey_main"] != "":
-            kmd_address = based_58.get_addr_from_pubkey(self.config["pubkey_main"], "KMD")
-            ltc_address = based_58.get_addr_from_pubkey(self.config["pubkey_main"], "LTC")
-            if not kmd_address:
-                self.color_msg.warning("Unable to calculate address from pubkey.")
-                self.config["pubkey_main"] = ""
-            else:
-                self.config["address_main_kmd"] = kmd_address
-                self.config["address_main_ltc"] = ltc_address
-             
-        if self.config["pubkey_3p"] != "":
-            for coin in const.COINS_3P:
-                if coin == "KMD_3P":
-                    coin = "KMD"
-                address = based_58.get_addr_from_pubkey(self.config["pubkey_3p"], coin)
-                if not address:
-                    self.color_msg.warning(f"Unable to calculate {coin} address from pubkey.")
-                    self.config["pubkey_3p"] = ""
+        self.msg.option(f"Current value for {option}: {config[option]}")
+        if option == "pubkey_main":
+            pubkey = helper.get_dpow_pubkey("main")
+            if pubkey != "":
+                fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
+                q = self.msg.input(f"Use {pubkey} from {fn}? [y/n]: ")
+                if q.lower() == "y":
+                    config[option] = pubkey
+                    self.save(config)
                     return
+        elif option == "pubkey_3p":
+            pubkey = helper.get_dpow_pubkey("3p")
+            if pubkey != "":
+                fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
+                q = self.msg.input(f"Use {pubkey} from {fn}? [y/n]: ")
+                if q.lower() == "y":
+                    config[option] = pubkey
+                    self.save(config)
+                    return
+        q = self.msg.input(f"Enter {option} value: ")
+        if option in ["pubkey_main", "pubkey_3p"]:
+            if helper.validate_pubkey(q):
+                config[option] = q
+                config = self.calculate_addresses(config)
+            else:
+                self.msg.error(f"{q} is not a valid pubkey.")
+                return
+        elif option == "sweep_address":
+            daemon = DaemonRPC("KMD")
+            if "isvalid" in daemon.validateaddress(q):
+                if daemon.validateaddress(q)["isvalid"]:
+                    config[option] = q
                 else:
-                    self.config["addresses_3p"].update({
-                        coin: address
-                    })
-        self.save()
+                    self.msg.error(f"{q} is not a valid KMD address.")
+                    return
+            else:
+                self.msg.error(f"Unable to validate KMD address. Is daemon running?")
+                return
+        else:
+            config[option] = q
+        self.save(config)
 
-    def add_notaries_to_addnodes(self):
-        for k, v in self.addnotary.items():
-            if v not in self.addnode.values():
-                self.addnode.update({k: v})
-
-
+    ### Templates ###
+    def get_config_template(self):
+        config = {
+            "userhome": const.HOME,
+            "sweep_address": "",
+            "pubkey_main": helper.get_dpow_pubkey("main"),
+            "pubkey_3p": helper.get_dpow_pubkey("3p"),
+            "addnode": const.ADDNODES,
+            "whitelist": const.ADDRESS_WHITELIST,
+            "addnotary": const.NOTARY_PEERS,
+            "addresses": {},
+            "split amount": 25,
+            "split_threshold": 50
+        }
+        config = self.calculate_addresses(config)
+        return config
+    
