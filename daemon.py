@@ -127,10 +127,16 @@ class DaemonRPC():
         return addr
 
     def validateaddress(self, address: str) -> dict:
-        return self.rpc("validateaddress", [address])["result"]
+        data = self.rpc("validateaddress", [address])
+        if "result" in data:
+            return data["result"]
+        logger.debug(f"validateaddress: {data}")
     
     def getaddressinfo(self, address: str) -> dict:
-        return self.rpc("getaddressinfo", [address])["result"]
+        data =  self.rpc("getaddressinfo", [address])
+        if "result" in data:
+            return data["result"]
+        logger.debug(f"getaddressinfo: {data}")
 
     ## Blocks
     def getblock(self, block) -> dict:
