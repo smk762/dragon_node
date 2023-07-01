@@ -68,19 +68,20 @@ IGUANA_CONFIGS = {
     "3p": f"dPoW/iguana/3rd_party"
 }
 
+# These are not used for anything yet, but will be used in the future to update daemon confs
 ADDRESS_WHITELIST = {
     "s6_dragonhound_DEV_main": "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN",
     "s6_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq",
     "s7_dragonhound_DEV_main": "RHi882Amab35uXjqBZjVxgEgmkkMu454KK",
     "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ"
 }
-
+# These are not used for anything yet, but will be used in the future to add peers to daemons and iguana
 NOTARY_PEERS = {
     "dragonhound_AR": "15.235.204.174",
     "dragonhound_NA": "209.222.101.247",
     "dragonhound_DEV": "103.195.100.32"
 }
-
+# These are not used for anything yet, but will be used in the future to add peers to daemons
 ADDNODES = {
     "komodostats": "seed.komodostats.com",
     "webworker": "seed.webworker.sh",
