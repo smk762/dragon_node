@@ -131,12 +131,14 @@ class DaemonRPC():
         if "result" in data:
             return data["result"]
         logger.debug(f"validateaddress: {data}")
+        return {}
     
     def getaddressinfo(self, address: str) -> dict:
         data =  self.rpc("getaddressinfo", [address])
         if "result" in data:
             return data["result"]
         logger.debug(f"getaddressinfo: {data}")
+        return {}
 
     ## Blocks
     def getblock(self, block) -> dict:
