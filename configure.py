@@ -23,15 +23,19 @@ class Config():
         ]
         self.required = ["sweep_address", "pubkey_main", "pubkey_3p"]
 
-    def load(self, refresh=False) -> dict:
-        if not refresh:
-            try:
-                if os.path.exists(const.APP_CONFIG_PATH):
-                    with open(const.APP_CONFIG_PATH, "r") as f:
-                        return json.load(f)
-            except json.decoder.JSONDecodeError:
-                pass
-        return self.get_config_template()
+    def load(self) -> dict:
+        template = self.get_config_template()
+        try:
+            if os.path.exists(const.APP_CONFIG_PATH):
+                with open(const.APP_CONFIG_PATH, "r") as f:
+                    data = json.load(f)
+                for i in template:
+                    if i not in data:
+                        data.update({i: template[i]})
+                return data                       
+        except json.decoder.JSONDecodeError:
+            pass
+        return template
 
     def save(self, data):
         logger.debug(f"Saving config to {const.APP_CONFIG_PATH}")
@@ -51,16 +55,19 @@ class Config():
                 self.msg.status(f"\n  ==== Config Options ====")
                 for i in options:
                     idx = options.index(i)
+                    opt = i.replace("_", " ").title()
                     if i == "Return to Config Menu":
                         self.msg.option(f"  [{idx}] {i}")
                     elif config[i] is None:
-                        self.msg.warning(f"  [{idx}] Update {i}")
+                        self.msg.warning(f"  [{idx}] Update {opt}")
+                    elif isinstance(config[i], (int, float)):
+                        self.msg.option(f"  [{idx}] Update {opt}")
                     elif len(config[i]) == 0:
-                        self.msg.warning(f"  [{idx}] Update {i}")
+                        self.msg.warning(f"  [{idx}] Update {opt}")
                     elif len(config[i]) == "":
-                        self.msg.warning(f"  [{idx}] Update {i}")
+                        self.msg.warning(f"  [{idx}] Update {opt}")
                     else:
-                        self.msg.option(f"  [{idx}] Update {i}")
+                        self.msg.option(f"  [{idx}] Update {opt}")
                 q = self.msg.input("Select Config option: ")
                 try:
                     q = int(q)
@@ -97,33 +104,34 @@ class Config():
         return config
 
     ### Menu Options ###
-    def legend(self) -> None:
-        readonly = self.msg.colorize("[read only]", "lightblue")
-        required = self.msg.colorize("[required]", "warning")
-        print(f"Legend: {readonly} {required}")
-
     def show(self) -> None:
         self.msg.status(f"\n==== Existing Config ====")
         config = self.load()
         for i in config:
+            mk = i.title().replace("_", " ")
             if isinstance(config[i], dict):
                 # All dict options are readonly, and one level deep
-                self.msg.ltblue(f"{i}: ")
+                self.msg.ltblue(f"{mk}: ")
                 for j in config[i]:
-                    self.msg.ltcyan(f"    {j}: {config[i][j]}")
+                    k = self.msg.colorize(j, "lightblue")
+                    v = self.msg.colorize(config[i][j], "lightcyan")
+                    print(f"    {k}: {v}")
             elif isinstance(config[i], list):
-                self.msg.ltblue(f"{i}: ")
+                self.msg.ltblue(f"{mk}: ")
                 for j in config[i]:
                     self.msg.ltcyan(f"    {j}")
             elif i in self.readonly:
-                k = self.msg.colorize(i, "lightblue")
+                k = self.msg.colorize(mk, "lightblue")
                 v = self.msg.colorize(config[i], "lightcyan")
                 print(f"{k}: {v}")
             elif config[i] in [None, ""]:
-                self.msg.warning(f"{i}: {config[i]}")
+                k = self.msg.colorize(mk, "lightred")
+                v = self.msg.colorize(config[i], "lightcyan")
+                print(f"{k}: {v}")
             else:
-                self.msg.ltgreen(f"{i}: {config[i]}")
-        self.legend()
+                k = self.msg.colorize(mk, "lightblue")
+                v = self.msg.colorize(config[i], "lightcyan")
+                print(f"{k}: {v}")
 
     def update(self, option):
         config = self.load()
