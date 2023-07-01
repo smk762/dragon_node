@@ -65,15 +65,6 @@ class MainMenu():
         while True:
             try:
                 nnstats.show()
-                err = []
-                iguana = Iguana("main")
-                if not iguana.test_connection():
-                    err.append("[Main Iguana down!]")
-                iguana = Iguana("3p")
-                if not iguana.test_connection():
-                    err.append("[3P Iguana down!]")
-                if len(err) > 0:
-                    self.msg.error(" " + '   '.join(err))
                 print()
                 self.msg.status(" Ctrl+C to exit to main menu.")
                 time.sleep(600)
@@ -87,13 +78,15 @@ class NotaryMenu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()
+        self.nn = Notary()
         self.servers = const.DPOW_SERVERS
         self.menu = [
-            {"start_coin": self.start_coin},
+            {"main_menu": self.exit},
             {"split_utxos": self.split_utxos},
-            {"restart_coin": self.restart_coin},
+            {"start_mining": self.start_mining},
             {"stop_coin": self.stop_coin},
-            {"main_menu": self.exit}
+            {"start_coin": self.start_coin},
+            {"stop_coin": self.stop_coin}
         ]
 
     def show(self):
@@ -101,7 +94,6 @@ class NotaryMenu():
 
 
     def split_utxos(self):
-        nn = Notary()
         coin = self.msg.input("Enter coin to split (or ALL): ")
         q = self.msg.input("Force split? (y/n): ")
         if q.lower() == "y":
@@ -110,32 +102,20 @@ class NotaryMenu():
             force = False                    
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
-                nn.split_utxos(coin, force)
+                self.nn.split_utxos(coin, force)
         elif coin.upper() in const.DPOW_COINS:
-            nn.split_utxos(coin, force)
+            self.nn.split_utxos(coin, force)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
 
     def start_coin(self):
-        notary = Notary()
         coin = self.msg.input("Enter coin to start (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
-                notary.start(coin)
+                self.nn.start(coin)
         elif coin.upper() in const.DPOW_COINS:
-            notary.start(coin)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
-
-    def restart_coin(self):
-        notary = Notary()
-        coin = self.msg.input("Enter coin to restart (or ALL): ")
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                notary.restart(coin)
-        elif coin.upper() in const.DPOW_COINS:
-            notary.restart(coin)
+            self.nn.start(coin)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
@@ -150,6 +130,13 @@ class NotaryMenu():
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
+    def start_mining(self):
+        daemon = DaemonRPC("KMD")
+        if daemon.is_mining():
+            self.msg.darkgrey("Already mining.")
+            return
+        print(daemon.start_mining())
+    
     def exit(self):
         raise KeyboardInterrupt
 

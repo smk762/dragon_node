@@ -8,6 +8,8 @@ import helper
 import requests
 from slickrpc import Proxy
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import InvalidURL, RequestException, ConnectionError
+
 from logger import logger
 from color import ColorMsg
 
@@ -51,21 +53,25 @@ class DaemonRPC():
             "method": method,
             "params": method_params,
         }
-        r = requests.post(
-            f"http://127.0.0.1:{self.rpcport}",
-            json.dumps(params),
-            auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
-            timeout=90
-        )
         try:
+            r = requests.post(
+                f"http://127.0.0.1:{self.rpcport}",
+                json.dumps(params),
+                auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
+                timeout=90
+            )
             # logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
             # logger.debug(f"response: {resp}")
             return resp
         except requests.exceptions.InvalidURL as e:
             resp = {"error": "Invalid URL"}
+        except requests.exceptions.ConnectionError:
+            resp = {"error": "Daemon connection error"}
         except requests.exceptions.RequestException as e:
-            resp = {"result": r.text}
+            resp = {"error": f"Error! {e}"}
+        except Exception as e:
+            resp = {"error": f"Error! {e}"}            
         return resp
 
     def getinfo(self):
@@ -195,7 +201,7 @@ class DaemonRPC():
             if not utxo["spendable"]:
                 logger.info(utxo)
 
-    def get_explorer_url(self, txid, endpoint: str='tx') -> str:
+    def get_explorer_url(self, value, endpoint: str='tx') -> str:
         # Param value can be a txid, address, or block
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
@@ -207,18 +213,19 @@ class DaemonRPC():
             data = helper.get_coins_config()
             baseurl = data[coin]["explorer_url"]
             if endpoint == "tx":
-                endpoint = data[coin]["explorer_tx_url"]
+                if "explorer_tx_url" in data[coin]:
+                    endpoint = data[coin]["explorer_tx_url"]
                 if endpoint == "":
                     endpoint = "tx/"
             if endpoint == "addr":
-                endpoint = data[coin]["explorer_address_url"]
+                if "explorer_address_url" in data[coin]:
+                    endpoint = data[coin]["explorer_address_url"]
                 if endpoint == "":
                     endpoint = "addr/"
             if endpoint == "block":
                 # Needs more suport in coins repo
                 endpoint = "b/"
-            endpoint = data[coin][endpoint]
-            return baseurl + endpoint + txid
+            return f"{baseurl}{endpoint}{value}"
         except json.decoder.JSONDecodeError:
             return ""
         except Exception as e:
@@ -232,3 +239,12 @@ class DaemonRPC():
             if utxo["amount"] == utxo_value:
                 count += 1
         return count
+
+    def is_mining(self) -> bool:
+        if "result" in self.rpc("getmininginfo"):
+            if "generate" in self.rpc("getmininginfo")["result"]:
+                return self.rpc("getmininginfo")["result"]["generate"]
+        return False
+
+    def start_mining(self) -> bool:
+        return self.rpc("setgenerate", [True, 1])["result"]

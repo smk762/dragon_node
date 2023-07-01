@@ -56,7 +56,7 @@ class Config():
         # We could move these to const.py
         self.readonly = ["userhome", "address_main_kmd", "address_main_ltc", "addresses_3p", "config", "hidden"]
         self.hidden = ["color_msg", "readonly", "hidden", "display_options", "options", "config"]
-        self.config = self.load()
+        self.config = self.load(True)
 
     def load(self, refresh=False):
         if not refresh:
@@ -68,9 +68,8 @@ class Config():
                 pass
         return self.__dict__.copy()
     
-    def save(self, refresh=False):
-        if refresh:
-            self.config = self.load(refresh=True)
+    def save(self):
+        self.config = self.load(True)
         with open(const.APP_CONFIG_PATH, "w") as f:
             if "address_main" in self.config:
                 self.config.pop("address_main")
@@ -180,7 +179,7 @@ class Config():
             self.calculate_addresses()
         elif option == "addnotary":
             self.add_notaries_to_addnodes()
-        self.save(True)
+        self.save()
 
     def calculate_addresses(self):
         if self.config["pubkey_main"] != "":
@@ -206,6 +205,7 @@ class Config():
                     self.config["addresses_3p"].update({
                         coin: address
                     })
+        self.save()
 
     def add_notaries_to_addnodes(self):
         for k, v in self.addnotary.items():

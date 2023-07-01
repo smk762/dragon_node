@@ -156,7 +156,6 @@ class Notary():
         for coin in const.COINS_MAIN:
             self.reset_wallet(coin, pk)
 
-        
     def reset_wallet(self, coin: str, pk=None) -> None:
         # TODO: Add support for 3P coins
         # See https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742
@@ -267,8 +266,6 @@ class Notary():
         else:
             self.msg.darkgrey(f"Skipping {coin} ({count} utxos in reserve)")
                 
-
-
     def consolidate(self, coin: str, reset=False, force: bool=False) -> None:
         print()
         if not self.configured:
@@ -296,7 +293,7 @@ class Notary():
                 self.msg.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                 txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
                 if txid != "":
-                    explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                    explorer_url = daemon.get_explorer_url(txid, 'tx')
                     if explorer_url != "":
                         txid = explorer_url
                     self.msg.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
@@ -352,7 +349,7 @@ class Notary():
                         try:
                             txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
                             if txid != "":
-                                explorer_url = daemon.get_explorer_url(txid, 'explorer_tx_url')
+                                explorer_url = daemon.get_explorer_url(txid, 'tx')
                                 if explorer_url != "":
                                     txid = explorer_url
                                 self.msg.info(f"Sent {value} to {address}: {txid}")
@@ -391,8 +388,6 @@ class Notary():
                     pubkey = line.split("=")[1].strip()
                     break
             
-        
-
     def restart(self, coin: str, docker=True) -> None:
         self.stop(coin, docker)
         self.start(coin, docker)
