@@ -20,6 +20,11 @@ from color import ColorMsg
 from logger import logger
 
 
+def validate_pubkey(pubkey: str) -> bool:
+    # TODO: this is weak validation, improve it
+    if len(pubkey) != 66:
+        return False
+    return True
 
 
 def get_base58_params():
@@ -313,13 +318,50 @@ def get_coins_config():
     with open(const.COINS_CONFIG_PATH, "r") as f:
         return json.load(f)
 
+def get_dpow_pubkey(server: str) -> str:
+    if server == "main":
+        fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
+    elif server == "3p":
+        fn = f"{const.HOME}/dPoW/iguana/pubkey_3p.txt"
+    else:
+        raise ValueError("Invalid server type")
+    if not os.path.exists(fn):
+        return ""
+    pubkey = ""
+    with open(fn, "r") as f:
+        for line in f.readlines():
+            if line.startswith("pubkey"):
+                pubkey = line.split("=")[1].strip()
+                break
+    if not validate_pubkey(pubkey):
+        raise ValueError("Invalid pubkey")
+    return pubkey
 
 def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
-   
+
+
 def chunkify(data: list, chunk_size: int):
     return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
+
+
+def is_configured(config: dict) -> bool:
+    if "pubkey_main" not in config:
+        return False
+    if "pubkey_3p" not in config:
+        return False
+    if "sweep_address" not in config:
+        return False
+    if config["pubkey_main"] is None:
+        return False
+    if config["pubkey_3p"] is None:
+        return False
+    if len(config["pubkey_main"]) == 0:
+        return False
+    if len(config["pubkey_3p"]) == 0:
+        return False
+    return True
 
 
 # simple key sort
