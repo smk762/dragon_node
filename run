@@ -1,15 +1,9 @@
 #!/usr/bin/env python3
-import sys
-from color import ColorMsg
-from menu import MainMenu, WalletMenu
+from menu import MainMenu
 from notary import Notary
-from configure import Config
 
-color_msg = ColorMsg()
 menu = MainMenu()
-wallet_menu = WalletMenu()
 notary = Notary()
-cfg = Config()
 
 print('''
   ________                                         _____   __     _________      
@@ -22,6 +16,5 @@ print('''
 print()
 if notary.configured:
     notary.welcome()
-
 
 menu.show()

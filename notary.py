@@ -9,6 +9,7 @@ import subprocess
 import based_58
 from color import ColorMsg
 from daemon import DaemonRPC
+from iguana import Iguana
 from configure import Config
 from logger import logger
 
@@ -242,6 +243,31 @@ class Notary():
         value = round(value/100000000, 8)
         return [inputs, value]
         
+    def split_utxos(self, coin: str, force: bool=False) -> None:
+        nn = Notary()
+        daemon = DaemonRPC(coin)
+        unspent = daemon.listunspent()
+        utxo_value = helper.get_utxo_value(coin)
+        count = daemon.get_utxo_count(utxo_value)
+        if count < nn.get_utxo_threshold(coin) or force:
+            server = helper.get_coin_server(coin)
+            split_amount = nn.get_split_amount(coin)
+            sats = int(helper.get_utxo_value(coin, True))
+            iguana = Iguana(server)
+            if iguana.test_connection():
+                r = iguana.splitfunds(coin, split_amount, sats)
+                if 'txid' in r:
+                    # TODO: explorer link
+                    self.msg.darkgrey(f"Split {split_amount} utxos for {coin}: {r['txid']}")
+                    daemon.get_explorer_url(r['txid'], 'tx') 
+                else:
+                    self.msg.darkgrey(f"Error splitting {split_amount} utxos for {coin}: {r}")
+            else:
+                self.msg.darkgrey(f"Error splitting {split_amount} utxos for {coin}: Iguana not running")
+        else:
+            self.msg.darkgrey(f"Skipping {coin} ({count} utxos in reserve)")
+                
+
 
     def consolidate(self, coin: str, reset=False, force: bool=False) -> None:
         print()

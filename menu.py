@@ -49,7 +49,7 @@ class MainMenu():
         self.menu = [
             {"configure": self.configure},
             {"stats": self.stats},
-            {"Node_menu": NodeMenu().show},
+            {"notary_menu": NotaryMenu().show},
             {"wallet_menu": WalletMenu().show},
             {"exit": self.exit}
         ]
@@ -83,13 +83,14 @@ class MainMenu():
     def exit(self):
         sys.exit()
 
-class NodeMenu():
+class NotaryMenu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"start_coin": self.start_coin},
+            {"split_utxos": self.split_utxos},
             {"restart_coin": self.restart_coin},
             {"stop_coin": self.stop_coin},
             {"main_menu": self.exit}
@@ -97,7 +98,25 @@ class NodeMenu():
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-   
+
+
+    def split_utxos(self):
+        nn = Notary()
+        coin = self.msg.input("Enter coin to split (or ALL): ")
+        q = self.msg.input("Force split? (y/n): ")
+        if q.lower() == "y":
+            force = True
+        else:
+            force = False                    
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                nn.split_utxos(coin, force)
+        elif coin.upper() in const.DPOW_COINS:
+            nn.split_utxos(coin, force)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
+
     def start_coin(self):
         notary = Notary()
         coin = self.msg.input("Enter coin to start (or ALL): ")
@@ -232,3 +251,4 @@ class WalletMenu():
         
     def exit(self):
         raise KeyboardInterrupt
+

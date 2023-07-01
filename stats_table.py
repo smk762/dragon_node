@@ -26,27 +26,8 @@ class StatsLine:
         return last_block
 
     def ntx_utxo_count(self):
-        unspent = self.daemon.listunspent()
-        utxo_value =helper.get_utxo_value(self.coin)
-        count = 0
-        for utxo in unspent:
-            if utxo["amount"] == utxo_value:
-                count += 1
-        if self.replenish_utxos:
-            nn = Notary()
-            if count < nn.get_utxo_threshold(self.coin):
-                server = helper.get_coin_server(self.coin)
-                split_amount = nn.get_split_amount(self.coin)
-                sats = int(helper.get_utxo_value(self.coin, True))
-                iguana = Iguana(server)
-                if const.AUTO_SPLIT:
-                    if iguana.test_connection():
-                        r = iguana.splitfunds(self.coin, split_amount, sats)
-                        if 'txid' in r:
-                            self.msg.darkgrey(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
-                        else:
-                            self.msg.darkgrey(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
-        return count
+        utxo_value = helper.get_utxo_value(self.coin)
+        return self.daemon.get_utxo_count(utxo_value)
 
     def connections(self):
         networkinfo = self.daemon.getnetworkinfo()

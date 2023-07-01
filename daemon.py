@@ -195,16 +195,28 @@ class DaemonRPC():
             if not utxo["spendable"]:
                 logger.info(utxo)
 
-    def get_explorer_url(self, txid, endpoint: str='explorer_tx_url') -> str:
+    def get_explorer_url(self, txid, endpoint: str='tx') -> str:
         # Param value can be a txid, address, or block
         # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
         try:
-            if self.coin == "TOKEL":
+            coin = self.coin.split("_")[0]
+            if coin == "TOKEL":
                 coin = "TKL"
             else:
                 coin = self.coin
             data = helper.get_coins_config()
             baseurl = data[coin]["explorer_url"]
+            if endpoint == "tx":
+                endpoint = data[coin]["explorer_tx_url"]
+                if endpoint == "":
+                    endpoint = "tx/"
+            if endpoint == "addr":
+                endpoint = data[coin]["explorer_address_url"]
+                if endpoint == "":
+                    endpoint = "addr/"
+            if endpoint == "block":
+                # Needs more suport in coins repo
+                endpoint = "b/"
             endpoint = data[coin][endpoint]
             return baseurl + endpoint + txid
         except json.decoder.JSONDecodeError:
@@ -212,3 +224,11 @@ class DaemonRPC():
         except Exception as e:
             logger.error(f"Error getting explorers: {e}")
             return ""
+
+    def get_utxo_count(self, utxo_value: float) -> int:
+        unspent = self.listunspent()
+        count = 0
+        for utxo in unspent:
+            if utxo["amount"] == utxo_value:
+                count += 1
+        return count
