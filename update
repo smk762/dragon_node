@@ -25,4 +25,3 @@ echo
 echo "Updated submodule settings:"
 git config --file=../.gitmodules -l
 
-git submodule update --remote
