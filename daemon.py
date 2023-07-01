@@ -249,9 +249,12 @@ class DaemonRPC():
         return count
 
     def is_mining(self) -> bool:
-        if "result" in self.rpc("getmininginfo"):
-            if "generate" in self.rpc("getmininginfo")["result"]:
-                return self.rpc("getmininginfo")["result"]["generate"]
+        try:
+            if "result" in self.rpc("getmininginfo"):
+                if "generate" in self.rpc("getmininginfo")["result"]:
+                    return self.rpc("getmininginfo")["result"]["generate"]
+        except Exception as e:
+            pass
         return False
 
     def start_mining(self) -> bool:
