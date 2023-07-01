@@ -1,36 +1,25 @@
 #!/usr/bin/env python3
 import os
-import io
 import sys
 import json
-import stat
-import time
-import string
-import random
-import os.path
-from zipfile import ZipFile
-import platform
-import requests
-from os.path import expanduser
-from dotenv import load_dotenv
-
-load_dotenv()
+from os.path import expanduser, dirname, realpath
 
 # Path constants
 HOME = expanduser('~')
-SCRIPT_PATH = os.path.dirname(os.path.realpath(sys.argv[0]))
-SWEEP_ADDR = os.getenv("SWEEP_ADDR")
+DPOW_PATH = f'{HOME}/dPoW'
+
 COMPOSE_PATH_MAIN = f'{HOME}/notary_docker_main/docker-compose.yml'
 COMPOSE_PATH_3P = f'{HOME}/notary_docker_3p/docker-compose.yml'
-COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
 
+SCRIPT_PATH = dirname(realpath(sys.argv[0]))
+COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
 APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
+
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
 COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/season-seven/README.md"
 COMMIT_HASHES_PATH = f"{SCRIPT_PATH}/commit_hashes.json"
-
 
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD", "NINJA"]
@@ -50,13 +39,14 @@ CONF_PATHS = {
         "CHIPS": f"{HOME}/.chips/chips.conf"
     }
 }
+
 # Autopopulate conf paths for all main coins
 [CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC"]]
-COINS_3P = list(CONF_PATHS["3p"].keys())
-IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "MIL", "LTC"]
-DPOW_COINS = COINS_3P + COINS_MAIN
-LARGE_UTXO_COINS = ["EMC2", "AYA"]
 DPOW_SERVERS = list(CONF_PATHS.keys())
+COINS_3P = list(CONF_PATHS["3p"].keys())
+DPOW_COINS = COINS_3P + COINS_MAIN
+IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "MIL", "LTC"]
+LARGE_UTXO_COINS = ["EMC2", "AYA"]
 
 # Notarisation constants
 UTXO_AMT = 0.00010000
@@ -78,4 +68,20 @@ IGUANA_CONFIGS = {
     "3p": f"dPoW/iguana/3rd_party"
 }
 
-AUTO_SPLIT = False
+ADDRESS_WHITELIST = {
+    "s6_dragonhound_DEV_main": "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN",
+    "s6_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq",
+    "s7_dragonhound_DEV_main": "RHi882Amab35uXjqBZjVxgEgmkkMu454KK",
+    "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ"
+}
+
+NOTARY_PEERS = {
+    "dragonhound_AR": "15.235.204.174",
+    "dragonhound_NA": "209.222.101.247",
+    "dragonhound_DEV": "103.195.100.32"
+}
+
+ADDNODES = {
+    "komodostats": "seed.komodostats.com",
+    "webworker": "seed.webworker.sh",
+}
