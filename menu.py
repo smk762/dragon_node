@@ -220,21 +220,25 @@ class WalletMenu():
                 daemon = DaemonRPC(coin)
                 self.msg.info(f"{coin} Validating {address}...")
                 addr_validation = daemon.validateaddress(address)
-                if "ismine" not in addr_validation:
+                if addr_validation is None:
                     addr_validation = daemon.getaddressinfo(address)
-                self.msg.info(f"{coin} Address: {addr_validation}")
-                if "ismine" not in addr_validation:
-                    self.msg.info(f"{coin} Importing private key...")
-                    wif = helper.wif_convert(coin, wif)
-                    r = daemon.importprivkey(wif)
-                    self.msg.info(f"{coin} Address: {r}")
-                elif not addr_validation["ismine"]:
-                    self.msg.info(f"{coin} Importing private key...")
-                    wif = helper.wif_convert(coin, wif)
-                    r = daemon.importprivkey(wif)
-                    self.msg.info(f"Address: {r}")
+
+                if addr_validation is not None:
+                    self.msg.info(f"{coin} Address: {addr_validation}")
+                    if "ismine" not in addr_validation:
+                        self.msg.info(f"{coin} Importing private key...")
+                        wif = helper.wif_convert(coin, wif)
+                        r = daemon.importprivkey(wif)
+                        self.msg.info(f"{coin} Address: {r}")
+                    elif not addr_validation["ismine"]:
+                        self.msg.info(f"{coin} Importing private key...")
+                        wif = helper.wif_convert(coin, wif)
+                        r = daemon.importprivkey(wif)
+                        self.msg.info(f"Address: {r}")
+                    else:
+                        self.msg.info(f"Address {address} already imported.")
                 else:
-                    self.msg.info(f"Address {address} already imported.")
+                    self.msg.info(f"Unable to validate {coin} address {address} already imported.")
         
     def exit(self):
         raise KeyboardInterrupt

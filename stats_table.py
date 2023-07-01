@@ -169,15 +169,15 @@ class Stats:
         if daemon.is_mining():
             mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "ltgreen")
         else:
-            mining = self.msg.colorize(f"[ Mining \N{cross mark} ]", "darkgrey")
+            mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
             status_main = self.msg.colorize(f"[ dPoW Main \N{check mark} ]", "lightgreen")
         else:
-            status_main = self.msg.colorize(f"[ dPoW Main \N{cross mark} ]", "darkgrey")
+            status_main = self.msg.colorize(f"[ dPoW Main \N{runic cross punctuation} ]", "darkgrey")
         if iguana_3p.test_connection():
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{check mark} ]", "lightgreen")
         else:
-            status_3p = self.msg.colorize(f"[ dPoW 3P \N{check mark} ]", "darkgrey")
+            status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
 
         date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
         footer_row = f"\N{position indicator}  {status_main}  \N{position indicator}  {status_3p}  \N{position indicator}  {mining}  \N{position indicator}  {date_str}  \N{position indicator}"
