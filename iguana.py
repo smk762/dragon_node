@@ -15,9 +15,7 @@ class Iguana():
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
         self.pubkey = helper.get_server_pubkey(self.server)
-        self.add_notaries()
         self.server_coins = helper.get_server_coins(self.server)
-        self.add_coins()
         
     def test_connection(self):
         r = self.help()
