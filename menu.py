@@ -31,7 +31,7 @@ def show_menu(menu, menu_name):
             except ValueError:
                 msg.error("Invalid option, try again.")
                 continue
-            if q > len(menu):
+            if q >= len(menu):
                 msg.error("Invalid option, try again.")
                 continue
             else:
