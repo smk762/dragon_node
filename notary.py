@@ -18,9 +18,6 @@ class Notary():
     def __init__(self) -> None:
         self.cfg = Config()
         self.msg = ColorMsg()
-        self.log_path = f"{const.HOME}/logs"
-        if not os.path.exists(self.log_path):
-            os.makedirs(self.log_path)
   
     def welcome(self) -> None:
         config = self.cfg.load()

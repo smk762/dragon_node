@@ -68,6 +68,16 @@ IGUANA_CONFIGS = {
     "3p": f"{DPOW_PATH}/iguana/3rd_party"
 }
 
+LOG_PATH = f"{HOME}/logs"
+if not os.path.exists(LOG_PATH):
+    os.makedirs(LOG_PATH)
+    
+IGUANA_LOGS = {
+    "main": f"{LOG_PATH}/iguana_main.log",
+    "3p": f"{LOG_PATH}/iguana_3p.log",
+}
+
+
 IGUANA_BIN_MAIN = f"{DPOW_PATH}/iguana/m_notary_main"
 IGUANA_BIN_3P = f"{DPOW_PATH}/iguana/m_notary_3rdparty_docker"
 
