@@ -18,7 +18,12 @@ class StatsLine:
         self.col_widths = column_widths
         self.daemon = DaemonRPC(self.coin)
         self.replenish_utxos = replenish_utxos
-        
+    
+    # To check if daemon pubkey matches config
+    def test_pubkey(self):
+        pass
+
+            
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
@@ -197,7 +202,7 @@ class Stats:
             if coin == "KMD":
                 mined_str = f"{row.pop(-1)}"
             if row[-1] == "-":
-                print(self.format_line(row, "lightred"))
+                print(self.format_line(row, "darkgrey"))
             else:
                 print(self.format_line(row))
         print(self.spacer())

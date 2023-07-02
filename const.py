@@ -84,9 +84,9 @@ IGUANA_BIN_3P = f"{DPOW_PATH}/iguana/m_notary_3rdparty_docker"
 # These are not used for anything yet, but will be used in the future to update daemon confs
 ADDRESS_WHITELIST = {
     "s6_dragonhound_DEV_main": "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN",
-    "s6_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq",
+    "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ",
     "s7_dragonhound_DEV_main": "RHi882Amab35uXjqBZjVxgEgmkkMu454KK",
-    "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ"
+    "s7_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq"
 }
 # These are not used for anything yet, but will be used in the future to add peers to daemons and iguana
 NOTARY_PEERS = {
