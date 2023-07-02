@@ -419,9 +419,12 @@ def launch(launch_params, log_output):
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
 
 
-def kill_process(process):
+def kill_process(process, filter=None):
     try:
-        for line in os.popen(f"ps ax | grep {process} | grep -v grep"):
+        cmd = f"ps ax | grep {process} | grep -v grep"
+        if filter:
+            cmd += f" | grep {filter}"
+        for line in os.popen(cmd):
             fields = line.split()
             pid = fields[0]
             os.kill(int(pid), signal.SIGKILL)

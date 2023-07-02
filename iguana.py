@@ -41,7 +41,11 @@ class Iguana():
             logger.error(e)
 
     def stop(self) -> None:
-        result = helper.kill_process("iguana") == "Killed"
+        if self.server == "main":
+            match = "notary"
+        else:
+            match = "3rd_party"
+        result = helper.kill_process("iguana", [match]) == "Killed"
         if result:
             self.msg.darkgrey(f"{self.server.title()} Iguana stopped")
         else:
