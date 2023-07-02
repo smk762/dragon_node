@@ -54,14 +54,14 @@ class Notary():
             return data
         
     def get_utxo_threshold(self, coin: str) -> int:
-        coins_ntx_data = self.get_coins_ntx_data()
+        coins_ntx_data = self.get_coins_ntx_data(True)
         if coin in coins_ntx_data:
             return coins_ntx_data[coin]["min_utxo_count"]
         else:
             return coins_ntx_data["KMD"]["min_utxo_count"]
     
     def get_split_amount(self, coin: str) -> int:
-        coins_ntx_data = self.get_coins_ntx_data()
+        coins_ntx_data = self.get_coins_ntx_data(True)
         if coin in coins_ntx_data:
             return coins_ntx_data[coin]["split_count"]
         else:
@@ -244,7 +244,7 @@ class Notary():
         config = self.cfg.load()
         if helper.is_configured(config):
             print()
-            coins_data = self.get_coins_ntx_data()
+            coins_data = self.get_coins_ntx_data(True)
             address = coins_data[coin]["address"]
             pubkey = coins_data[coin]["pubkey"]
             daemon = DaemonRPC(coin)
@@ -374,7 +374,7 @@ class Notary():
     def start_container(self, coin):
         config = self.cfg.load()
         if helper.is_configured(config):
-            coins_data = self.get_coins_ntx_data()
+            coins_data = self.get_coins_ntx_data(True)
             server = coins_data[coin]["server"]
             if server == "main":
                 compose = const.COMPOSE_PATH_MAIN

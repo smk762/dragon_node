@@ -38,6 +38,7 @@ def show_menu(menu, menu_name):
                 for k, v in menu[q].items():
                     v()
         except KeyboardInterrupt:
+            print()
             break
 
 
@@ -290,7 +291,6 @@ class IguanaMenu():
             self.msg.darkgrey(f"{self.dpow_main.dpow(coin)}")
         for coin in const.COINS_3P:
             self.msg.darkgrey(f"{self.dpow_3p.dpow(coin)}")
-
 
     def split_utxos(self):
         coin = self.msg.input("Enter coin to split (or ALL): ")
