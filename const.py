@@ -45,7 +45,8 @@ CONF_PATHS = {
 DPOW_SERVERS = list(CONF_PATHS.keys())
 COINS_3P = list(CONF_PATHS["3p"].keys())
 DPOW_COINS = COINS_3P + COINS_MAIN
-IMPORT_PRUNED_COINS = ["EMC2", "CHIPS", "AYA", "MIL", "LTC"]
+IMPORT_PRUNED_COINS = ["AYA", "EMC2", "MIL", "CHIPS", "VRSC", "LTC"]
+                      
 LARGE_UTXO_COINS = ["EMC2", "AYA"]
 
 # Notarisation constants

@@ -109,7 +109,9 @@ class DaemonRPC():
     def dumpprivkey(self, address):
         return self.rpc("dumpprivkey", [address])["result"]
 
-    def sendtoaddress(self, address, amount):
+    def sendtoaddress(self, address: str, amount: float, subtractfeefromamount: bool=True):
+        if not subtractfeefromamount:
+            return self.rpc("sendtoaddress", [address, amount])["result"]
         return self.rpc("sendtoaddress", [address, amount, "", "", True])["result"]
 
     def gettxoutproof(self, txid):
@@ -286,4 +288,4 @@ class DaemonRPC():
         return self.rpc("setgenerate", [True, 1])["result"]
 
     def stop_mining(self) -> bool:
-        return self.rpc("setgenerate", [false])["result"]
+        return self.rpc("setgenerate", [False])["result"]

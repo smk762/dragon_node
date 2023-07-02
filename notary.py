@@ -120,7 +120,7 @@ class Notary():
                 except Exception as e:
                     logger.error(e)
 
-    def reset_wallet_all(self) -> None:
+    def reset_wallet_all(self, exclude_noconsolidate: bool=True) -> None:
         pk = self.msg.input(f"Enter 3P KMD private key: ")
         for coin in const.COINS_3P:
             self.reset_wallet(coin, pk)
@@ -128,12 +128,17 @@ class Notary():
         for coin in const.COINS_MAIN:
             self.reset_wallet(coin, pk)
 
-    def reset_wallet(self, coin: str, pk=None) -> None:
+    def reset_wallet(self, coin: str, pk=None, exclude_noconsolidate: bool=True) -> None:
         # TODO: Add support for 3P coins
         # See https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742
-        if coin in ["AYA", "EMC2", "MIL", "CHIPS", "VRSC"]:
-            self.msg.status(f"Skipping {coin} reset - these are untested at the moment.")
-            return
+        if coin in const.IMPORT_PRUNED_COINS:
+            if exclude_noconsolidate:
+                self.msg.status(f"Skipping {coin} reset - these are untested at the moment.")
+                return
+            else:
+                ref_url = "https://gist.github.com/DeckerSU/e94386556a7a175f77063e2a73963742"
+                self.msg.status(f"{coin} will not auto-consolidate!")
+                self.msg.status(f"See {ref_url} for notes about cleaning this coin.")
         daemon = DaemonRPC(coin)
         server = helper.get_coin_server(coin)
         self.move_wallet(coin)
@@ -239,12 +244,13 @@ class Notary():
         else:
             self.msg.darkgrey(f"Skipping {coin} ({count} utxos in reserve)")
                 
-    def consolidate(self, coin: str, reset=False, force: bool=False) -> None:
+    def consolidate(self, coin: str, reset=False, force: bool=False, address: str="") -> None:
         config = self.cfg.load()
         if helper.is_configured(config):
             print()
             coins_data = self.get_coins_ntx_data(True)
-            address = coins_data[coin]["address"]
+            if address == "":
+                address = coins_data[coin]["address"]
             pubkey = coins_data[coin]["pubkey"]
             daemon = DaemonRPC(coin)
             utxos = self.get_utxos(coin, pubkey)

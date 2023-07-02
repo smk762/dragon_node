@@ -84,9 +84,10 @@ class NotaryMenu():
         self.menu = [
             {"main_menu": self.exit},
             {"start_mining": self.start_mining},
-            {"stop_coin": self.stop_coin},
+            {"stop_mining": self.stop_mining},
             {"start_coin": self.start_coin},
-            {"stop_coin": self.stop_coin}
+            {"stop_coin": self.stop_coin},
+            {"migrate_finds_to_pubkey": self.migrate_finds_to_pubkey}
         ]
 
     def show(self):
@@ -119,7 +120,49 @@ class NotaryMenu():
             self.msg.darkgrey("Already mining.")
             return
         print(daemon.start_mining())
-    
+       
+    def stop_mining(self):
+        daemon = DaemonRPC("KMD")
+        if daemon.is_mining():
+            self.msg.darkgrey("Already mining.")
+            return
+        print(daemon.start_mining())
+
+    def migrate_finds_to_pubkey(self):
+        pubkey = self.msg.input("Enter pubkey to migrate finds to: ")
+        nn = Notary()
+        coins_ntx_data = nn.get_coins_ntx_data()
+        coins = list(coins_ntx_data.keys())
+        coins.sort()
+        print()
+        
+        # Try consolidate first to get any hidden utxos
+        for coin in coins:
+            address = based_58.get_addr_from_pubkey(pubkey, coin)
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{address:<40}", "lightcyan")
+            print(f"{k}: {v}")
+            try:
+                nn.consolidate(coin, True, True, address)
+            except Exception as e:
+                self.msg.error(f"Error consolidating {coin}: {e}")
+
+        for i in range(60):
+            msg.status(f"Waiting {60-i} seconds for consolidations to progress...")
+            time.sleep(1)
+
+        # Try daemon next to get any funds is change addresses
+        for coin in coins:
+            address = based_58.get_addr_from_pubkey(pubkey, coin)
+            try:
+                daemon = DaemonRPC(coin)
+                balance = daemon.getbalance()
+                daemon.sendtoaddress(address, balance, True)
+            except Exception as e:
+                self.msg.error(f"Error connecting to {coin}: {e}")
+            
+        
+
     def exit(self):
         raise KeyboardInterrupt
 
@@ -132,10 +175,11 @@ class WalletMenu():
         self.menu = [
             {"main_menu": self.exit},
             {"consolidate": self.consolidate},
-            {"convert_privkey": self.convert_privkey},
             {"reset_wallet": self.reset_wallet},
-            {"import_privkey": self.import_privkey},
-            {"list_addresses": self.list_addresses}
+            {"list_addresses": self.list_addresses},
+            {"list_private_keys": self.list_private_keys},
+            {"import_private_key": self.import_privkey},
+            {"convert_private_key": self.convert_privkey}
         ]
 
     def show(self):
@@ -165,15 +209,37 @@ class WalletMenu():
         wif = self.msg.input("Enter private key: ")
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
-                print(f"{coin}: {helper.wif_convert(coin, wif)}")       
+                print(f"{coin}: {helper.wif_convert(coin, wif)}")
+
+    def list_private_keys(self):
+        '''Gets KMD pk for each server, then converts and prints for each coin'''
+        config = Config().load()
+        daemon_main = DaemonRPC("KMD")
+        address_main = config["KMD"]["address"]
+        wif_main = daemon_main.dumpprivkey(address_main)
+        for coin in const.COINS_MAIN:
+            
+            print(f"{coin}: {helper.wif_convert(coin, wif_main)}")
+        daemon_3p = DaemonRPC("KMD_3P")
+        address_3p = config["KMD_3P"]["address"]
+        wif_3p = daemon_main.dumpprivkey(address_main)
+        for coin in const.COINS_3P:
+            print(f"{coin}: {helper.wif_convert(coin, wif_3p)}")
 
     def reset_wallet(self):
+        self.msg.warning("WARNING: This will delete your wallet.dat, then restart daemons and import your private keys without a rescan.")
+        self.msg.warning("Afterwards, a consolidation will be attempted - but not all coins have a supporting API.")
+        self.msg.warning("For some third party coins, alternative methods like `importprunefunds` may be required.")
         config = Config().load()
         if helper.is_configured(config):
             notary = Notary()
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
-                    notary.reset_wallet_all()                        
+                q = self.msg.input("Exclude coins that can not auto-consolidate? [y/n]: ")
+                if q.lower() == "y":
+                    notary.reset_wallet_all(True)
+                else:
+                    notary.reset_wallet_all(False)
             elif coin.upper() in const.DPOW_COINS:
                 notary.reset_wallet(coin)                    
             else:

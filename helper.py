@@ -37,6 +37,7 @@ def generate_rpc_pass(length):
     rpc_chars = string.ascii_letters + string.digits + special_chars
     return "".join(secrets.choice(rpc_chars) for _ in range(length))
 
+
 def bytes_to_unit(filesize):
     unit = 'B'
     if filesize > 1024:
@@ -45,10 +46,17 @@ def bytes_to_unit(filesize):
         unit = 'M'
     if filesize > 1024 ** 3:
         unit = 'G'
-        
     exponents_map = {'B': 0, 'K': 1, 'M': 2, 'G': 3}
     size = filesize / 1024 ** exponents_map[unit]
     return f"{round(size, 2)}{unit}"
+
+
+def convert_bytes(num):
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
+
 
 def hash160(hexstr):
     preshabin = binascii.unhexlify(hexstr)
