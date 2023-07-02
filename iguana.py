@@ -30,13 +30,13 @@ class Iguana():
         else:
             bin = const.IGUANA_BIN_3P
         try:
-            with open(const.IGUANA_LOGS[self.server], "w") as logfile:
-                iguana_path = f"{const.DPOW_PATH}/iguana"
-                subprocess.Popen(
-                    [bin], start_new_session=True,
-                    universal_newlines=True, cwd=iguana_path,
-                    stdout=logfile, stderr=logfile
-                )
+            logfile = open(const.IGUANA_LOGS[self.server], "w")
+            iguana_path = f"{const.DPOW_PATH}/iguana"
+            subprocess.Popen(
+                [bin], start_new_session=True,
+                universal_newlines=True, cwd=iguana_path,
+                stdout=logfile, stderr=logfile
+            )
         except subprocess.CalledProcessError as e:
             logger.error(e)
 
