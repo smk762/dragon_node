@@ -1,0 +1,18 @@
+#!/bin/bash
+
+test_main=$(ps ax | grep iguana | grep -v grep | grep notary)
+test_3p=$(ps ax | grep iguana | grep -v grep | grep 3rd_party)
+cd /home/dPoW/iguana
+if [ ${#test_main} -gt 0 ]; then
+    echo "iguana running"
+else
+    echo "iguana not running - startng now"
+    ./m_notary_main
+fi
+
+if [ ${#test_3p} -gt 0 ]; then
+    echo "iguana running"
+else
+    echo "iguana not running"
+    ./m_notary_3rdparty_docker
+fi
