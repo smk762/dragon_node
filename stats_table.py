@@ -167,7 +167,7 @@ class Stats:
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
         if daemon.is_mining():
-            mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "ltgreen")
+            mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "lightgreen")
         else:
             mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
@@ -195,7 +195,7 @@ class Stats:
             line = StatsLine(self.col_widths, coin, replenish_utxos)
             row = line.get()
             if coin == "KMD":
-                last_mined = row[-1]
+                last_mined = row[:-1]
                 row = row[:-1]
                 mined_str = f"{last_mined} since"
             if row[-1] == "-":
