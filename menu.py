@@ -50,6 +50,7 @@ class MainMenu():
         self.menu = [
             {"stats": self.stats},
             {"config_menu": ConfigMenu().show},
+            {"iguana_menu": IguanaMenu().show},
             {"notary_menu": NotaryMenu().show},
             {"wallet_menu": WalletMenu().show},
             {"exit": self.exit}
@@ -72,6 +73,7 @@ class MainMenu():
     def exit(self):
         sys.exit()
 
+
 class NotaryMenu():
     def __init__(self):
         self.config = Config()
@@ -80,7 +82,6 @@ class NotaryMenu():
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
-            {"split_utxos": self.split_utxos},
             {"start_mining": self.start_mining},
             {"stop_coin": self.stop_coin},
             {"start_coin": self.start_coin},
@@ -89,22 +90,6 @@ class NotaryMenu():
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-
-
-    def split_utxos(self):
-        coin = self.msg.input("Enter coin to split (or ALL): ")
-        q = self.msg.input("Force split? (y/n): ")
-        if q.lower() == "y":
-            force = True
-        else:
-            force = False                    
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                self.nn.split_utxos(coin, force)
-        elif coin.upper() in const.DPOW_COINS:
-            self.nn.split_utxos(coin, force)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
 
 
     def start_coin(self):
@@ -118,13 +103,12 @@ class NotaryMenu():
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
     def stop_coin(self):
-        notary = Notary()
         coin = self.msg.input("Enter coin to stop (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
-                notary.stop(coin)
+                self.nn.stop(coin)
         elif coin.upper() in const.DPOW_COINS:
-            notary.stop(coin)
+            self.nn.stop(coin)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
@@ -262,6 +246,67 @@ class ConfigMenu():
 
     def update_config(self):
         self.config.menu()
+
+    def exit(self):
+        raise KeyboardInterrupt
+
+
+class IguanaMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.nn = Notary()
+        self.dpow_main = Iguana("main")
+        self.dpow_3p = Iguana("3p")
+        self.menu = [
+            {"main_menu": self.exit},
+            {"add_coins": self.add_coins},
+            {"add_peers": self.add_peers},
+            {"dpow_coins": self.dpow_coins},
+            {"split_utxos": self.split_utxos}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Iguana Menu")
+
+    def add_coins(self):
+        for coin in const.COINS_MAIN:
+            self.msg.darkgrey(f"{self.dpow_main.addcoin(coin)}")
+        for coin in const.COINS_3P:
+            self.msg.darkgrey(f"{self.dpow_3p.addcoin(coin)}")
+
+    def add_peers(self):
+        config = self.config.load()
+        for k, v in config["addnotary"].items():
+            self.msg.info(f"Adding {k}")
+            self.msg.darkgrey(f"{self.dpow_main.addnotary(v)}")
+            self.msg.darkgrey(f"{self.dpow_3p.addnotary(v)}")
+            for coin in const.DPOW_COINS:
+                self.msg.darkgrey(f"{DaemonRPC(coin).addnode(v)}")
+
+    def dpow_coins(self):
+        config = self.config.load()
+        for coin in const.COINS_MAIN:
+            self.msg.darkgrey(f"{self.dpow_main.dpow(coin)}")
+        for coin in const.COINS_3P:
+            self.msg.darkgrey(f"{self.dpow_3p.dpow(coin)}")
+
+
+    def split_utxos(self):
+        coin = self.msg.input("Enter coin to split (or ALL): ")
+        q = self.msg.input("Force split? (y/n): ")
+        if q.lower() == "y":
+            force = True
+        else:
+            force = False                    
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                self.nn.split_utxos(coin, force)
+        elif coin.upper() in const.DPOW_COINS:
+            self.nn.split_utxos(coin, force)
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
+
 
 
     def exit(self):
