@@ -263,7 +263,6 @@ class IguanaMenu():
         self.dpow_3p = Iguana("3p")
         self.menu = [
             {"main_menu": self.exit},
-            {"start_iguana": self.start_iguana},
             {"stop_iguana": self.stop_iguana},
             {"add_coins": self.add_coins},
             {"add_peers": self.add_peers},

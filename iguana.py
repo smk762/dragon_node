@@ -24,6 +24,7 @@ class Iguana():
             return False
         return True
 
+    # This is blocking the app. Leaving here to change later
     def start(self) -> None:
         if self.server == "main":
             bin = const.IGUANA_BIN_MAIN
