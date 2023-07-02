@@ -202,7 +202,7 @@ class WalletMenu():
                 for coin in const.DPOW_COINS:
                     self.notary.consolidate(coin, force, force)
             elif coin.upper() in const.DPOW_COINS:
-                self.notary.consolidate(coin, force, force)
+                self.notary.consolidate(coin.upper(), force, force)
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
         else:
@@ -385,7 +385,7 @@ class IguanaMenu():
         elif coin.upper() in const.DPOW_COINS:
             self.nn.split_utxos(coin.upper(), force)
         else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
+            self.msg.error(f"Invalid coin '{coin.upper()}', try again.")
 
 
 
