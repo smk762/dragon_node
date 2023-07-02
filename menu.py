@@ -129,8 +129,8 @@ class NotaryMenu():
         print(daemon.start_mining())
 
     def migrate_finds_to_pubkey(self):
-        pubkey_main = self.msg.input("Enter pubkey to migrate Main finds to: ")
-        pubkey_3p = self.msg.input("Enter pubkey to migrate 3P finds to: ")
+        pubkey_main = self.msg.input("Enter pubkey to migrate Main funds to: ")
+        pubkey_3p = self.msg.input("Enter pubkey to migrate 3P funds to: ")
         nn = Notary()
         coins_ntx_data = nn.get_coins_ntx_data()
         coins = list(coins_ntx_data.keys())
