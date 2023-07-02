@@ -383,7 +383,7 @@ class IguanaMenu():
             for coin in const.DPOW_COINS:
                 self.nn.split_utxos(coin, force)
         elif coin.upper() in const.DPOW_COINS:
-            self.nn.split_utxos(coin, force)
+            self.nn.split_utxos(coin.upper(), force)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
