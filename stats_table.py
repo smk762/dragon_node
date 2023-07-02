@@ -22,7 +22,6 @@ class StatsLine:
     # To check if daemon pubkey matches config
     def test_pubkey(self):
         pass
-
             
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()

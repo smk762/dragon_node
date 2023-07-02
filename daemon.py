@@ -284,3 +284,6 @@ class DaemonRPC():
 
     def start_mining(self) -> bool:
         return self.rpc("setgenerate", [True, 1])["result"]
+
+    def stop_mining(self) -> bool:
+        return self.rpc("setgenerate", [false])["result"]
