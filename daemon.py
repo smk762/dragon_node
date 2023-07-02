@@ -269,9 +269,10 @@ class DaemonRPC():
     def get_utxo_count(self, utxo_value: float) -> int:
         unspent = self.listunspent()
         count = 0
-        for utxo in unspent:
-            if utxo["amount"] == utxo_value:
-                count += 1
+        if unspent:
+            for utxo in unspent:
+                if utxo["amount"] == utxo_value:
+                    count += 1
         return count
 
     def is_mining(self) -> bool:
