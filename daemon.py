@@ -22,7 +22,8 @@ class DaemonRPC():
         self.rpcuser = self.creds[0]
         self.rpcpass = self.creds[1]
         self.rpcport = self.creds[2]
-
+        
+        
     def get_creds(self):
         rpcport = 0
         rpcuser = ''
@@ -65,13 +66,29 @@ class DaemonRPC():
             # logger.debug(f"response: {resp}")
             return resp
         except requests.exceptions.InvalidURL as e:
-            resp = {"error": "Invalid URL"}
+            resp = {
+                "error": "Invalid URL",
+                "result": None
+            }
+            self.msg.error(f'')
         except requests.exceptions.ConnectionError:
-            resp = {"error": "Daemon connection error"}
+            resp = {
+                "error": "Daemon connection error",
+                "result": None
+            }
+            self.msg.error(f'')
         except requests.exceptions.RequestException as e:
-            resp = {"error": f"Error! {e}"}
+            resp = {
+                "error": f"Error! {e}",
+                "result": None
+            }
+            self.msg.error(f'')
         except Exception as e:
-            resp = {"error": f"Error! {e}"}            
+            resp = {
+                "error": f"Error! {e}",
+                "result": None
+            }
+        self.msg.darkgrey(f"RPC Failed: {resp}")
         return resp
 
     def addnode(self, ip: str, cmd: str="add") -> dict:
