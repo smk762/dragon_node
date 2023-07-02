@@ -212,11 +212,10 @@ class DaemonRPC():
             end = self.getblockcount()
         return self.rpc("rescanblockchain", [start, end])["result"]
 
-    def unlock_unspent(self):
-        locked_unspent = self.get_locked_unspent()
+    def unlock_unspent(self, locked_unspent):
         return self.rpc("lockunspent", [True, locked_unspent])["result"]
 
-    def get_locked_unspent(self):
+    def listlockunspent(self):
         return self.rpc("listlockunspent")["result"]
 
     # Transactions

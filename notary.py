@@ -219,7 +219,7 @@ class Notary():
         value = round(value/100000000, 8)
         return [inputs, value]
         
-    def split_utxos(self, coin: str, force: bool=False) -> None:
+    def split_utxos(self, coin: str, force: bool=False) -> bool:
         daemon = DaemonRPC(coin)
         unspent = daemon.listunspent()
         utxo_value = helper.get_utxo_value(coin)
@@ -237,12 +237,16 @@ class Notary():
                     link = daemon.get_explorer_url(r['txid'], 'tx') 
                     if link != "":
                         self.msg.ltcyan(f"Explorer: {link}")
+                    return True
                 else:
                     self.msg.darkgrey(f"Error splitting {split_amount} utxos for {coin}: {r}")
+                    return False
             else:
                 self.msg.darkgrey(f"Error splitting {split_amount} utxos for {coin}: Iguana not running")
+                return False
         else:
             self.msg.darkgrey(f"Skipping {coin} ({count} utxos in reserve)")
+            return True
                 
     def consolidate(self, coin: str, reset=False, force: bool=False, address: str="") -> None:
         config = self.cfg.load()
