@@ -64,9 +64,12 @@ PUBKEYS_MAIN = json.load(open("notary_pubkeys.json", "r"))
 PUBKEYS_3P = json.load(open("notary_pubkeys_3p.json", "r"))
 
 IGUANA_CONFIGS = {
-    "main": f"dPoW/iguana/elected",
-    "3p": f"dPoW/iguana/3rd_party"
+    "main": f"{DPOW_PATH}/iguana/elected",
+    "3p": f"{DPOW_PATH}/iguana/3rd_party"
 }
+
+IGUANA_BIN_MAIN = f"{DPOW_PATH}/iguana/m_notary_main"
+IGUANA_BIN_3P = f"{DPOW_PATH}/iguana/m_notary_3rdparty_docker"
 
 # These are not used for anything yet, but will be used in the future to update daemon confs
 ADDRESS_WHITELIST = {

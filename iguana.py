@@ -3,6 +3,7 @@ import os
 import json
 import socket
 import requests
+import subprocess
 import const
 import helper
 from logger import logger
@@ -21,8 +22,25 @@ class Iguana():
         r = self.help()
         if "error" in r:
             return False
-        return True       
-    
+        return True
+
+    def start(self, server: str="main") -> None:
+        if server == "main":
+            bin = const.IGUANA_BIN_MAIN
+        else:
+            bin = const.IGUANA_BIN_3P
+        try:
+            subprocess.run([bin], check=True)
+        except subprocess.CalledProcessError as e:
+            logger.error(e)
+
+    def stop(self, server: str="main") -> None:
+        result = helper.kill_process("iguana") == "Killed"
+        if result:
+            self.msg.darkgrey(f"{server.title()} Iguana stopped")
+        else:
+            self.msg.darkgrey(f"Failed to stop {server.title()} Iguana: {result}")
+
     def add_coins(self):
         for coin in self.server_coins:
             self.addcoin(coin)

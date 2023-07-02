@@ -10,6 +10,7 @@ import ecdsa
 import base58
 import string
 import codecs
+import signal
 import hashlib
 import secrets
 import requests
@@ -417,7 +418,18 @@ def preexec(): # Don't forward signals.
 def launch(launch_params, log_output):
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
 
+
+def kill_process(process):
+    try:
+        for line in os.popen(f"ps ax | grep {process} | grep -v grep"):
+            fields = line.split()
+            pid = fields[0]
+            os.kill(int(pid), signal.SIGKILL)
+        return "Killed"
+    except Exception as e:
+        return False
     
+
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)

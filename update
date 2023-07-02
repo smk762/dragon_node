@@ -12,8 +12,6 @@ else
     branch="$1"
 fi
 
-git submodule init
-
 echo "Existing submodule settings:"
 git config --file=../.gitmodules -l
 echo

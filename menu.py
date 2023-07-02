@@ -261,6 +261,8 @@ class IguanaMenu():
         self.dpow_3p = Iguana("3p")
         self.menu = [
             {"main_menu": self.exit},
+            {"start_iguana": self.start_iguana},
+            {"stop_iguana": self.stop_iguana},
             {"add_coins": self.add_coins},
             {"add_peers": self.add_peers},
             {"dpow_coins": self.dpow_coins},
@@ -284,6 +286,14 @@ class IguanaMenu():
             self.msg.darkgrey(f"{self.dpow_3p.addnotary(v)}")
             for coin in const.DPOW_COINS:
                 self.msg.darkgrey(f"{DaemonRPC(coin).addnode(v)}")
+
+    def start_iguana(self):
+        self.dpow_main.start()
+        self.dpow_3p.start()
+
+    def stop_iguana(self):
+        self.dpow_main.stop()
+        self.dpow_3p.stop()
 
     def dpow_coins(self):
         config = self.config.load()
