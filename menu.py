@@ -186,7 +186,9 @@ class WalletMenu():
         coins.sort()
         print()
         for coin in coins:
-            self.msg.status(f"{coin:>12}: {coins_ntx_data[coin]['address']:<40}")
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{coins_ntx_data[coin]['address']:<40}", "lightcyan")
+            print(f"{k}: {v}")
 
     def import_privkey(self):
         nn = Notary()
