@@ -24,22 +24,23 @@ class Iguana():
             return False
         return True
 
-    def start(self, server: str="main") -> None:
-        if server == "main":
+    def start(self) -> None:
+        if self.server == "main":
             bin = const.IGUANA_BIN_MAIN
         else:
             bin = const.IGUANA_BIN_3P
         try:
+            os.chdir(f"{const.DPOW_PATH}/iguana")
             subprocess.run([bin], check=True)
         except subprocess.CalledProcessError as e:
             logger.error(e)
 
-    def stop(self, server: str="main") -> None:
+    def stop(self) -> None:
         result = helper.kill_process("iguana") == "Killed"
         if result:
-            self.msg.darkgrey(f"{server.title()} Iguana stopped")
+            self.msg.darkgrey(f"{self.server.title()} Iguana stopped")
         else:
-            self.msg.darkgrey(f"Failed to stop {server.title()} Iguana: {result}")
+            self.msg.darkgrey(f"Failed to stop {self.server.title()} Iguana: {result}")
 
     def add_coins(self):
         for coin in self.server_coins:
