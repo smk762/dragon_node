@@ -32,8 +32,8 @@ class Iguana():
         try:
             subprocess.Popen(
                 [bin],
-                start_new_session=True,
-                universal_newlines=True
+                cwd=f"{const.DPOW_PATH}/iguana",
+                start_new_session=True
             )
         except subprocess.CalledProcessError as e:
             logger.error(e)
