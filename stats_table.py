@@ -195,8 +195,7 @@ class Stats:
             line = StatsLine(self.col_widths, coin, replenish_utxos)
             row = line.get()
             if coin == "KMD":
-                last_mined = row.pop(-1)
-                mined_str = f"{last_mined} since"
+                mined_str = f"{row.pop(-1)}"
             if row[-1] == "-":
                 print(self.format_line(row, "lightred"))
             else:
