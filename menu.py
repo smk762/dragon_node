@@ -129,7 +129,8 @@ class NotaryMenu():
         print(daemon.start_mining())
 
     def migrate_finds_to_pubkey(self):
-        pubkey = self.msg.input("Enter pubkey to migrate finds to: ")
+        pubkey_main = self.msg.input("Enter pubkey to migrate Main finds to: ")
+        pubkey_3p = self.msg.input("Enter pubkey to migrate 3P finds to: ")
         nn = Notary()
         coins_ntx_data = nn.get_coins_ntx_data()
         coins = list(coins_ntx_data.keys())
@@ -138,6 +139,8 @@ class NotaryMenu():
         
         # Try consolidate first to get any hidden utxos
         for coin in coins:
+            server = helper.get_coin_server(coin)
+            pubkey = pubkey_main if server == "main" else pubkey_3p
             address = based_58.get_addr_from_pubkey(pubkey, coin)
             k = self.msg.colorize(f"{coin:>12}", "lightblue")
             v = self.msg.colorize(f"{address:<40}", "lightcyan")
@@ -153,15 +156,15 @@ class NotaryMenu():
 
         # Try daemon next to get any funds is change addresses
         for coin in coins:
+            server = helper.get_coin_server(coin)
+            pubkey = pubkey_main if server == "main" else pubkey_3p
             address = based_58.get_addr_from_pubkey(pubkey, coin)
             try:
                 daemon = DaemonRPC(coin)
                 balance = daemon.getbalance()
                 daemon.sendtoaddress(address, balance, True)
             except Exception as e:
-                self.msg.error(f"Error connecting to {coin}: {e}")
-            
-        
+                self.msg.error(f"Error connecting to {coin}: {e}")      
 
     def exit(self):
         raise KeyboardInterrupt
