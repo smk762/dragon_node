@@ -61,8 +61,8 @@ NTX_ADDR = {
     "MIL": "MVx1hSH9WqwQurgqR7HBDRCu3ESkuhQC8r"
 }
 
-PUBKEYS_MAIN = json.load(open("notary_pubkeys.json", "r"))
-PUBKEYS_3P = json.load(open("notary_pubkeys_3p.json", "r"))
+PUBKEYS_MAIN = json.load(open(f"{SCRIPT_PATH}/notary_pubkeys.json", "r"))
+PUBKEYS_3P = json.load(open(f"{SCRIPT_PATH}/notary_pubkeys_3p.json", "r"))
 
 IGUANA_CONFIGS = {
     "main": f"{DPOW_PATH}/iguana/elected",
