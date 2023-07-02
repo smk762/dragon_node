@@ -231,8 +231,10 @@ class Notary():
                 r = iguana.splitfunds(coin, split_amount, sats)
                 if 'txid' in r:
                     # TODO: explorer link
-                    self.msg.darkgrey(f"Split {split_amount} utxos for {coin}: {r['txid']}")
-                    daemon.get_explorer_url(r['txid'], 'tx') 
+                    self.msg.green(f"Split {split_amount} utxos for {coin}: {r['txid']}")
+                    link = daemon.get_explorer_url(r['txid'], 'tx') 
+                    if link != "":
+                        self.msg.ltcyan(f"Explorer: {link}")
                 else:
                     self.msg.darkgrey(f"Error splitting {split_amount} utxos for {coin}: {r}")
             else:

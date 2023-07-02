@@ -222,6 +222,8 @@ class DaemonRPC():
             coin = self.coin.split("_")[0]
             if coin == "TOKEL":
                 coin = "TKL"
+            if coin == "PIRATE":
+                coin = "ARRR"
             else:
                 coin = self.coin
             data = helper.get_coins_config()
