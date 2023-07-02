@@ -9,9 +9,10 @@ for coin in DPOW_COINS:
     if not nn.split_utxos(coin):
         daemon = DaemonRPC(coin)
         locked_unspent = daemon.listlockunspent()
-        if len(locked_unspent) > 0:
-            print("Unlocking UTXOs to try again...")
-            daemon.unlock_unspent(locked_unspent)
-            time.sleep(1)
-            if not nn.split_utxos(coin):
-                print("Consolidate UTXOs, try again after the consolidation tx confirms...")
+        if locked_unspent:
+            if len(locked_unspent) > 0:
+                print("Unlocking UTXOs to try again...")
+                daemon.unlock_unspent(locked_unspent)
+                time.sleep(1)
+                if not nn.split_utxos(coin):
+                    print("Consolidate UTXOs, try again after the consolidation tx confirms...")
