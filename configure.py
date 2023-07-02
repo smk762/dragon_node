@@ -193,7 +193,7 @@ class Config():
             "addnotary": const.NOTARY_PEERS,
             "addresses": {},
             "split amount": 25,
-            "split_threshold": 50
+            "split_threshold": 25
         }
         config = self.calculate_addresses(config)
         return config
