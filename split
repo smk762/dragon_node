@@ -1,0 +1,7 @@
+#!/usr/bin/env python3
+from const import DPOW_COINS
+from notary import Notary
+
+nn = Notary()
+for coin in DPOW_COINS:
+    nn.split_utxos(coin)
