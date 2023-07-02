@@ -218,14 +218,13 @@ class Notary():
         return [inputs, value]
         
     def split_utxos(self, coin: str, force: bool=False) -> None:
-        nn = Notary()
         daemon = DaemonRPC(coin)
         unspent = daemon.listunspent()
         utxo_value = helper.get_utxo_value(coin)
         count = daemon.get_utxo_count(utxo_value)
-        if count < nn.get_utxo_threshold(coin) or force:
+        if count < self.get_utxo_threshold(coin) or force:
             server = helper.get_coin_server(coin)
-            split_amount = nn.get_split_amount(coin)
+            split_amount = self.get_split_amount(coin)
             sats = int(helper.get_utxo_value(coin, True))
             iguana = Iguana(server)
             if iguana.test_connection():

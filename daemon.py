@@ -74,9 +74,15 @@ class DaemonRPC():
             resp = {"error": f"Error! {e}"}            
         return resp
 
+    def addnode(self, ip: str, cmd: str="add") -> dict:
+        try:
+            return self.rpc("addnode", [ip, cmd])["result"]
+        except Exception as e:
+            return {"error": f"Error! {e}"}
+
     def getinfo(self):
         return self.rpc("getinfo")["result"]
-    
+
     def getnetworkinfo(self):
         return self.rpc("getnetworkinfo")["result"]
 
