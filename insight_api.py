@@ -29,7 +29,7 @@ class InsightAPI:
 
     def address_utxos(self, address):
         '''Get the unspent outputs for an address'''
-        url = f'{self.api_url}/addr/{address}/balance'
+        url = f'{self.api_url}/addr/{address}/utxo'
         response = requests.get(url)
         return response.json()
 
@@ -148,5 +148,4 @@ class InsightAPI:
         url = f'{self.api_url}/txs/?address={addresses}'
         response = requests.get(url)
         return response.json()
-
 

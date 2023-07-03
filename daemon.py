@@ -88,7 +88,7 @@ class DaemonRPC():
                 "error": f"Error! {e}",
                 "result": None
             }
-        self.msg.darkgrey(f"RPC Failed: {resp}")
+        # self.msg.darkgrey(f"RPC Failed: {resp}")
         return resp
 
     def addnode(self, ip: str, cmd: str="add") -> dict:
@@ -235,7 +235,16 @@ class DaemonRPC():
 
     def get_explorer_url(self, value, endpoint: str='tx') -> str:
         # Param value can be a txid, address, or block
-        # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
+        # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be added to coins repo)
+        if self.coin in const.INSIGHT_EXPLORERS:
+            if const.INSIGHT_EXPLORERS[self.coin] != "":
+                if endpoint == "tx":
+                    endpoint = "tx/"
+                elif endpoint == "addr":
+                    endpoint = "address/"
+                elif endpoint == "block":
+                    endpoint = "block/"
+                return f"{const.INSIGHT_EXPLORERS[self.coin]}{endpoint}{value}"
         try:
             coin = self.coin.split("_")[0]
             if coin == "TOKEL":

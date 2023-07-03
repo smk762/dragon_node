@@ -17,7 +17,9 @@ import requests
 import binascii
 import subprocess
 import helper
+import based_58
 from color import ColorMsg
+from insight_api import InsightAPI
 from logger import logger
 
 
@@ -211,6 +213,12 @@ def get_wallet_path(coin: str) -> str:
     return ""
 
 def get_utxos(coin: str, pubkey: str) -> list:
+    if coin in const.INSIGHT_EXPLORERS:
+        if const.INSIGHT_EXPLORERS[coin] != "":
+            baseurl = const.INSIGHT_EXPLORERS[coin]
+            insight = InsightAPI(baseurl)
+            address = based_58.get_addr_from_pubkey(pubkey, coin)
+            return insight.address_utxos(address)
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
         coin = coin.split("_")[0]

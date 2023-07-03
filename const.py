@@ -100,3 +100,26 @@ ADDNODES = {
     "komodostats": "seed.komodostats.com",
     "webworker": "seed.webworker.sh",
 }
+
+INSIGHT_EXPLORERS = {
+    'AYA': '',
+    'CCL': 'https://ccl.explorer.dexstats.info/',
+    'CHIPS': 'https://chips.explorer.dexstats.info/',
+    'CLC': 'https://clc.explorer.dexstats.info/',
+    'DOC': 'https://doc.dragonhound.info/',
+    'EMC2': '',
+    'GLEEC': 'https://gleec.explorer.dexstats.info/',
+    'ILN': 'https://iln.explorer.dexstats.info/',
+    'KMD': 'https://kmd.explorer.dexstats.info/',
+    'KMD_3P': 'https://kmd.explorer.dexstats.info/',
+    'KOIN': 'https://koin.explorer.dexstats.info/',
+    'LTC': '',
+    'MARTY': 'https://marty.dragonhound.info/',
+    'MCL': 'https://mcl.explorer.dexstats.info/',
+    'MIL': '',
+    'PIRATE': 'https://explorer.pirate.black/',
+    'SUPERNET': 'https://supernet.explorer.dexstats.info/',
+    'THC': 'https://thc.explorer.dexstats.info/',
+    'TOKEL': 'https://tokel.explorer.dexstats.info/',
+    'VRSC': 'https://vrsc.explorer.dexstats.info/'
+}
