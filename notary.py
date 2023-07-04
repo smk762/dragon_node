@@ -231,6 +231,12 @@ class Notary():
             iguana = Iguana(server)
             if iguana.test_connection():
                 r = iguana.splitfunds(coin, split_amount, sats)
+                if 'error' in r:
+                    iguana.addcoin(coin)
+                    time.sleep(0.1)
+                    iguana.dpow(coin)
+                    time.sleep(0.1)
+                    r = iguana.splitfunds(coin, split_amount, sats)
                 if 'txid' in r:
                     # TODO: explorer link
                     self.msg.green(f"Split {split_amount} utxos for {coin}: {r['txid']}")
