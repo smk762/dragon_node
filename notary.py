@@ -227,6 +227,10 @@ class Notary():
         if count < self.get_utxo_threshold(coin) or force:
             server = helper.get_coin_server(coin)
             split_amount = self.get_split_amount(coin)
+            # Double the reserve for KMD as it is more active
+            if coin in ["KMD", "KMD_3P"]:
+                split_amount *= 2
+                
             sats = int(helper.get_utxo_value(coin, True))
             iguana = Iguana(server)
             if iguana.test_connection():
