@@ -7,7 +7,7 @@ import requests
 class InsightAPI:
     def __init__(self, baseurl, api_path="insight-api-komodo", api_key=None):
         self.api_key = api_key # Unused for now, but may be used in the future
-        self.api_url = f"{baseurl}/{api_path}"
+        self.api_url = f"{baseurl}{api_path}"
 
     def address(self, address):
         '''Get information about an address'''

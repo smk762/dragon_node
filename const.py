@@ -117,6 +117,7 @@ INSIGHT_EXPLORERS = {
     'MARTY': 'https://marty.dragonhound.info/',
     'MCL': 'https://mcl.explorer.dexstats.info/',
     'MIL': '',
+    'NINJA': '',
     'PIRATE': 'https://explorer.pirate.black/',
     'SUPERNET': 'https://supernet.explorer.dexstats.info/',
     'THC': 'https://thc.explorer.dexstats.info/',
