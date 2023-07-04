@@ -1,0 +1,11 @@
+#!/bin/bash
+pkill -9 iguana
+sleep 2
+
+mkdir -p $HOME/logs
+cd $HOME/dPoW/iguana
+./m_notary_3rdparty_docker > $HOME/logs/iguana_3p.log &
+
+if [ "$1" != "notail" ]; then
+    tail -f $HOME/logs/iguana_3p.log
+fi

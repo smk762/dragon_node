@@ -1,18 +1,22 @@
 #!/bin/bash
 
+# Add to your crontab like
+# */10 * * * * /home/user/dragon_node/check_iguana > /home/user/logs/check_iguana.log
+
+
 test_main=$(ps ax | grep iguana | grep -v grep | grep notary)
 test_3p=$(ps ax | grep iguana | grep -v grep | grep 3rd_party)
-cd /${HOME}/dPoW/iguana
+cd /${HOME}/dragon_node
 if [ ${#test_main} -gt 0 ]; then
     echo "iguana running"
 else
     echo "iguana not running - startng now"
-    ./m_notary_main &
+    ./start_dpow_main notail &
 fi
 
 if [ ${#test_3p} -gt 0 ]; then
     echo "iguana running"
 else
     echo "iguana not running"
-    ./m_notary_3rdparty_docker &
+    ./start_dpow_3p notail &
 fi
