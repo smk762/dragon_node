@@ -216,7 +216,10 @@ def get_utxos(coin: str, pubkey: str) -> list:
     if coin in const.INSIGHT_EXPLORERS:
         if const.INSIGHT_EXPLORERS[coin] != "":
             baseurl = const.INSIGHT_EXPLORERS[coin]
-            insight = InsightAPI(baseurl)
+            if baseurl == "https://chips.explorer.dexstats.info/":
+                insight = InsightAPI(baseurl, "api")
+            else:
+                insight = InsightAPI(baseurl)
             address = based_58.get_addr_from_pubkey(pubkey, coin)
             return insight.address_utxos(address)
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
@@ -227,7 +230,7 @@ def get_utxos(coin: str, pubkey: str) -> list:
         r = requests.get(url)
         return r.json()["results"]["utxos"]
     except Exception as e:
-        if coin in ["AYA", "EMC2", "MIL", "CHIPS"]:
+        if coin in ["AYA", "EMC2", "MIL"]:
             logger.warning(f"{coin} Utxo API not available")
         else:
             logger.error(f"{coin} Error getting UTXOs with pubkey {pubkey}")
