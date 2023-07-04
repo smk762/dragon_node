@@ -40,7 +40,10 @@ class Config():
     def save(self, data):
         logger.debug(f"Saving config to {const.APP_CONFIG_PATH}")
         for i in list(data.keys()):
-            if i in ["address_main_kmd", "address_main_ltc", "addresses_3p"]:
+            if i in [
+                "address_main_kmd", "config_path", "address_main",
+                "address_main_ltc", "addresses_3p"
+            ]:
                 del data[i]
         with open(const.APP_CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=4)
@@ -52,6 +55,7 @@ class Config():
                 options = list(set(config.keys()) - set(self.readonly))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
+                options.append("Add Whitelist Address")
                 self.msg.status(f"\n  ==== Config Options ====")
                 for i in options:
                     idx = options.index(i)
@@ -133,6 +137,17 @@ class Config():
                 v = self.msg.colorize(config[i], "lightcyan")
                 print(f"{k}: {v}")
 
+    def update_daemon_whitelists(self, config: dict) -> None:
+        for coin in const.WHITELIST_COMPATIBLE:
+            conf_file = helper.get_conf_path(coin)
+            with open(conf_file, 'r') as conf:
+                conf_lines = conf.readlines()
+            existing_whitelist = [i.split("=")[1].strip() for i in conf_lines if "whitelistaddress" in i]
+            new_whitelist = [i for i in config["whitelist"].items() if i[1] not in existing_whitelist]
+            with open(conf_file, 'a') as conf:
+                for k, v in new_whitelist:
+                    conf.write(f'whitelistaddress={v} # {k}\n')
+
     def update(self, option):
         config = self.load()
         options = list(config.keys())
@@ -140,6 +155,25 @@ class Config():
             self.msg.error("Invalid option, will not update.")
             return
         self.msg.option(f"Current value for {option}: {config[option]}")
+        
+        if option == "Add Whitelist Address":
+            v = self.msg.input(f"Enter KMD address for whitelist: ")
+            daemon = DaemonRPC("KMD")
+            r = daemon.validateaddress(v)
+            if "isvalid" in r:
+                if r["isvalid"]:
+                    if "whitelist" not in config:
+                        config["whitelist"] = const.ADDRESS_WHITELIST
+                    k = self.msg.input(f"Enter label for {v}: ")
+                    config["whitelist"].update({k: v})
+                    # Update daemon confs
+                    self.update_daemon_whitelists(config)
+                    
+                    self.save(config)
+                    self.msg.success(f"Added {v} to whitelist.")
+                self.msg.error(f"{v} is not a valid KMD address.")
+            self.msg.error(f"KMD daemon is not responding.")
+            
         if option == "pubkey_main":
             pubkey = helper.get_dpow_pubkey("main")
             if pubkey != "":

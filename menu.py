@@ -344,8 +344,10 @@ class IguanaMenu():
 
     def add_coins(self):
         for coin in const.COINS_MAIN:
+            self.msg.ltblue(f"adding {coin}")
             self.msg.darkgrey(f"{self.dpow_main.addcoin(coin)}")
         for coin in const.COINS_3P:
+            self.msg.ltblue(f"adding {coin}")
             self.msg.darkgrey(f"{self.dpow_3p.addcoin(coin)}")
 
     def add_peers(self):
@@ -367,9 +369,13 @@ class IguanaMenu():
 
     def dpow_coins(self):
         config = self.config.load()
+        # KMD needs to go first
+        self.msg.darkgrey(f"{self.dpow_main.dpow('KMD')}")
         for coin in const.COINS_MAIN:
+            self.msg.ltblue(f"adding {coin}")
             self.msg.darkgrey(f"{self.dpow_main.dpow(coin)}")
         for coin in const.COINS_3P:
+            self.msg.ltblue(f"adding {coin}")
             self.msg.darkgrey(f"{self.dpow_3p.dpow(coin)}")
 
     def split_utxos(self):
@@ -386,8 +392,5 @@ class IguanaMenu():
             self.nn.split_utxos(coin.upper(), force)
         else:
             self.msg.error(f"Invalid coin '{coin.upper()}', try again.")
-
-
-
     def exit(self):
         raise KeyboardInterrupt

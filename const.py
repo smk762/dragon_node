@@ -124,3 +124,4 @@ INSIGHT_EXPLORERS = {
     'TOKEL': 'https://tokel.explorer.dexstats.info/',
     'VRSC': 'https://vrsc.explorer.dexstats.info/'
 }
+WHITELIST_COMPATIBLE = list(set(COINS_MAIN) - set(["LTC"])) + ["KMD_3P", "MCL", "TOKEL", "VRSC", "CHIPS"]
