@@ -1,5 +1,7 @@
 # Dragon Node
 
+![image](https://github.com/smk762/dragon_node/assets/35845239/4843993c-8166-4837-a40a-6725715de4f5)
+
 A node management tool for Komodo Platform Notary Node Operations
 
 ---
@@ -17,6 +19,9 @@ A node management tool for Komodo Platform Notary Node Operations
 
 ---
 ## Features
+
+![image](https://github.com/smk762/dragon_node/assets/35845239/b8a3e52a-bd8d-465d-b29c-edb68df82ede)
+
 - [x] Private key conversion
 - [x] Private key import (for each server)
 - [x] Private key list (from KMD pk)
@@ -24,6 +29,7 @@ A node management tool for Komodo Platform Notary Node Operations
 - [x] dPoW stats display loop
 - [x] UTXO splitting (in tui, or can run in crontab via `./split`)
 - [x] Funds conolidation
+- [x] Iguana & mining status indicators
 - [ ] Wallet reset (work in progress - use at own risk; some 3P coins not supported)
 - [ ] Automated KMD funds sweeping
 - [ ] Automated Mining activation/deactivation
