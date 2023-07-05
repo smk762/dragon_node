@@ -155,8 +155,10 @@ class Notary():
         # TODO: Electrums may be a viable alternative
         self.consolidate(coin, True, True)
 
-    def get_vouts(self, coin: str, address: str, value: float) -> dict:
-        if coin in ["EMC", "CHIPS", "AYA", "LTC"]:
+    def get_vouts(self, coin: str, address: str, value: float, tx_size: int) -> dict:
+        if coin in ["LTC"]:
+            fee = tx_size * 0.00000001
+        elif coin in ["EMC", "CHIPS", "AYA"]:
             fee = helper.get_tx_fee(coin) / 100000000
             if fee == 0:
                 fee = 0.0001
@@ -267,8 +269,10 @@ class Notary():
             for utxos in utxo_chunks:
                 inputs_data = self.get_inputs(utxos, [], force)
                 inputs = inputs_data[0]
+                # Assuming 100 bytes per input
+                tx_size = len(inputs) * 100
                 value = inputs_data[1]
-                vouts = self.get_vouts(coin, address, value)
+                vouts = self.get_vouts(coin, address, value, tx_size)
                 if len(inputs) > 0 and len(vouts) > 0:
                     self.msg.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                     txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
@@ -324,7 +328,7 @@ class Notary():
                     inputs_data = self.get_inputs(utxos, error_utxos, force)
                     inputs = inputs_data[0]
                     value = inputs_data[1]
-                    vouts = self.get_vouts(coin, address, value)
+                    vouts = self.get_vouts(coin, address, value, tx_size)
                     if len(inputs) > 0 and len(vouts) > 0:
                         try:
                             txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
