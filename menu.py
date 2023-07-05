@@ -222,13 +222,12 @@ class WalletMenu():
         '''Gets KMD pk for each server, then converts and prints for each coin'''
         config = Config().load()
         daemon_main = DaemonRPC("KMD")
-        address_main = config["KMD"]["address"]
+        address_main = config["addresses"]["KMD"]
         wif_main = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_MAIN:
-            
             print(f"{coin}: {helper.wif_convert(coin, wif_main)}")
         daemon_3p = DaemonRPC("KMD_3P")
-        address_3p = config["KMD_3P"]["address"]
+        address_3p = config["addresses"]["KMD"]
         wif_3p = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_3P:
             print(f"{coin}: {helper.wif_convert(coin, wif_3p)}")

@@ -158,12 +158,12 @@ class Notary():
     def get_vouts(self, coin: str, address: str, value: float, tx_size: int) -> dict:
         fee = 0
         if coin in ["LTC"]:
-            fee = tx_size * 0.00000001
+            fee = tx_size * 0.00000002
         elif coin in ["EMC", "CHIPS", "AYA"]:
             fee = helper.get_tx_fee(coin) / 100000000
             if fee == 0:
                 fee = 0.0001
-        print(f"{coin} fee: {fee}")
+        self.msg.darkgrey(f"{coin} fee: {fee}")
         return {address: value - fee}
 
     def get_utxos(self, coin: str, pubkey: str) -> list:
@@ -274,17 +274,15 @@ class Notary():
                 value = inputs_data[1]
                 vouts = self.get_vouts(coin, address, value, tx_size)
                 if len(inputs) > 0 and len(vouts) > 0:
-                    self.msg.info(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
+                    self.msg.darkgrey(f"{coin} consolidating {len(inputs)} UTXOs, value: {value}")
                     txid = self.process_raw_transaction(coin, address, utxos, inputs, vouts, force)
                     if txid != "":
                         explorer_url = daemon.get_explorer_url(txid, 'tx')
                         if explorer_url != "":
                             txid = explorer_url
-                        self.msg.info(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
+                        self.msg.ltgreen(f"{coin} Sent {value} to {address}: {txid} from {len(inputs)} input UTXOs")
                     else:
                         logger.error(f"{coin} Failed to send {value} to {address} from {len(inputs)} input UTXOs")
-                        logger.debug(f"{coin} inputs {inputs}")
-                        logger.debug(f"{coin} vouts {vouts}")
                     time.sleep(0.1)
                 else:
                     logger.debug(f"{coin} no valid inputs or vouts for")
