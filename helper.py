@@ -214,7 +214,7 @@ def get_wallet_path(coin: str) -> str:
             return f"{conf_path}/wallet.dat"
     return ""
 
-def get_utxos(coin: str, pubkey: str) -> list:
+def get_utxos_from_api(coin: str, pubkey: str) -> list:
     address = based_58.get_addr_from_pubkey(pubkey, coin)
     if coin in const.INSIGHT_EXPLORERS:
         baseurl = const.INSIGHT_EXPLORERS[coin]

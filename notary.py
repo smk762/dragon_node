@@ -153,7 +153,7 @@ class Notary():
         # TODO: This relies on access to explorer APIs, which may not be available for all coins
         # AYA block explorer API has no usable endpoints
         # TODO: Electrums may be a viable alternative
-        self.consolidate(coin, True, True)
+        self.consolidate(coin, True)
 
     def get_vouts(self, coin: str, address: str, value: float, tx_size: int) -> dict:
         fee = 0
@@ -166,10 +166,11 @@ class Notary():
         self.msg.darkgrey(f"{coin} fee: {fee}")
         return {address: value - fee}
 
-    def get_utxos(self, coin: str, pubkey: str) -> list:
+    def get_utxos(self, coin: str, pubkey: str, api=True) -> list:
         daemon = DaemonRPC(coin)
-        utxos_data = helper.get_utxos(coin, pubkey)
-        if len(utxos_data) == 0:
+        if api:
+            utxos_data = helper.get_utxos_from_api(coin, pubkey)
+        else:
             try:
                 utxos_data = daemon.listunspent()
             except Exception as e:
@@ -247,20 +248,19 @@ class Notary():
             self.msg.darkgrey(f"Skipping {coin} ({count} utxos in reserve)")
             return True
                 
-    def consolidate(self, coin: str, reset=False, force: bool=False, address: str="") -> None:
+    def consolidate(self, coin: str, force: bool=False, api: bool=False) -> None:
         config = self.cfg.load()
         if helper.is_configured(config):
             print()
-            coins_data = self.get_coins_ntx_data(True)
-            if address == "":
-                address = coins_data[coin]["address"]
-            pubkey = coins_data[coin]["pubkey"]
             daemon = DaemonRPC(coin)
-            utxos = self.get_utxos(coin, pubkey)
+            coins_data = self.get_coins_ntx_data(True)
+            address = coins_data[coin]["address"]
+            pubkey = coins_data[coin]["pubkey"]
+            utxos = self.get_utxos(coin, pubkey, api)
             if len(utxos) == 0:
                 logger.warning(f"{coin} No UTXOs found")
                 return
-            if not reset:
+            if not force:
                 if len(utxos) < 20 and daemon.getbalance() > 0.001 and not force:
                     logger.debug(f"{coin} < 20 UTXOs to consolidate, skipping")
                     return
