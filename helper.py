@@ -226,13 +226,29 @@ def get_utxos(coin: str, pubkey: str) -> list:
         url = f"https://chainz.cryptoid.info/{coin.lower()}/api.dws?q=unspent"
         url += f"&key={const.CRYPTOID_API_KEY}&active={address}"
         r = requests.get(url).json()
-        return remap_utxo_data(r["unspent_outputs"])
+        utxos = []
+        for i in r["unspent_outputs"]:
+            utxos.append({
+                "txid": i["tx_hash"],
+                "vout": i["tx_ouput_n"],
+                "satoshis": i["value"],
+                "amount": i["value"] * 100000000
+            })
+        return utxos
 
     elif coin in const.BLOCKCYPHER_EXPLORERS:
         url = f"https://api.blockcypher.com/v1/{coin.lower()}/main/addrs/"
-        url += "{address}?unspentOnly=true"
+        url += f"{address}?unspentOnly=true"
         r = requests.get(url).json()
-        return remap_utxo_data(r["txrefs"])
+        utxos = []
+        for i in r["txrefs"]:
+            utxos.append({
+                "txid": i["tx_hash"],
+                "vout": i["tx_output_n"],
+                "satoshis": i["value"],
+                "amount": i["value"] * 100000000
+            })
+        return utxos
 
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
