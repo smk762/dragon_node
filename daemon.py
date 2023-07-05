@@ -245,6 +245,24 @@ class DaemonRPC():
                 elif endpoint == "block":
                     endpoint = "block/"
                 return f"{const.INSIGHT_EXPLORERS[self.coin]}{endpoint}{value}"
+        elif self.coin in const.CRYPTOID_EXPLORERS:
+            baseurl = f"https://chainz.cryptoid.info/emc2/"
+            if endpoint == "tx":
+                return f"{baseurl}tx.dws?{value}.htm"
+            elif endpoint == "addr":
+                return f"{baseurl}address.dws?{value}.htm"
+            elif endpoint == "block":
+                return f"{baseurl}block.dws?{value}.htm"
+            
+        elif self.coin in const.BLOCKCYPHER_EXPLORERS:
+            baseurl = f"https://live.blockcypher.com/{self.coin.lower()}/"
+            if endpoint == "tx":
+                return f"{baseurl}tx/{value}"
+            elif endpoint == "addr":
+                return f"{baseurl}address/{value}"
+            elif endpoint == "block":
+                return f"{baseurl}block/{value}"
+            
         try:
             coin = self.coin.split("_")[0]
             if coin == "TOKEL":

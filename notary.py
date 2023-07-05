@@ -195,20 +195,7 @@ class Notary():
         inputs = []
         for utxo in utxos:
             try:
-                # Remap utxo data from APIs
-                if "tx_pos" in utxo:
-                    utxo["vout"] = utxo["tx_pos"]
-                if "tx_hash" in utxo:
-                    utxo["txid"] = utxo["tx_hash"]
-                if "value" in utxo:
-                    utxo["satoshis"] = utxo["value"]
-
                 if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
-                    if "satoshis" not in utxo:
-                        if "amount" in utxo:
-                            utxo["satoshis"] = utxo["amount"] * 100000000
-                        else:
-                            logger.error(f"UTXO has no satoshis: {utxo}")
                     inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
                     value += utxo["satoshis"]
                 else:

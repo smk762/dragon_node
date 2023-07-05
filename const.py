@@ -102,21 +102,17 @@ ADDNODES = {
 }
 
 INSIGHT_EXPLORERS = {
-    'AYA': '',
     'CCL': 'https://ccl.explorer.dexstats.info/',
     'CHIPS': 'https://chips.explorer.dexstats.info/',
     'CLC': 'https://clc.explorer.dexstats.info/',
     'DOC': 'https://doc.dragonhound.info/',
-    'EMC2': '',
     'GLEEC': 'https://gleec.explorer.dexstats.info/',
     'ILN': 'https://iln.explorer.dexstats.info/',
     'KMD': 'https://kmd.explorer.dexstats.info/',
     'KMD_3P': 'https://kmd.explorer.dexstats.info/',
     'KOIN': 'https://koin.explorer.dexstats.info/',
-    'LTC': '',
     'MARTY': 'https://marty.dragonhound.info/',
     'MCL': 'https://mcl.explorer.dexstats.info/',
-    'MIL': '',
     'NINJA': '',
     'PIRATE': 'https://explorer.pirate.black/',
     'SUPERNET': 'https://supernet.explorer.dexstats.info/',
@@ -124,4 +120,18 @@ INSIGHT_EXPLORERS = {
     'TOKEL': 'https://tokel.explorer.dexstats.info/',
     'VRSC': 'https://vrsc.explorer.dexstats.info/'
 }
+CRYPTOID_API_KEY = os.getenv('CRYPTOID_API_KEY')
+CRYPTOID_EXPLORERS = {
+    'EMC2': 'https://chainz.cryptoid.info/emc2/',
+    'MIL': 'https://chainz.cryptoid.info/mil/'
+}
+BLOCKCYPHER_EXPLORERS = {
+    'LTC': 'https://api.blockcypher.com/v1/ltc/main'
+}
+NO_EXPLORER = {
+    'AYA': ''
+}
 WHITELIST_COMPATIBLE = list(set(COINS_MAIN) - set(["LTC"])) + ["KMD_3P", "MCL", "TOKEL", "VRSC", "CHIPS"]
+
+# https://chainz.cryptoid.info/emc2/api.dws?q=unspent&key=f01f30f935a8&active=EeVxpgmmbjLosvkHpmgSjqMFwgvUFCRmeL
+# https://api.blockcypher.com/v1/ltc/main/addrs/LS814iSp85xv7N4dGnwAyas92u9AMVr9KV?unspentOnly=true

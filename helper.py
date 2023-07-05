@@ -213,15 +213,27 @@ def get_wallet_path(coin: str) -> str:
     return ""
 
 def get_utxos(coin: str, pubkey: str) -> list:
+    address = based_58.get_addr_from_pubkey(pubkey, coin)
     if coin in const.INSIGHT_EXPLORERS:
-        if const.INSIGHT_EXPLORERS[coin] != "":
-            baseurl = const.INSIGHT_EXPLORERS[coin]
-            if baseurl == "https://chips.explorer.dexstats.info/":
-                insight = InsightAPI(baseurl, "api")
-            else:
-                insight = InsightAPI(baseurl)
-            address = based_58.get_addr_from_pubkey(pubkey, coin)
-            return insight.address_utxos(address)
+        baseurl = const.INSIGHT_EXPLORERS[coin]
+        if baseurl == "https://chips.explorer.dexstats.info/":
+            insight = InsightAPI(baseurl, "api")
+        else:
+            insight = InsightAPI(baseurl)
+        return insight.address_utxos(address)
+
+    elif coin in const.CRYPTOID_EXPLORERS:
+        url = f"https://chainz.cryptoid.info/{coin.lower()}/api.dws?q=unspent"
+        url += f"&key={const.CRYPTOID_API_KEY}&active={address}"
+        r = requests.get(url).json()
+        return remap_utxo_data(r["unspent_outputs"])
+
+    elif coin in const.BLOCKCYPHER_EXPLORERS:
+        url = f"https://api.blockcypher.com/v1/{coin.lower()}/main/addrs/"
+        url += "{address}?unspentOnly=true"
+        r = requests.get(url).json()
+        return remap_utxo_data(r["txrefs"])
+
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
         coin = coin.split("_")[0]
@@ -236,6 +248,18 @@ def get_utxos(coin: str, pubkey: str) -> list:
             logger.error(f"{coin} Error getting UTXOs with pubkey {pubkey}")
             logger.error(e)
         return []
+
+
+def remap_utxo_data(data):
+    utxos = []
+    for i in data:
+        utxos.append({
+            "txid": i["tx_hash"],
+            "vout": i["tx_output_n"],
+            "satoshis": i["value"],
+            "amount": i["value"] * 100000000
+        })
+    return utxos
 
 def format_param(param, value):
     return '-' + param + '=' + value
