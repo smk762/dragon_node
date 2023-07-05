@@ -156,15 +156,15 @@ class Notary():
         self.consolidate(coin, True, True)
 
     def get_vouts(self, coin: str, address: str, value: float, tx_size: int) -> dict:
+        fee = 0
         if coin in ["LTC"]:
             fee = tx_size * 0.00000001
         elif coin in ["EMC", "CHIPS", "AYA"]:
             fee = helper.get_tx_fee(coin) / 100000000
             if fee == 0:
                 fee = 0.0001
-            return {address: value - fee}
-        else:
-            return {address: value}
+        print(f"{coin} fee: {fee}")
+        return {address: value - fee}
 
     def get_utxos(self, coin: str, pubkey: str) -> list:
         daemon = DaemonRPC(coin)
@@ -328,6 +328,7 @@ class Notary():
                     inputs_data = self.get_inputs(utxos, error_utxos, force)
                     inputs = inputs_data[0]
                     value = inputs_data[1]
+                    tx_size = len(inputs) * 100
                     vouts = self.get_vouts(coin, address, value, tx_size)
                     if len(inputs) > 0 and len(vouts) > 0:
                         try:
