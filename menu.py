@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 import time
 import const
@@ -217,6 +217,8 @@ class WalletMenu():
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
                 print(f"{coin}: {helper.wif_convert(coin, wif)}")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
 
     def list_private_keys(self):
         '''Gets KMD pk for each server, then converts and prints for each coin'''
@@ -231,6 +233,8 @@ class WalletMenu():
         wif_3p = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_3P:
             print(f"{coin}: {helper.wif_convert(coin, wif_3p)}")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
 
     def reset_wallet(self):
         self.msg.warning("WARNING: This will delete your wallet.dat, then restart daemons and import your private keys without a rescan.")
@@ -298,6 +302,8 @@ class WalletMenu():
                         self.msg.info(f"Address {address} already imported.")
                 else:
                     self.msg.info(f"Unable to validate {coin} address {address} already imported.")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
         
     def exit(self):
         raise KeyboardInterrupt

@@ -52,7 +52,7 @@ class Config():
         while True:
             try:
                 config = self.load()
-                options = list(set(config.keys()) - set(self.readonly))
+                options = list(set(list(config.keys())) - set(self.readonly))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 options.append("Add Whitelist Address")
