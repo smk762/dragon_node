@@ -68,6 +68,12 @@ class ColorMsg():
     def ltgrey(self, msg: str) -> None:
         print(self.colorize(msg, "lightgrey"))
 
+    def ltblue(self, msg: str) -> None:
+        print(self.colorize(msg, "lightblue"))
+
+    def ltcyan(self, msg: str) -> None:
+        print(self.colorize(msg, "lightcyan"))
+
     def darkgrey(self, msg: str) -> None:
         print(self.colorize(msg, "darkgrey"))
 

@@ -3,6 +3,7 @@ import os
 import json
 import socket
 import requests
+import subprocess
 import const
 import helper
 from logger import logger
@@ -15,16 +16,40 @@ class Iguana():
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
         self.pubkey = helper.get_server_pubkey(self.server)
-        self.add_notaries()
         self.server_coins = helper.get_server_coins(self.server)
-        self.add_coins()
         
     def test_connection(self):
         r = self.help()
         if "error" in r:
             return False
-        return True       
-    
+        return True
+
+    # This is blocking the app. Leaving here to change later
+    def start(self) -> None:
+        if self.server == "main":
+            bin = const.IGUANA_BIN_MAIN
+        else:
+            bin = const.IGUANA_BIN_3P
+        try:
+            subprocess.Popen(
+                [bin],
+                cwd=f"{const.DPOW_PATH}/iguana",
+                start_new_session=True
+            )
+        except subprocess.CalledProcessError as e:
+            logger.error(e)
+
+    def stop(self) -> None:
+        if self.server == "main":
+            match = "notary"
+        else:
+            match = "3rd_party"
+        result = helper.kill_process("iguana", [match]) == "Killed"
+        if result:
+            self.msg.darkgrey(f"{self.server.title()} Iguana stopped")
+        else:
+            self.msg.darkgrey(f"Failed to stop {self.server.title()} Iguana: {result}")
+
     def add_coins(self):
         for coin in self.server_coins:
             self.addcoin(coin)

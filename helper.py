@@ -10,16 +10,24 @@ import ecdsa
 import base58
 import string
 import codecs
+import signal
 import hashlib
 import secrets
 import requests
 import binascii
 import subprocess
 import helper
+import based_58
 from color import ColorMsg
+from insight_api import InsightAPI
 from logger import logger
 
 
+def validate_pubkey(pubkey: str) -> bool:
+    # TODO: this is weak validation, improve it
+    if len(pubkey) != 66:
+        return False
+    return True
 
 
 def get_base58_params():
@@ -31,6 +39,7 @@ def generate_rpc_pass(length):
     rpc_chars = string.ascii_letters + string.digits + special_chars
     return "".join(secrets.choice(rpc_chars) for _ in range(length))
 
+
 def bytes_to_unit(filesize):
     unit = 'B'
     if filesize > 1024:
@@ -39,10 +48,17 @@ def bytes_to_unit(filesize):
         unit = 'M'
     if filesize > 1024 ** 3:
         unit = 'G'
-        
     exponents_map = {'B': 0, 'K': 1, 'M': 2, 'G': 3}
     size = filesize / 1024 ** exponents_map[unit]
     return f"{round(size, 2)}{unit}"
+
+
+def convert_bytes(num):
+    for x in ['bytes', 'KB', 'MB', 'GB', 'TB']:
+        if num < 1024.0:
+            return "%3.1f %s" % (num, x)
+        num /= 1024.0
+
 
 def hash160(hexstr):
     preshabin = binascii.unhexlify(hexstr)
@@ -61,6 +77,8 @@ def addr_from_ripemd(prefix, ripemd):
 
 def get_wiftype(coin):
     params = get_base58_params()
+    if coin == "KMD_3P":
+        coin = "KMD"
     if coin not in params:
         logger.error(f"Coin {coin} not found in base 58 params, using KMD params...")
         return params["KMD"]["wiftype"]
@@ -197,6 +215,43 @@ def get_wallet_path(coin: str) -> str:
     return ""
 
 def get_utxos(coin: str, pubkey: str) -> list:
+    address = based_58.get_addr_from_pubkey(pubkey, coin)
+    if coin in const.INSIGHT_EXPLORERS:
+        baseurl = const.INSIGHT_EXPLORERS[coin]
+        if baseurl == "https://chips.explorer.dexstats.info/":
+            insight = InsightAPI(baseurl, "api")
+        else:
+            insight = InsightAPI(baseurl)
+        return insight.address_utxos(address)
+
+    elif coin in const.CRYPTOID_EXPLORERS:
+        url = f"https://chainz.cryptoid.info/{coin.lower()}/api.dws?q=unspent"
+        url += f"&key={const.CRYPTOID_API_KEY}&active={address}"
+        r = requests.get(url).json()
+        utxos = []
+        for i in r["unspent_outputs"]:
+            utxos.append({
+                "txid": i["tx_hash"],
+                "vout": i["tx_ouput_n"],
+                "satoshis": i["value"],
+                "amount": i["value"] * 100000000
+            })
+        return utxos
+
+    elif coin in const.BLOCKCYPHER_EXPLORERS:
+        url = f"https://api.blockcypher.com/v1/{coin.lower()}/main/addrs/"
+        url += f"{address}?unspentOnly=true"
+        r = requests.get(url).json()
+        utxos = []
+        for i in r["txrefs"]:
+            utxos.append({
+                "txid": i["tx_hash"],
+                "vout": i["tx_output_n"],
+                "satoshis": i["value"],
+                "amount": i["value"] * 100000000
+            })
+        return utxos
+
     url = f"http://stats.kmd.io/api/tools/pubkey_utxos/"
     try:
         coin = coin.split("_")[0]
@@ -205,12 +260,24 @@ def get_utxos(coin: str, pubkey: str) -> list:
         r = requests.get(url)
         return r.json()["results"]["utxos"]
     except Exception as e:
-        if coin in ["AYA", "EMC2", "MIL", "CHIPS"]:
+        if coin in ["AYA", "EMC2", "MIL"]:
             logger.warning(f"{coin} Utxo API not available")
         else:
             logger.error(f"{coin} Error getting UTXOs with pubkey {pubkey}")
             logger.error(e)
         return []
+
+
+def remap_utxo_data(data):
+    utxos = []
+    for i in data:
+        utxos.append({
+            "txid": i["tx_hash"],
+            "vout": i["tx_output_n"],
+            "satoshis": i["value"],
+            "amount": i["value"] * 100000000
+        })
+    return utxos
 
 def format_param(param, value):
     return '-' + param + '=' + value
@@ -313,13 +380,50 @@ def get_coins_config():
     with open(const.COINS_CONFIG_PATH, "r") as f:
         return json.load(f)
 
+def get_dpow_pubkey(server: str) -> str:
+    if server == "main":
+        fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
+    elif server == "3p":
+        fn = f"{const.HOME}/dPoW/iguana/pubkey_3p.txt"
+    else:
+        raise ValueError("Invalid server type")
+    if not os.path.exists(fn):
+        return ""
+    pubkey = ""
+    with open(fn, "r") as f:
+        for line in f.readlines():
+            if line.startswith("pubkey"):
+                pubkey = line.split("=")[1].strip()
+                break
+    if not validate_pubkey(pubkey):
+        raise ValueError("Invalid pubkey")
+    return pubkey
 
 def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
-   
+
+
 def chunkify(data: list, chunk_size: int):
     return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]
+
+
+def is_configured(config: dict) -> bool:
+    if "pubkey_main" not in config:
+        return False
+    if "pubkey_3p" not in config:
+        return False
+    if "sweep_address" not in config:
+        return False
+    if config["pubkey_main"] is None:
+        return False
+    if config["pubkey_3p"] is None:
+        return False
+    if len(config["pubkey_main"]) == 0:
+        return False
+    if len(config["pubkey_3p"]) == 0:
+        return False
+    return True
 
 
 # simple key sort
@@ -375,7 +479,21 @@ def preexec(): # Don't forward signals.
 def launch(launch_params, log_output):
     subprocess.Popen(launch_params, stdout=log_output, stderr=log_output, universal_newlines=True, preexec_fn=preexec)
 
+
+def kill_process(process, filter=None):
+    try:
+        cmd = f"ps ax | grep {process} | grep -v grep"
+        if filter:
+            cmd += f" | grep {filter}"
+        for line in os.popen(cmd):
+            fields = line.split()
+            pid = fields[0]
+            os.kill(int(pid), signal.SIGKILL)
+        return "Killed"
+    except Exception as e:
+        return False
     
+
 if __name__ == '__main__':
     wif = input("Enter WIF: ")
     pubkey = wif_to_pubkey(wif)

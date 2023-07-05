@@ -18,7 +18,11 @@ class StatsLine:
         self.col_widths = column_widths
         self.daemon = DaemonRPC(self.coin)
         self.replenish_utxos = replenish_utxos
-        
+    
+    # To check if daemon pubkey matches config
+    def test_pubkey(self):
+        pass
+            
     def last_block_time(self):
         best_block = self.daemon.rpc.getbestblockhash()
         best_blk_info = self.daemon.rpc.getblock(best_block)
@@ -26,27 +30,8 @@ class StatsLine:
         return last_block
 
     def ntx_utxo_count(self):
-        unspent = self.daemon.listunspent()
-        utxo_value =helper.get_utxo_value(self.coin)
-        count = 0
-        for utxo in unspent:
-            if utxo["amount"] == utxo_value:
-                count += 1
-        if self.replenish_utxos:
-            nn = Notary()
-            if count < nn.get_utxo_threshold(self.coin):
-                server = helper.get_coin_server(self.coin)
-                split_amount = nn.get_split_amount(self.coin)
-                sats = int(helper.get_utxo_value(self.coin, True))
-                iguana = Iguana(server)
-                if const.AUTO_SPLIT:
-                    if iguana.test_connection():
-                        r = iguana.splitfunds(self.coin, split_amount, sats)
-                        if 'txid' in r:
-                            self.msg.darkgrey(f"Split {split_amount} utxos for {self.coin}: {r['txid']}")
-                        else:
-                            self.msg.darkgrey(f"Error splitting {split_amount} utxos for {self.coin}: {r}")
-        return count
+        utxo_value = helper.get_utxo_value(self.coin)
+        return self.daemon.get_utxo_count(utxo_value)
 
     def connections(self):
         networkinfo = self.daemon.getnetworkinfo()
@@ -164,7 +149,7 @@ class Stats:
             "LASTNTX", "BLOCKS", "LASTBLK", "CONN",
             "SIZE", "NUMTX", "TIME"
         ]
-        self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths) + 1)
+        self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths)) + 3
         
     def format_line(self, row: list, color: str="") -> str:
         line = " | "
@@ -181,8 +166,29 @@ class Stats:
     def header(self) -> str:
         return self.format_line(self.columns)
     
+    def footer(self, mined_str) -> str:
+        daemon = DaemonRPC("KMD")
+        iguana_main = Iguana('main')
+        iguana_3p = Iguana('3p')
+        if daemon.is_mining():
+            mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "lightgreen")
+        else:
+            mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
+        if iguana_main.test_connection():
+            status_main = self.msg.colorize(f"[ dPoW Main \N{check mark} ]", "lightgreen")
+        else:
+            status_main = self.msg.colorize(f"[ dPoW Main \N{runic cross punctuation} ]", "darkgrey")
+        if iguana_3p.test_connection():
+            status_3p = self.msg.colorize(f"[ dPoW 3P \N{check mark} ]", "lightgreen")
+        else:
+            status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
+
+        date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
+        footer_row = f"\N{position indicator}  {status_main}  \N{position indicator}  {status_3p}  \N{position indicator}  {mining}  \N{position indicator}  {date_str}  \N{position indicator}"
+        return footer_row.center(145)
+    
     def spacer(self) -> str:
-        return " " + "-" * (self.table_width)
+        return " " + "-" * (self.table_width - 1)
 
     def show(self, replenish_utxos=True) -> None:
         print()
@@ -193,15 +199,11 @@ class Stats:
             line = StatsLine(self.col_widths, coin, replenish_utxos)
             row = line.get()
             if coin == "KMD":
-                last_mined = row[-1]
-                row = row[:-1]
-                mined_str = f"Last KMD Mined: {last_mined}"
+                mined_str = f"{row.pop(-1)}"
             if row[-1] == "-":
-                print(self.format_line(row, "lightred"))
+                print(self.format_line(row, "darkgrey"))
             else:
                 print(self.format_line(row))
         print(self.spacer())
-        
-        date_str = f'| {mined_str}  | ' + datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S") + ' |'
-        fmt_date_str = str(date_str).rjust(self.table_width)
-        print(fmt_date_str)
+        print(self.footer(mined_str))
+       

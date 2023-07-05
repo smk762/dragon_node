@@ -8,6 +8,8 @@ import helper
 import requests
 from slickrpc import Proxy
 from requests.auth import HTTPBasicAuth
+from requests.exceptions import InvalidURL, RequestException, ConnectionError
+
 from logger import logger
 from color import ColorMsg
 
@@ -20,7 +22,8 @@ class DaemonRPC():
         self.rpcuser = self.creds[0]
         self.rpcpass = self.creds[1]
         self.rpcport = self.creds[2]
-
+        
+        
     def get_creds(self):
         rpcport = 0
         rpcuser = ''
@@ -51,26 +54,52 @@ class DaemonRPC():
             "method": method,
             "params": method_params,
         }
-        r = requests.post(
-            f"http://127.0.0.1:{self.rpcport}",
-            json.dumps(params),
-            auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
-            timeout=90
-        )
         try:
+            r = requests.post(
+                f"http://127.0.0.1:{self.rpcport}",
+                json.dumps(params),
+                auth=HTTPBasicAuth(self.rpcuser, self.rpcpass),
+                timeout=90
+            )
             # logger.debug(f"RPC: {method} {method_params}")
             resp = r.json()
             # logger.debug(f"response: {resp}")
             return resp
         except requests.exceptions.InvalidURL as e:
-            resp = {"error": "Invalid URL"}
+            resp = {
+                "error": "Invalid URL",
+                "result": None
+            }
+            self.msg.error(f'')
+        except requests.exceptions.ConnectionError:
+            resp = {
+                "error": "Daemon connection error",
+                "result": None
+            }
+            self.msg.error(f'')
         except requests.exceptions.RequestException as e:
-            resp = {"result": r.text}
+            resp = {
+                "error": f"Error! {e}",
+                "result": None
+            }
+            self.msg.error(f'')
+        except Exception as e:
+            resp = {
+                "error": f"Error! {e}",
+                "result": None
+            }
+        # self.msg.darkgrey(f"RPC Failed: {resp}")
         return resp
+
+    def addnode(self, ip: str, cmd: str="add") -> dict:
+        try:
+            return self.rpc("addnode", [ip, cmd])["result"]
+        except Exception as e:
+            return {"error": f"Error! {e}"}
 
     def getinfo(self):
         return self.rpc("getinfo")["result"]
-    
+
     def getnetworkinfo(self):
         return self.rpc("getnetworkinfo")["result"]
 
@@ -80,7 +109,9 @@ class DaemonRPC():
     def dumpprivkey(self, address):
         return self.rpc("dumpprivkey", [address])["result"]
 
-    def sendtoaddress(self, address, amount):
+    def sendtoaddress(self, address: str, amount: float, subtractfeefromamount: bool=True):
+        if not subtractfeefromamount:
+            return self.rpc("sendtoaddress", [address, amount])["result"]
         return self.rpc("sendtoaddress", [address, amount, "", "", True])["result"]
 
     def gettxoutproof(self, txid):
@@ -121,10 +152,18 @@ class DaemonRPC():
         return addr
 
     def validateaddress(self, address: str) -> dict:
-        return self.rpc("validateaddress", [address])["result"]
+        data = self.rpc("validateaddress", [address])
+        if "result" in data:
+            return data["result"]
+        logger.debug(f"validateaddress: {data}")
+        return {}
     
     def getaddressinfo(self, address: str) -> dict:
-        return self.rpc("getaddressinfo", [address])["result"]
+        data =  self.rpc("getaddressinfo", [address])
+        if "result" in data:
+            return data["result"]
+        logger.debug(f"getaddressinfo: {data}")
+        return {}
 
     ## Blocks
     def getblock(self, block) -> dict:
@@ -173,11 +212,10 @@ class DaemonRPC():
             end = self.getblockcount()
         return self.rpc("rescanblockchain", [start, end])["result"]
 
-    def unlock_unspent(self):
-        locked_unspent = self.get_locked_unspent()
+    def unlock_unspent(self, locked_unspent):
         return self.rpc("lockunspent", [True, locked_unspent])["result"]
 
-    def get_locked_unspent(self):
+    def listlockunspent(self):
         return self.rpc("listlockunspent")["result"]
 
     # Transactions
@@ -195,20 +233,86 @@ class DaemonRPC():
             if not utxo["spendable"]:
                 logger.info(utxo)
 
-    def get_explorer_url(self, txid, endpoint: str='explorer_tx_url') -> str:
+    def get_explorer_url(self, value, endpoint: str='tx') -> str:
         # Param value can be a txid, address, or block
-        # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be adred to coins repo)
+        # Valid endpoint values: explorer_tx_url, explorer_address_url, TODO: explorer_block_url (needs to be added to coins repo)
+        if self.coin in const.INSIGHT_EXPLORERS:
+            if const.INSIGHT_EXPLORERS[self.coin] != "":
+                if endpoint == "tx":
+                    endpoint = "tx/"
+                elif endpoint == "addr":
+                    endpoint = "address/"
+                elif endpoint == "block":
+                    endpoint = "block/"
+                return f"{const.INSIGHT_EXPLORERS[self.coin]}{endpoint}{value}"
+        elif self.coin in const.CRYPTOID_EXPLORERS:
+            baseurl = f"https://chainz.cryptoid.info/emc2/"
+            if endpoint == "tx":
+                return f"{baseurl}tx.dws?{value}.htm"
+            elif endpoint == "addr":
+                return f"{baseurl}address.dws?{value}.htm"
+            elif endpoint == "block":
+                return f"{baseurl}block.dws?{value}.htm"
+            
+        elif self.coin in const.BLOCKCYPHER_EXPLORERS:
+            baseurl = f"https://live.blockcypher.com/{self.coin.lower()}/"
+            if endpoint == "tx":
+                return f"{baseurl}tx/{value}"
+            elif endpoint == "addr":
+                return f"{baseurl}address/{value}"
+            elif endpoint == "block":
+                return f"{baseurl}block/{value}"
+            
         try:
-            if self.coin == "TOKEL":
+            coin = self.coin.split("_")[0]
+            if coin == "TOKEL":
                 coin = "TKL"
+            elif coin == "PIRATE":
+                coin = "ARRR"
             else:
                 coin = self.coin
             data = helper.get_coins_config()
             baseurl = data[coin]["explorer_url"]
-            endpoint = data[coin][endpoint]
-            return baseurl + endpoint + txid
+            if endpoint == "tx":
+                if "explorer_tx_url" in data[coin]:
+                    endpoint = data[coin]["explorer_tx_url"]
+                if endpoint == "":
+                    endpoint = "tx/"
+            if endpoint == "addr":
+                if "explorer_address_url" in data[coin]:
+                    endpoint = data[coin]["explorer_address_url"]
+                if endpoint == "":
+                    endpoint = "addr/"
+            if endpoint == "block":
+                # Needs more suport in coins repo
+                endpoint = "b/"
+            return f"{baseurl}{endpoint}{value}"
         except json.decoder.JSONDecodeError:
             return ""
         except Exception as e:
             logger.error(f"Error getting explorers: {e}")
             return ""
+
+    def get_utxo_count(self, utxo_value: float) -> int:
+        unspent = self.listunspent()
+        count = 0
+        if unspent:
+            for utxo in unspent:
+                if utxo["amount"] == utxo_value:
+                    count += 1
+        return count
+
+    def is_mining(self) -> bool:
+        try:
+            if "result" in self.rpc("getmininginfo"):
+                if "generate" in self.rpc("getmininginfo")["result"]:
+                    return self.rpc("getmininginfo")["result"]["generate"]
+        except Exception as e:
+            pass
+        return False
+
+    def start_mining(self) -> bool:
+        return self.rpc("setgenerate", [True, 1])["result"]
+
+    def stop_mining(self) -> bool:
+        return self.rpc("setgenerate", [False])["result"]

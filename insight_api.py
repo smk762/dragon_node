@@ -7,7 +7,7 @@ import requests
 class InsightAPI:
     def __init__(self, baseurl, api_path="insight-api-komodo", api_key=None):
         self.api_key = api_key # Unused for now, but may be used in the future
-        self.api_url = f"{baseurl}/{api_path}"
+        self.api_url = f"{baseurl}{api_path}"
 
     def address(self, address):
         '''Get information about an address'''
@@ -29,9 +29,14 @@ class InsightAPI:
 
     def address_utxos(self, address):
         '''Get the unspent outputs for an address'''
-        url = f'{self.api_url}/addr/{address}/balance'
-        response = requests.get(url)
-        return response.json()
+        url = f'{self.api_url}/addr/{address}/utxo'
+        try:
+            response = requests.get(url)
+            return response.json()
+        except:
+            print(f"{url} failed to return a response. Check the address and try again.")
+            return []
+            
 
     def addresses_transactions(self, addresses, from_=None, to_=None, no_asm=None, no_script_sig=None, no_spent=None):
         '''Get the transactions for multiple addresses'''
@@ -148,5 +153,4 @@ class InsightAPI:
         url = f'{self.api_url}/txs/?address={addresses}'
         response = requests.get(url)
         return response.json()
-
 

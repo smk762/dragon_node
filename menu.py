@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-
+import os
 import sys
 import time
 import const
@@ -13,7 +13,21 @@ from iguana import Iguana
 from logger import logger
 import based_58
 
+notary = Notary()
 msg = ColorMsg()
+
+def show_logo():
+    msg.table('''
+      ________                                         _____   __     _________      
+      ___  __ `____________ _ _____ _____________      ___/ | / /___________/ /____  
+      __  / / /_/ ___// __ `/ / __ ` / __ `_/ __ `     __/  |/ / / __ `/ __  / / _ ` 
+      _  /_/ /_/ /   / /_/ / / /_/ // /_/ // / / /     _/ /|  / / /_/ / /_/ / /  __/ 
+      /_____/ /_/    `__,_/  `__, / `____//_/ /_/      /_/ |_/  `____/`__,_/  `___/  
+                            /____/                                                   
+    ''')
+    msg.ltcyan('{:^80}'.format('Dragon Node menu v0.2 by Dragonhound'))
+    print()
+    notary.welcome()
 
 def show_menu(menu, menu_name):
     while True:
@@ -31,12 +45,14 @@ def show_menu(menu, menu_name):
             except ValueError:
                 msg.error("Invalid option, try again.")
                 continue
-            if q > len(menu):
+            if q >= len(menu):
                 msg.error("Invalid option, try again.")
+                continue
             else:
                 for k, v in menu[q].items():
                     v()
         except KeyboardInterrupt:
+            print()
             break
 
 
@@ -47,33 +63,25 @@ class MainMenu():
         self.servers = const.DPOW_SERVERS
             
         self.menu = [
-            {"configure": self.configure},
             {"stats": self.stats},
-            {"Node_menu": NodeMenu().show},
+            {"config_menu": ConfigMenu().show},
+            {"iguana_menu": IguanaMenu().show},
+            {"notary_menu": NotaryMenu().show},
             {"wallet_menu": WalletMenu().show},
             {"exit": self.exit}
         ]
 
     def show(self):
         show_menu(self.menu, "Main Menu")
-    
-    def configure(self):
-        self.config.create()
+        
+    def logo(self):
+        show_logo()
 
     def stats(self):
         nnstats = Stats(const.DPOW_COINS)
         while True:
             try:
                 nnstats.show()
-                err = []
-                iguana = Iguana("main")
-                if not iguana.test_connection():
-                    err.append("[Main Iguana down!]")
-                iguana = Iguana("3p")
-                if not iguana.test_connection():
-                    err.append("[3P Iguana down!]")
-                if len(err) > 0:
-                    self.msg.error(" " + '   '.join(err))
                 print()
                 self.msg.status(" Ctrl+C to exit to main menu.")
                 time.sleep(600)
@@ -83,53 +91,97 @@ class MainMenu():
     def exit(self):
         sys.exit()
 
-class NodeMenu():
+
+class NotaryMenu():
     def __init__(self):
         self.config = Config()
         self.msg = ColorMsg()
+        self.nn = Notary()
         self.servers = const.DPOW_SERVERS
         self.menu = [
+            {"main_menu": self.exit},
+            {"start_mining": self.start_mining},
+            {"stop_mining": self.stop_mining},
             {"start_coin": self.start_coin},
-            {"restart_coin": self.restart_coin},
             {"stop_coin": self.stop_coin},
-            {"main_menu": self.exit}
+            {"migrate_funds_to_pubkey": self.migrate_funds_to_pubkey}
         ]
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-   
+
+
     def start_coin(self):
-        notary = Notary()
         coin = self.msg.input("Enter coin to start (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
-                notary.start(coin)
+                self.nn.start(coin)
         elif coin.upper() in const.DPOW_COINS:
-            notary.start(coin)
-        else:
-            self.msg.error(f"Invalid coin '{coin}', try again.")
-
-    def restart_coin(self):
-        notary = Notary()
-        coin = self.msg.input("Enter coin to restart (or ALL): ")
-        if coin.lower() == "all":
-            for coin in const.DPOW_COINS:
-                notary.restart(coin)
-        elif coin.upper() in const.DPOW_COINS:
-            notary.restart(coin)
+            self.nn.start(coin)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
 
     def stop_coin(self):
-        notary = Notary()
         coin = self.msg.input("Enter coin to stop (or ALL): ")
         if coin.lower() == "all":
             for coin in const.DPOW_COINS:
-                notary.stop(coin)
+                self.nn.stop(coin)
         elif coin.upper() in const.DPOW_COINS:
-            notary.stop(coin)
+            self.nn.stop(coin)
         else:
             self.msg.error(f"Invalid coin '{coin}', try again.")
+
+    def start_mining(self):
+        daemon = DaemonRPC("KMD")
+        if daemon.is_mining():
+            self.msg.darkgrey("Already mining.")
+            return
+        print(daemon.start_mining())
+       
+    def stop_mining(self):
+        daemon = DaemonRPC("KMD")
+        if daemon.is_mining():
+            self.msg.darkgrey("Already mining.")
+            return
+        print(daemon.start_mining())
+
+    def migrate_funds_to_pubkey(self):
+        pubkey_main = self.msg.input("Enter pubkey to migrate Main funds to: ")
+        pubkey_3p = self.msg.input("Enter pubkey to migrate 3P funds to: ")
+        nn = Notary()
+        coins_ntx_data = nn.get_coins_ntx_data()
+        coins = list(coins_ntx_data.keys())
+        coins.sort()
+        print()
+        
+        # Try consolidate first to get any hidden utxos
+        for coin in coins:
+            server = helper.get_coin_server(coin)
+            pubkey = pubkey_main if server == "main" else pubkey_3p
+            address = based_58.get_addr_from_pubkey(pubkey, coin)
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{address:<40}", "lightcyan")
+            print(f"{k}: {v}")
+            try:
+                nn.consolidate(coin, True, True, address)
+            except Exception as e:
+                self.msg.error(f"Error consolidating {coin}: {e}")
+
+        for i in range(60):
+            msg.status(f"Waiting {60-i} seconds for consolidations to progress...")
+            time.sleep(1)
+
+        # Try daemon next to get any funds is change addresses
+        for coin in coins:
+            server = helper.get_coin_server(coin)
+            pubkey = pubkey_main if server == "main" else pubkey_3p
+            address = based_58.get_addr_from_pubkey(pubkey, coin)
+            try:
+                daemon = DaemonRPC(coin)
+                balance = daemon.getbalance()
+                daemon.sendtoaddress(address, balance, True)
+            except Exception as e:
+                self.msg.error(f"Error connecting to {coin}: {e}")      
 
     def exit(self):
         raise KeyboardInterrupt
@@ -141,20 +193,26 @@ class WalletMenu():
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
         self.menu = [
+            {"main_menu": self.exit},
             {"consolidate": self.consolidate},
-            {"convert_privkey": self.convert_privkey},
             {"reset_wallet": self.reset_wallet},
-            {"import_privkey": self.import_privkey},
             {"list_addresses": self.list_addresses},
-            {"main_menu": self.exit}
+            {"list_private_keys": self.list_private_keys},
+            {"import_private_key": self.import_privkey},
+            {"convert_private_key": self.convert_privkey}
         ]
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
         
     def consolidate(self):
-        self.notary = Notary()
-        if self.notary.configured:
+        config = Config().load()
+        if helper.is_configured(config):
+            self.notary = Notary()
+            self.msg.status("AYA not yet supported...")
+            if not const.CRYPTOID_API_KEY:
+                self.msg.status("EMC2 & MIL need an API key from https://chainz.cryptoid.info/api.dws in your .env file...")
+            
             coin = self.msg.input("Enter coin to consolidate (or ALL): ")
             q = self.msg.input("Force consolidation? (y/n): ")
             if q.lower() == "y":
@@ -165,7 +223,7 @@ class WalletMenu():
                 for coin in const.DPOW_COINS:
                     self.notary.consolidate(coin, force, force)
             elif coin.upper() in const.DPOW_COINS:
-                self.notary.consolidate(coin, force, force)
+                self.notary.consolidate(coin.upper(), force, force)
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
         else:
@@ -175,14 +233,48 @@ class WalletMenu():
         wif = self.msg.input("Enter private key: ")
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
-                print(f"{coin}: {helper.wif_convert(coin, wif)}")       
+                k = self.msg.colorize(f"{coin:>12}", "lightblue")
+                v = self.msg.colorize(f"{helper.wif_convert(coin, wif)}", "lightcyan")
+                print(f"{k}: {v}")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
+        show_logo()
+
+    def list_private_keys(self):
+        '''Gets KMD pk for each server, then converts and prints for each coin'''
+        config = Config().load()
+        daemon_main = DaemonRPC("KMD")
+        address_main = config["addresses"]["KMD"]
+        wif_main = daemon_main.dumpprivkey(address_main)
+        for coin in const.COINS_MAIN:
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{helper.wif_convert(coin, wif_main)}", "lightcyan")
+            print(f"{k}: {v}")
+        daemon_3p = DaemonRPC("KMD_3P")
+        address_3p = config["addresses"]["KMD"]
+        wif_3p = daemon_main.dumpprivkey(address_main)
+        for coin in const.COINS_3P:
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{helper.wif_convert(coin, wif_3p)}", "lightcyan")
+            print(f"{k}: {v}")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
+        show_logo()
 
     def reset_wallet(self):
-        notary = Notary()
-        if notary.configured:
+        self.msg.warning("WARNING: This will delete your wallet.dat, then restart daemons and import your private keys without a rescan.")
+        self.msg.warning("Afterwards, a consolidation will be attempted - but not all coins have a supporting API.")
+        self.msg.warning("For some third party coins, alternative methods like `importprunefunds` may be required.")
+        config = Config().load()
+        if helper.is_configured(config):
+            notary = Notary()
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
-                    notary.reset_wallet_all()                        
+                q = self.msg.input("Exclude coins that can not auto-consolidate? [y/n]: ")
+                if q.lower() == "y":
+                    notary.reset_wallet_all(True)
+                else:
+                    notary.reset_wallet_all(False)
             elif coin.upper() in const.DPOW_COINS:
                 notary.reset_wallet(coin)                    
             else:
@@ -195,7 +287,9 @@ class WalletMenu():
         coins.sort()
         print()
         for coin in coins:
-            self.msg.status(f"{coin:>12}: {coins_ntx_data[coin]['address']:<40}")
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{coins_ntx_data[coin]['address']:<40}", "lightcyan")
+            print(f"{k}: {v}")
 
     def import_privkey(self):
         nn = Notary()
@@ -214,21 +308,124 @@ class WalletMenu():
                 daemon = DaemonRPC(coin)
                 self.msg.info(f"{coin} Validating {address}...")
                 addr_validation = daemon.validateaddress(address)
-                if "ismine" not in addr_validation:
+                if addr_validation is None:
                     addr_validation = daemon.getaddressinfo(address)
-                self.msg.info(f"{coin} Address: {addr_validation}")
-                if "ismine" not in addr_validation:
-                    self.msg.info(f"{coin} Importing private key...")
-                    wif = helper.wif_convert(coin, wif)
-                    r = daemon.importprivkey(wif)
-                    self.msg.info(f"{coin} Address: {r}")
-                elif not addr_validation["ismine"]:
-                    self.msg.info(f"{coin} Importing private key...")
-                    wif = helper.wif_convert(coin, wif)
-                    r = daemon.importprivkey(wif)
-                    self.msg.info(f"Address: {r}")
+
+                if addr_validation is not None:
+                    self.msg.info(f"{coin} Address: {addr_validation}")
+                    if "ismine" not in addr_validation:
+                        self.msg.info(f"{coin} Importing private key...")
+                        wif = helper.wif_convert(coin, wif)
+                        r = daemon.importprivkey(wif)
+                        self.msg.info(f"{coin} Address: {r}")
+                    elif not addr_validation["ismine"]:
+                        self.msg.info(f"{coin} Importing private key...")
+                        wif = helper.wif_convert(coin, wif)
+                        r = daemon.importprivkey(wif)
+                        self.msg.info(f"Address: {r}")
+                    else:
+                        self.msg.info(f"Address {address} already imported.")
                 else:
-                    self.msg.info(f"Address {address} already imported.")
+                    self.msg.info(f"Unable to validate {coin} address {address} already imported.")
+        self.msg.input("Press enter to continue...")
+        os.system('clear')
+        show_logo()
         
+    def exit(self):
+        raise KeyboardInterrupt
+
+
+class ConfigMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.menu = [
+            {"main_menu": self.exit},
+            {"show_config": self.show_config},
+            {"update_config": self.update_config}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Configuration Menu")
+
+    def show_config(self):
+        self.config.show()
+
+    def update_config(self):
+        self.config.menu()
+
+    def exit(self):
+        raise KeyboardInterrupt
+
+
+class IguanaMenu():
+    def __init__(self):
+        self.config = Config()
+        self.msg = ColorMsg()
+        self.nn = Notary()
+        self.dpow_main = Iguana("main")
+        self.dpow_3p = Iguana("3p")
+        self.menu = [
+            {"main_menu": self.exit},
+            {"stop_iguana": self.stop_iguana},
+            {"add_coins": self.add_coins},
+            {"add_peers": self.add_peers},
+            {"dpow_coins": self.dpow_coins},
+            {"split_utxos": self.split_utxos}
+        ]
+
+    def show(self):
+        show_menu(self.menu, "Iguana Menu")
+
+    def add_coins(self):
+        for coin in const.COINS_MAIN:
+            self.msg.ltblue(f"adding {coin}")
+            self.msg.darkgrey(f"{self.dpow_main.addcoin(coin)}")
+        for coin in const.COINS_3P:
+            self.msg.ltblue(f"adding {coin}")
+            self.msg.darkgrey(f"{self.dpow_3p.addcoin(coin)}")
+
+    def add_peers(self):
+        config = self.config.load()
+        for k, v in config["addnotary"].items():
+            self.msg.info(f"Adding {k}")
+            self.msg.darkgrey(f"{self.dpow_main.addnotary(v)}")
+            self.msg.darkgrey(f"{self.dpow_3p.addnotary(v)}")
+            for coin in const.DPOW_COINS:
+                self.msg.darkgrey(f"{DaemonRPC(coin).addnode(v)}")
+
+    def start_iguana(self):
+        self.dpow_main.start()
+        self.dpow_3p.start()
+
+    def stop_iguana(self):
+        self.dpow_main.stop()
+        self.dpow_3p.stop()
+
+    def dpow_coins(self):
+        config = self.config.load()
+        # KMD needs to go first
+        self.msg.darkgrey(f"{self.dpow_main.dpow('KMD')}")
+        for coin in const.COINS_MAIN:
+            self.msg.ltblue(f"adding {coin}")
+            self.msg.darkgrey(f"{self.dpow_main.dpow(coin)}")
+        for coin in const.COINS_3P:
+            self.msg.ltblue(f"adding {coin}")
+            self.msg.darkgrey(f"{self.dpow_3p.dpow(coin)}")
+
+    def split_utxos(self):
+        coin = self.msg.input("Enter coin to split (or ALL): ")
+        q = self.msg.input("Force split? (y/n): ")
+        if q.lower() == "y":
+            force = True
+        else:
+            force = False                    
+        if coin.lower() == "all":
+            for coin in const.DPOW_COINS:
+                self.nn.split_utxos(coin, force)
+        elif coin.upper() in const.DPOW_COINS:
+            self.nn.split_utxos(coin.upper(), force)
+        else:
+            self.msg.error(f"Invalid coin '{coin.upper()}', try again.")
     def exit(self):
         raise KeyboardInterrupt
