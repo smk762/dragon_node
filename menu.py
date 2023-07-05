@@ -233,7 +233,7 @@ class WalletMenu():
         wif = self.msg.input("Enter private key: ")
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
-                print(f"{coin}: {helper.wif_convert(coin, wif)}")
+                self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif)}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
         show_logo()
@@ -245,12 +245,12 @@ class WalletMenu():
         address_main = config["addresses"]["KMD"]
         wif_main = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_MAIN:
-            print(f"{coin}: {helper.wif_convert(coin, wif_main)}")
+            self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif_main)}")
         daemon_3p = DaemonRPC("KMD_3P")
         address_3p = config["addresses"]["KMD"]
         wif_3p = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_3P:
-            print(f"{coin}: {helper.wif_convert(coin, wif_3p)}")
+            self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif_3p)}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
         show_logo()
