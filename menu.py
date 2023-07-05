@@ -233,7 +233,9 @@ class WalletMenu():
         wif = self.msg.input("Enter private key: ")
         for coin in const.DPOW_COINS:
             if coin != "KMD_3P":
-                self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif)}")
+                k = self.msg.colorize(f"{coin:>12}", "lightblue")
+                v = self.msg.colorize(f"{helper.wif_convert(coin, wif)}", "lightcyan")
+                print(f"{k}: {v}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
         show_logo()
@@ -245,12 +247,16 @@ class WalletMenu():
         address_main = config["addresses"]["KMD"]
         wif_main = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_MAIN:
-            self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif_main)}")
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{helper.wif_convert(coin, wif_main)}", "lightcyan")
+            print(f"{k}: {v}")
         daemon_3p = DaemonRPC("KMD_3P")
         address_3p = config["addresses"]["KMD"]
         wif_3p = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_3P:
-            self.msg.status(f"{coin:>11}: {helper.wif_convert(coin, wif_3p)}")
+            k = self.msg.colorize(f"{coin:>12}", "lightblue")
+            v = self.msg.colorize(f"{helper.wif_convert(coin, wif_3p)}", "lightcyan")
+            print(f"{k}: {v}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
         show_logo()
