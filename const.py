@@ -3,6 +3,8 @@ import os
 import sys
 import json
 from os.path import expanduser, dirname, realpath
+from dotenv import load_dotenv
+load_dotenv()
 
 # Path constants
 HOME = expanduser('~')
