@@ -13,7 +13,21 @@ from iguana import Iguana
 from logger import logger
 import based_58
 
+notary = Notary()
 msg = ColorMsg()
+
+def show_logo():
+    msg.table('''
+      ________                                         _____   __     _________      
+      ___  __ `____________ _ _____ _____________      ___/ | / /___________/ /____  
+      __  / / /_/ ___// __ `/ / __ ` / __ `_/ __ `     __/  |/ / / __ `/ __  / / _ ` 
+      _  /_/ /_/ /   / /_/ / / /_/ // /_/ // / / /     _/ /|  / / /_/ / /_/ / /  __/ 
+      /_____/ /_/    `__,_/  `__, / `____//_/ /_/      /_/ |_/  `____/`__,_/  `___/  
+                            /____/                                                   
+    ''')
+    msg.ltcyan('{:^80}'.format('Dragon Node menu v0.2 by Dragonhound'))
+    print()
+    notary.welcome()
 
 def show_menu(menu, menu_name):
     while True:
@@ -59,6 +73,9 @@ class MainMenu():
 
     def show(self):
         show_menu(self.menu, "Main Menu")
+        
+    def logo(self):
+        show_logo()
 
     def stats(self):
         nnstats = Stats(const.DPOW_COINS)
@@ -219,6 +236,7 @@ class WalletMenu():
                 print(f"{coin}: {helper.wif_convert(coin, wif)}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
+        show_logo()
 
     def list_private_keys(self):
         '''Gets KMD pk for each server, then converts and prints for each coin'''
@@ -235,6 +253,7 @@ class WalletMenu():
             print(f"{coin}: {helper.wif_convert(coin, wif_3p)}")
         self.msg.input("Press enter to continue...")
         os.system('clear')
+        show_logo()
 
     def reset_wallet(self):
         self.msg.warning("WARNING: This will delete your wallet.dat, then restart daemons and import your private keys without a rescan.")
@@ -304,6 +323,7 @@ class WalletMenu():
                     self.msg.info(f"Unable to validate {coin} address {address} already imported.")
         self.msg.input("Press enter to continue...")
         os.system('clear')
+        show_logo()
         
     def exit(self):
         raise KeyboardInterrupt
