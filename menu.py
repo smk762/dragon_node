@@ -252,7 +252,7 @@ class WalletMenu():
             print(f"{k}: {v}")
         daemon_3p = DaemonRPC("KMD_3P")
         address_3p = config["addresses"]["KMD_3P"]
-        wif_3p = daemon_main.dumpprivkey(address_3p)
+        wif_3p = daemon_3p.dumpprivkey(address_3p)
         for coin in const.COINS_3P:
             k = self.msg.colorize(f"{coin:>12}", "lightblue")
             v = self.msg.colorize(f"{helper.wif_convert(coin, wif_3p)}", "lightcyan")
