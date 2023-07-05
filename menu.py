@@ -104,7 +104,7 @@ class NotaryMenu():
             {"stop_mining": self.stop_mining},
             {"start_coin": self.start_coin},
             {"stop_coin": self.stop_coin},
-            {"migrate_finds_to_pubkey": self.migrate_finds_to_pubkey}
+            {"migrate_funds_to_pubkey": self.migrate_funds_to_pubkey}
         ]
 
     def show(self):
@@ -145,7 +145,7 @@ class NotaryMenu():
             return
         print(daemon.start_mining())
 
-    def migrate_finds_to_pubkey(self):
+    def migrate_funds_to_pubkey(self):
         pubkey_main = self.msg.input("Enter pubkey to migrate Main funds to: ")
         pubkey_3p = self.msg.input("Enter pubkey to migrate 3P funds to: ")
         nn = Notary()
