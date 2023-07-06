@@ -174,7 +174,7 @@ class Stats:
         dex = AtomicDEX()
         dex_version = dex.version()
         if dex_version != "Error":
-            dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {mined_str}]", "lightgreen")
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version}]", "lightgreen")
         else:
             # TODO: This should confirm the version running is the official version
             dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} ]", "darkgrey")
@@ -192,7 +192,7 @@ class Stats:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
 
         date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
-        status_data = f"\N{position indicator}".join([status_main, status_3p, mining, dex_status, date_str]) 
+        status_data = f" \N{position indicator} ".join([status_main, status_3p, mining, dex_status, date_str]) 
         footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
         return footer_row.center(145)
     
