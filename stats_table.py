@@ -9,6 +9,7 @@ from logger import logger
 from color import ColorMsg
 from notary import Notary
 from iguana import Iguana
+from atomicdex import AtomicDEX
 
 class StatsLine:
     def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
@@ -170,8 +171,15 @@ class Stats:
         daemon = DaemonRPC("KMD")
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
+        dex = AtomicDEX()
+        dex_version = dex.version()
+        if dex_version != "Error":
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {mined_str}]", "lightgreen")
+        else:
+            # TODO: This should confirm the version running is the official version
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} ]", "darkgrey")
         if daemon.is_mining():
-            mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "lightgreen")
+            mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:
             mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
@@ -184,7 +192,8 @@ class Stats:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
 
         date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
-        footer_row = f"\N{position indicator}  {status_main}  \N{position indicator}  {status_3p}  \N{position indicator}  {mining}  \N{position indicator}  {date_str}  \N{position indicator}"
+        status_data = f"\N{position indicator}".join([status_main, status_3p, mining, dex_status, date_str]) 
+        footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
         return footer_row.center(145)
     
     def spacer(self) -> str:

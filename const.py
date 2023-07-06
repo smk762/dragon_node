@@ -137,3 +137,6 @@ WHITELIST_COMPATIBLE = list(set(COINS_MAIN) - set(["LTC"])) + ["KMD_3P", "MCL", 
 
 # https://chainz.cryptoid.info/emc2/api.dws?q=unspent&key=f01f30f935a8&active=EeVxpgmmbjLosvkHpmgSjqMFwgvUFCRmeL
 # https://api.blockcypher.com/v1/ltc/main/addrs/LS814iSp85xv7N4dGnwAyas92u9AMVr9KV?unspentOnly=true
+
+# MM2 constants
+MM2_JSON_PATH = f"{HOME}/notary_docker_3p/mm2/MM2.json"
