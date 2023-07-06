@@ -163,6 +163,11 @@ class Stats:
             return self.msg.colorize(line, color)
         else:
             return line
+
+    def datetime_str(self) -> str:
+        date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
+        date_str = f"{self.table_width:>145}"
+        return date_str
     
     def header(self) -> str:
         return self.format_line(self.columns)
@@ -191,8 +196,7 @@ class Stats:
         else:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
 
-        date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
-        status_data = f" \N{position indicator} ".join([status_main, status_3p, mining, dex_status, date_str]) 
+        status_data = f" \N{position indicator} ".join([status_main, status_3p, mining, dex_status]) 
         footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
         return footer_row.center(145)
     
@@ -201,6 +205,7 @@ class Stats:
 
     def show(self, replenish_utxos=True) -> None:
         print()
+        print(self.datetime_str())
         print(self.header())
         print(self.spacer())
         mined_str = ""
