@@ -177,9 +177,9 @@ class Stats:
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
         dex = AtomicDEX()
-        dex_version = dex.version()
+        dex_version = dex.version().split("_")[-1]
         if dex_version != "Error":
-            dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version}]", "lightgreen")
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version} ]", "lightgreen")
         else:
             # TODO: This should confirm the version running is the official version
             dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} ]", "darkgrey")
