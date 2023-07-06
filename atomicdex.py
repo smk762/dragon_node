@@ -23,7 +23,7 @@ class AtomicDEX():
 
     def version(self):
         try:
-            return self.rpc("version").json()
+            return self.rpc("version").json()["result"]
         except:
             return "Error"
     
