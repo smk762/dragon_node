@@ -165,8 +165,8 @@ class Stats:
             return line
 
     def datetime_str(self) -> str:
-        date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
-        date_str = f"{date_str:>110}"
+        date_str = self.msg.colorize(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', "darkgrey")
+        date_str = f"{date_str:>119}"
         return date_str
     
     def header(self) -> str:
@@ -198,7 +198,7 @@ class Stats:
 
         status_data = f" \N{position indicator} ".join([status_main, status_3p, mining, dex_status]) 
         footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
-        return footer_row.center(110)
+        return footer_row.center(155)
     
     def spacer(self) -> str:
         return " " + "-" * (self.table_width - 1)
