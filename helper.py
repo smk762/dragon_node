@@ -214,7 +214,7 @@ def get_wallet_path(coin: str) -> str:
             return f"{conf_path}/wallet.dat"
     return ""
 
-def get_utxos(coin: str, pubkey: str) -> list:
+def get_utxos_from_api(coin: str, pubkey: str) -> list:
     address = based_58.get_addr_from_pubkey(pubkey, coin)
     if coin in const.INSIGHT_EXPLORERS:
         baseurl = const.INSIGHT_EXPLORERS[coin]
@@ -293,7 +293,11 @@ def read_json_data(filename: str) -> dict:
 def sec_since(ts):
     return int(time.time()) - ts
 
-def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_threshold: int=21600, upper_threshold: int=86400) -> str:
+def sec_to_dhms(sec: int, colorize: bool=True,
+                optimal_max: int=7200, lower_threshold: int=21600,
+                upper_threshold: int=86400, prefix: str="",
+                padding: bool=True, color: bool=True, 
+            ) -> str:
     if sec < 0:
         sec = sec*-1
     minutes, seconds = divmod(sec, 60)
@@ -314,18 +318,16 @@ def sec_to_dhms(sec: int, colorize: bool=True, optimal_max: int=7200, lower_thre
     if sec < 0:
         result = f"-{result}"
     # Add color and fix padding
-    if sec < optimal_max:
+    if padding:
         while len(result) < 8:
             result = f" {result}"
-        result = '\033[92m' + result + '\033[0m'
-    if sec > upper_threshold:
-        while len(result) < 8:
-            result = f" {result}"
-        result = '\033[31m' + result + '\033[0m'
-    if sec > lower_threshold:
-        while len(result) < 8:
-            result = f" {result}"
-        result = '\033[33m' + result + '\033[0m'
+    if color:
+        if sec < optimal_max:
+            result = '\033[92m' + result + '\033[0m'
+        if sec > upper_threshold:
+            result = '\033[31m' + result + '\033[0m'
+        if sec > lower_threshold:
+            result = '\033[33m' + result + '\033[0m'
     return result
 
 
@@ -372,13 +374,39 @@ def get_tx_fee(coin):
     else:
         return 0.00001000
 
-def get_coins_config():
-    if not os.path.exists(const.COINS_CONFIG_PATH):
-        data = requests.get(const.COINS_CONFIG_URL).json()
-        with open(const.COINS_CONFIG_PATH, "w") as f:
-            json.dump(data, f, indent=4)    
-    with open(const.COINS_CONFIG_PATH, "r") as f:
+
+def refresh_external_data(file, url):
+    if not os.path.exists(file):
+        data = requests.get(url).json()
+        with open(file, "w") as f:
+            json.dump(data, f, indent=4)
+    else:
+        now = int(time.time())
+        mtime = os.path.getmtime(file)
+        if now - mtime > 86400:
+            data = requests.get(url).json()
+            with open(file, "w") as f:
+                json.dump(data, f, indent=4)
+    with open(file, "r") as f:
         return json.load(f)
+
+
+def get_coins_config():
+    return refresh_external_data(const.COINS_CONFIG_PATH, const.COINS_CONFIG_URL)
+
+
+def get_seednode_versions():
+    return refresh_external_data(const.SEEDNODE_VERSIONS_PATH, const.SEEDNODE_VERSIONS_URL)
+
+
+def get_active_seednode_versions():
+    now = int(time.time())
+    active_versions = []
+    versions = get_seednode_versions()
+    for v in versions:
+        if versions[v]["end"] > now:
+            active_versions.append(v)
+    return active_versions
 
 def get_dpow_pubkey(server: str) -> str:
     if server == "main":

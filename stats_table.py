@@ -9,6 +9,7 @@ from logger import logger
 from color import ColorMsg
 from notary import Notary
 from iguana import Iguana
+from atomicdex import AtomicDEX
 
 class StatsLine:
     def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
@@ -125,9 +126,13 @@ class StatsLine:
                 
             if self.coin == "KMD":
                 # Last Mined
-                last_mined = ntx_stats[2]
-                last_mined = helper.sec_since(last_mined)
-                last_mined = helper.sec_to_dhms(last_mined)
+                last_mined_ts = ntx_stats[2]
+                last_mined_sec = helper.sec_since(last_mined_ts)
+                last_mined = helper.sec_to_dhms(last_mined_sec, padding=False, color=False)
+                if last_mined_sec > 14400:
+                    last_mined = '\033[35m' + last_mined + '\033[0m'
+                else:
+                    last_mined = '\033[92m' + last_mined + '\033[0m'
                 row.append(last_mined)
         except Exception as e:
             # print(e)
@@ -162,6 +167,11 @@ class Stats:
             return self.msg.colorize(line, color)
         else:
             return line
+
+    def datetime_str(self) -> str:
+        date_str = self.msg.colorize(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', "darkgrey")
+        date_str = f"{date_str:>119}"
+        return date_str
     
     def header(self) -> str:
         return self.format_line(self.columns)
@@ -170,8 +180,18 @@ class Stats:
         daemon = DaemonRPC("KMD")
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
+        dex = AtomicDEX()
+        dex_version = dex.version().split("_")[-1]
+        if dex_version != "Error":
+            active_versions = helper.get_active_seednode_versions()
+            if dex_version in active_versions:
+                dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version} ]", "lightgreen")
+            else:
+                dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "purple")
+        else:
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "darkgrey")
         if daemon.is_mining():
-            mining = self.msg.colorize(f"[ Mining \N{check mark} ({mined_str})]", "lightgreen")
+            mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:
             mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
@@ -183,15 +203,16 @@ class Stats:
         else:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
 
-        date_str = self.msg.colorize(f'[ {datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")} ]', "darkgrey")
-        footer_row = f"\N{position indicator}  {status_main}  \N{position indicator}  {status_3p}  \N{position indicator}  {mining}  \N{position indicator}  {date_str}  \N{position indicator}"
-        return footer_row.center(145)
+        status_data = f" \N{position indicator} ".join([status_main, status_3p, mining, dex_status]) 
+        footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
+        return footer_row.center(155)
     
     def spacer(self) -> str:
         return " " + "-" * (self.table_width - 1)
 
     def show(self, replenish_utxos=True) -> None:
         print()
+        print(self.datetime_str())
         print(self.header())
         print(self.spacer())
         mined_str = ""

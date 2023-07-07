@@ -163,7 +163,7 @@ class NotaryMenu():
             v = self.msg.colorize(f"{address:<40}", "lightcyan")
             print(f"{k}: {v}")
             try:
-                nn.consolidate(coin, True, True, address)
+                nn.consolidate(coin, True)
             except Exception as e:
                 self.msg.error(f"Error consolidating {coin}: {e}")
 
@@ -194,7 +194,8 @@ class WalletMenu():
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
-            {"consolidate": self.consolidate},
+            {"consolidate (from API)": self.consolidate_api},
+            {"consolidate (from daemon)": self.consolidate_daemon},
             {"reset_wallet": self.reset_wallet},
             {"list_addresses": self.list_addresses},
             {"list_private_keys": self.list_private_keys},
@@ -204,13 +205,19 @@ class WalletMenu():
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-        
-    def consolidate(self):
+    
+    def consolidate_api(self):
+        self.consolidate(True)
+    
+    def consolidate_daemon(self):
+        self.consolidate(False)
+    
+    def consolidate(self, api=True):
         config = Config().load()
         if helper.is_configured(config):
             self.notary = Notary()
-            self.msg.status("AYA not yet supported...")
-            if not const.CRYPTOID_API_KEY:
+            if not const.CRYPTOID_API_KEY and api:
+                self.msg.status("AYA not yet supported...")
                 self.msg.status("EMC2 & MIL need an API key from https://chainz.cryptoid.info/api.dws in your .env file...")
             
             coin = self.msg.input("Enter coin to consolidate (or ALL): ")
@@ -221,9 +228,9 @@ class WalletMenu():
                 force = False                    
             if coin.lower() == "all":
                 for coin in const.DPOW_COINS:
-                    self.notary.consolidate(coin, force, force)
+                    self.notary.consolidate(coin, force, api)
             elif coin.upper() in const.DPOW_COINS:
-                self.notary.consolidate(coin.upper(), force, force)
+                self.notary.consolidate(coin.upper(), force, api)
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
         else:
