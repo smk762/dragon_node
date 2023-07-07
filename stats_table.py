@@ -183,9 +183,9 @@ class Stats:
             if dex_version in active_versions:
                 dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version} ]", "lightgreen")
             else:
-                dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} ]", "darkgrey")
+                dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "purple")
         else:
-            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} ]", "darkgrey")
+            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "darkgrey")
         if daemon.is_mining():
             mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:
