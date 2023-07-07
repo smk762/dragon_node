@@ -23,6 +23,9 @@ COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/season-seven/README.md"
 COMMIT_HASHES_PATH = f"{SCRIPT_PATH}/commit_hashes.json"
 
+SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/master/doc/seed_version_epochs.json"
+SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
+
 # Coins constants
 COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD", "NINJA"]
 CONF_PATHS = {

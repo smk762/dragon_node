@@ -372,13 +372,39 @@ def get_tx_fee(coin):
     else:
         return 0.00001000
 
-def get_coins_config():
-    if not os.path.exists(const.COINS_CONFIG_PATH):
-        data = requests.get(const.COINS_CONFIG_URL).json()
-        with open(const.COINS_CONFIG_PATH, "w") as f:
-            json.dump(data, f, indent=4)    
-    with open(const.COINS_CONFIG_PATH, "r") as f:
+
+def refresh_external_data(file, url):
+    if not os.path.exists(file):
+        data = requests.get(url).json()
+        with open(file, "w") as f:
+            json.dump(data, f, indent=4)
+    else:
+        now = int(time.time())
+        mtime = os.path.getmtime(file)
+        if now - mtime > 86400:
+            data = requests.get(url).json()
+            with open(file, "w") as f:
+                json.dump(data, f, indent=4)
+    with open(file, "r") as f:
         return json.load(f)
+
+
+def get_coins_config():
+    return refresh_external_data(const.COINS_CONFIG_PATH, const.COINS_CONFIG_URL)
+
+
+def get_seednode_versions():
+    return refresh_external_data(const.SEEDNODE_VERSIONS_PATH, const.SEEDNODE_VERSIONS_URL)
+
+
+def get_active_seednode_versions():
+    now = int(time.time())
+    active_versions = []
+    versions = get_seednode_versions()
+    for v in versions:
+        if versions[v]["end"] > now:
+            active_versions.append(v)
+    return active_versions
 
 def get_dpow_pubkey(server: str) -> str:
     if server == "main":
