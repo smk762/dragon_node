@@ -126,9 +126,13 @@ class StatsLine:
                 
             if self.coin == "KMD":
                 # Last Mined
-                last_mined = ntx_stats[2]
-                last_mined = helper.sec_since(last_mined)
-                last_mined = helper.sec_to_dhms(last_mined, prefix="Mining")
+                last_mined_ts = ntx_stats[2]
+                last_mined_sec = helper.sec_since(last_mined_ts)
+                last_mined = helper.sec_to_dhms(last_mined_sec, padding=False, color=False)
+                if last_mined_sec > 14400:
+                    last_mined = '\033[35m' + last_mined + '\033[0m'
+                else:
+                    last_mined = '\033[92m' + last_mined + '\033[0m'
                 row.append(last_mined)
         except Exception as e:
             # print(e)
@@ -187,9 +191,9 @@ class Stats:
         else:
             dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "darkgrey")
         if daemon.is_mining():
-            mining = self.msg.colorize(f"[ \N{check mark} {mined_str}]", "lightgreen")
+            mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:
-            mining = self.msg.colorize(f"[ \N{runic cross punctuation} {mined_str} ]", "darkgrey")
+            mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
             status_main = self.msg.colorize(f"[ dPoW Main \N{check mark} ]", "lightgreen")
         else:

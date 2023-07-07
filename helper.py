@@ -295,7 +295,8 @@ def sec_since(ts):
 
 def sec_to_dhms(sec: int, colorize: bool=True,
                 optimal_max: int=7200, lower_threshold: int=21600,
-                upper_threshold: int=86400, prefix: str=""
+                upper_threshold: int=86400, prefix: str="",
+                padding: bool=True, color: bool=True, 
             ) -> str:
     if sec < 0:
         sec = sec*-1
@@ -304,7 +305,7 @@ def sec_to_dhms(sec: int, colorize: bool=True,
     days, hours = divmod(hours, 24)
     periods = []
     if days > 7:
-        return '\033[31m' + prefix + ' ' + " > week!" + '\033[0m'
+        return '\033[31m' + " > week!" + '\033[0m'
     elif days > 0:
         periods = [('d', days), ('h', hours)]
     elif hours > 0:
@@ -317,18 +318,16 @@ def sec_to_dhms(sec: int, colorize: bool=True,
     if sec < 0:
         result = f"-{result}"
     # Add color and fix padding
-    if sec < optimal_max:
+    if padding:
         while len(result) < 8:
             result = f" {result}"
-        result = '\033[92m' + prefix + ' ' + result + '\033[0m'
-    if sec > upper_threshold:
-        while len(result) < 8:
-            result = f" {result}"
-        result = '\033[31m' + prefix + ' ' + result + '\033[0m'
-    if sec > lower_threshold:
-        while len(result) < 8:
-            result = f" {result}"
-        result = '\033[33m' + prefix + ' ' + result + '\033[0m'
+    if color:
+        if sec < optimal_max:
+            result = '\033[92m' + result + '\033[0m'
+        if sec > upper_threshold:
+            result = '\033[31m' + result + '\033[0m'
+        if sec > lower_threshold:
+            result = '\033[33m' + result + '\033[0m'
     return result
 
 
