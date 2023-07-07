@@ -156,13 +156,16 @@ class Stats:
         ]
         self.table_width = sum(self.col_widths) + 2 * (len(self.col_widths)) + 3
         
-    def format_line(self, row: list, color: str="") -> str:
+    def format_line(self, row: list, color: str="", header=False) -> str:
         line = " | "
         for i in range(len(row)):
-            if i in [0]:
-                line += f"{str(row[i]).ljust(self.col_widths[i])} |"
+            if header:
+                line += f"{str(row[i]).center(self.col_widths[i])} |"
             else:
-                line += f"{str(row[i]).rjust(self.col_widths[i])} |"
+                if i in [0]:
+                    line += f"{str(row[i]).ljust(self.col_widths[i])} |"
+                else:
+                    line += f"{str(row[i]).rjust(self.col_widths[i])} |"
         if color != "":
             return self.msg.colorize(line, color)
         else:
@@ -174,7 +177,7 @@ class Stats:
         return date_str
     
     def header(self) -> str:
-        return self.format_line(self.columns)
+        return self.format_line(self.columns, header=True)
     
     def footer(self, mined_str) -> str:
         daemon = DaemonRPC("KMD")
