@@ -368,7 +368,8 @@ def get_tx_fee(coin):
     coins_config = get_coins_config()
     if coin in coins_config:
         if "txfee" in coins_config[coin]:
-            return coins_config[coin]["txfee"]
+            if coins_config[coin]["txfee"] > 0:
+                return coins_config[coin]["txfee"] / 100000000
     if coin in const.LARGE_UTXO_COINS:
         return 0.00010000
     else:
