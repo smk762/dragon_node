@@ -20,10 +20,10 @@ APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
-COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/season-seven/README.md"
+COMMIT_HASHES_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/master/README.md"
 COMMIT_HASHES_PATH = f"{SCRIPT_PATH}/commit_hashes.json"
 
-SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/master/doc/seed_version_epochs.json"
+SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/seednode-update/doc/seed_version_epochs.json"
 SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
 
 # Coins constants
@@ -92,7 +92,8 @@ ADDRESS_WHITELIST = {
     "s6_dragonhound_DEV_main": "RDragoNHdwovvsDLSLMiAEzEArAD3kq6FN",
     "s7_dragonhound_DEV_3p": "RHound8PpyhVLfi56dC7MK3ZvvkAmB3bvQ",
     "s7_dragonhound_DEV_main": "RHi882Amab35uXjqBZjVxgEgmkkMu454KK",
-    "s7_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq"
+    "s7_dragonhound_DEV_3p": "RLdmqsXEor84FC8wqDAZbkmJLpgf2nUSkq",
+    "Notary faucet": "RSzqu1ZmAbbM2WUNdqNtPLTcLB54kwLp6D"
 }
 # These are not used for anything yet, but will be used in the future to add peers to daemons and iguana
 NOTARY_PEERS = {
@@ -118,7 +119,7 @@ INSIGHT_EXPLORERS = {
     'KOIN': 'https://koin.explorer.dexstats.info/',
     'MARTY': 'https://marty.dragonhound.info/',
     'MCL': 'https://mcl.explorer.dexstats.info/',
-    'NINJA': '',
+    'NINJA': 'https://ninja.explorer.dexstats.info/',
     'PIRATE': 'https://explorer.pirate.black/',
     'SUPERNET': 'https://supernet.explorer.dexstats.info/',
     'THC': 'https://thc.explorer.dexstats.info/',
