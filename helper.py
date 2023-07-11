@@ -381,13 +381,12 @@ def refresh_external_data(file, url):
         data = requests.get(url).json()
         with open(file, "w") as f:
             json.dump(data, f, indent=4)
-    else:
-        now = int(time.time())
-        mtime = os.path.getmtime(file)
-        if now - mtime > 21600: # 6 hours
-            data = requests.get(url).json()
-            with open(file, "w") as f:
-                json.dump(data, f, indent=4)
+    now = int(time.time())
+    mtime = os.path.getmtime(file)
+    if now - mtime > 21600: # 6 hours
+        data = requests.get(url).json()
+        with open(file, "w") as f:
+            json.dump(data, f, indent=4)
     with open(file, "r") as f:
         return json.load(f)
 
