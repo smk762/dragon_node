@@ -187,9 +187,9 @@ for server in CONF_PATHS:
                 lines = f.readlines()
                 for line in lines:
                     if line.startswith("whitelistaddress"):
-                        whitelisted.append(line.split("=")[1].strip())
+                        whitelisted.append(line.split("=")[1].strip().split("#")[0].strip())
                     if line.startswith("addnode"):
-                        addnodes.append(line.split("=")[1].strip())
+                        addnodes.append(line.split("=")[1].strip().split("#")[0].strip())
             with open(cf, "a") as f:
                 for k, v in config["whitelist"].items():
                     if v not in whitelisted:
@@ -197,3 +197,10 @@ for server in CONF_PATHS:
                 for k, v in config["addnode"].items():
                     if v not in addnodes:
                         f.write(f"addnode={v} # {k}\n")
+            # Remove duplicate entries and sort
+            with open(cf, "r") as f:
+                lines = list(set(f.readlines()))
+                lines.sort()
+            with open(cf, "w") as f:
+                for line in lines:
+                    f.write(f"{line}")
