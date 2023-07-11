@@ -191,9 +191,9 @@ for server in CONF_PATHS:
                     if line.startswith("addnode"):
                         addnodes.append(line.split("=")[1].strip())
             with open(cf, "a") as f:
-                for i in config["whitelist"]:
-                    if i not in whitelisted:
-                        f.write(f"whitelistaddress={i}\n")
-                for i in config["addnode"]:
-                    if i not in addnodes:
-                        f.write(f"addnode={i}\n")
+                for k, v in config["whitelist"].items():
+                    if v not in whitelisted:
+                        f.write(f"whitelistaddress={v} # {k}\n")
+                for k, v in config["addnode"].items():
+                    if v not in addnodes:
+                        f.write(f"addnode={v} # {k}\n")
