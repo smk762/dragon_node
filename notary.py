@@ -160,9 +160,10 @@ class Notary():
         if coin in ["LTC"]:
             fee = tx_size * 0.00000002
         elif coin in ["EMC", "CHIPS", "AYA"]:
-            fee = helper.get_tx_fee(coin) / 100000000
-            if fee == 0:
-                fee = 0.0001
+            if coin in const.LARGE_UTXO_COINS:
+                fee = 0.00010000
+            else:
+                fee = 0.00001000
         self.msg.darkgrey(f"{coin} fee: {fee}")
         return {address: value - fee}
 
@@ -188,7 +189,7 @@ class Notary():
                     i["amount"] = i["value"] / 100000000
                 else:
                     logger.error(f"{coin} UTXO data: {i}")
-            
+
         utxos_data = [i for i in utxos_data if "amount" in i]
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         return utxos
