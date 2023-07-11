@@ -52,7 +52,7 @@ COINS_3P = list(CONF_PATHS["3p"].keys())
 DPOW_COINS = COINS_3P + COINS_MAIN
 IMPORT_PRUNED_COINS = ["AYA", "EMC2", "MIL", "CHIPS", "VRSC", "LTC"]
                       
-LARGE_UTXO_COINS = ["EMC2", "AYA"]
+LARGE_UTXO_COINS = ["EMC2", "AYA", "MIL"]
 
 # Notarisation constants
 UTXO_AMT = 0.00010000
@@ -99,8 +99,17 @@ ADDRESS_WHITELIST = {
 NOTARY_PEERS = {
     "dragonhound_AR": "15.235.204.174",
     "dragonhound_NA": "209.222.101.247",
-    "dragonhound_DEV": "103.195.100.32"
+    "dragonhound_DEV": "103.195.100.32",
+    "gcharang_AR": "148.113.1.52",
+    "gcharang_SH": "51.161.209.100",
+    "gcharang_DEV": "148.113.8.6",
+    "Alright_DEV":"144.76.80.75",
+    "Alright_EU": "65.21.77.109",
+    "Marmara1": "89.19.26.211",
+    "Marmara2": "89.19.26.212"
 }
+
+
 # These are not used for anything yet, but will be used in the future to add peers to daemons
 ADDNODES = {
     "komodostats": "seed.komodostats.com",
@@ -144,3 +153,47 @@ WHITELIST_COMPATIBLE = list(set(COINS_MAIN) - set(["LTC"])) + ["KMD_3P", "MCL", 
 
 # MM2 constants
 MM2_JSON_PATH = f"{HOME}/notary_docker_3p/mm2/MM2.json"
+
+with open(f"{SCRIPT_PATH}/config.json", "r") as f:
+    config = json.load(f)
+    for i in ["whitelist", "addnode", "addnotary"]:
+        if i not in config:
+            config.update({i: {}})
+        if i == "whitelist":
+            for k, v in ADDRESS_WHITELIST.items():
+                if k not in config[i]:
+                    config[i].update({k: v})
+        if i == "addnode":
+            for k, v in ADDNODES.items():
+                if k not in config[i]:
+                    config[i].update({k: v})
+        if i == "addnotary":
+            for k, v in NOTARY_PEERS.items():
+                if k not in config[i]:
+                    config[i].update({k: v})
+
+with open(f"{SCRIPT_PATH}/config.json", "w") as f:
+    json.dump(config, f, indent=4)
+
+for server in CONF_PATHS:
+    for coin in CONF_PATHS[server]:
+        cf = CONF_PATHS[server][coin]
+        if not ".komodo" in cf:
+            continue
+        whitelisted = []
+        addnodes = []
+        if os.path.exists(cf):
+            with open(cf, "r") as f:
+                lines = f.readlines()
+                for line in lines:
+                    if line.startswith("whitelistaddress"):
+                        whitelisted.append(line.split("=")[1].strip())
+                    if line.startswith("addnode"):
+                        addnodes.append(line.split("=")[1].strip())
+            with open(cf, "a") as f:
+                for i in config["whitelist"]:
+                    if i not in whitelisted:
+                        f.write(f"whitelistaddress={i}\n")
+                for i in config["addnode"]:
+                    if i not in addnodes:
+                        f.write(f"addnode={i}\n")
