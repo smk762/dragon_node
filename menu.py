@@ -194,6 +194,7 @@ class WalletMenu():
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
+            {"sweep_kmd": self.sweep_kmd},
             {"consolidate (from API)": self.consolidate_api},
             {"consolidate (from daemon)": self.consolidate_daemon},
             {"reset_wallet": self.reset_wallet},
@@ -205,10 +206,14 @@ class WalletMenu():
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-    
+
+    def sweep_kmd(self):
+        nn = Notary()
+        nn.sweep_kmd()
+
     def consolidate_api(self):
         self.consolidate(True)
-    
+
     def consolidate_daemon(self):
         self.consolidate(False)
     

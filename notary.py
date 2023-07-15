@@ -349,17 +349,17 @@ class Notary():
         logger.error(f"{coin} vouts {vouts}")
         return ""
                     
-    def sweep_kmd(self, coin: str) -> None:
+    def sweep_kmd(self) -> None:
         config = self.cfg.load()
         if helper.is_configured(config):
-            daemon = DaemonRPC(coin)
+            daemon = DaemonRPC("KMD")
             unspent = daemon.listunspent()
             self.msg.info(f"{len(unspent)} unspent utxos detected")
             balance = 0
             for utxo in unspent:
                 if utxo["amount"] != 0.00010000 and utxo["spendable"]:
                     balance += utxo["amount"]
-            if balance > 100:
+            if balance > 500:
                 self.msg.info(f"{balance} KMD in non-split UTXOs")
                 self.msg.info(daemon.sendtoaddress(config["sweep_address"], round(balance-5, 4)))
             else:
