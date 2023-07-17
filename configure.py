@@ -203,8 +203,10 @@ class Config():
                     
                     self.save(config)
                     self.msg.success(f"Added {v} to whitelist.")
-                self.msg.error(f"{v} is not a valid KMD address.")
-            self.msg.error(f"KMD daemon is not responding.")
+                else:
+                    self.msg.error(f"{v} is not a valid KMD address.")
+            else:
+                self.msg.error(f"KMD daemon is not responding. {r}")
             
         elif option == "pubkey_main":
             pubkey = helper.get_dpow_pubkey("main")
