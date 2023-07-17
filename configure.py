@@ -4,6 +4,7 @@ import json
 import const
 import color
 import based_58
+from typing import List
 from logger import logger
 import helper
 from daemon import DaemonRPC
@@ -148,7 +149,7 @@ class Config():
                 for k, v in new_whitelist:
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
-    def update_coin_split_config(self, coins: list[str], split_count: int, split_threshold: int) -> None:
+    def update_coin_split_config(self, coins: List[str], split_count: int, split_threshold: int) -> None:
         with open(const.COINS_NTX_DATA_PATH, "w") as f:
             data = json.load(f)
             for coin in coins:
