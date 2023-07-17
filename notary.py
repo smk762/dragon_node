@@ -218,9 +218,6 @@ class Notary():
         if count < self.get_utxo_threshold(coin) or force:
             server = helper.get_coin_server(coin)
             split_amount = self.get_split_amount(coin)
-            # Double the reserve for KMD as it is more active
-            if coin in ["KMD", "KMD_3P"]:
-                split_amount *= 2
                 
             sats = int(helper.get_utxo_value(coin, True))
             iguana = Iguana(server)
@@ -262,8 +259,8 @@ class Notary():
                 logger.warning(f"{coin} No UTXOs found")
                 return
             if not force:
-                if len(utxos) < 20 and daemon.getbalance() > 0.001 and not force:
-                    logger.debug(f"{coin} < 20 UTXOs to consolidate, skipping")
+                if len(utxos) < 5 and daemon.getbalance() > 0.001 and not force:
+                    logger.debug(f"{coin} < 5 UTXOs to consolidate, skipping")
                     return
 
             utxo_chunks = helper.chunkify(utxos, 800)
