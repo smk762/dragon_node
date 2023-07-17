@@ -40,9 +40,9 @@ class Notary():
             name = name[0].upper() + name[1:]
         return name
 
-    def get_coins_ntx_data(self, refresh=False) -> dict:
-        if os.path.exists(const.COINS_NTX_DATA_PATH) and not refresh:
-            with open(const.COINS_NTX_DATA_PATH) as file:
+    def get_coins_ntx_data(self) -> dict:
+        if os.path.exists(const.COINS_NTX_DATA_PATH):
+            with open(const.COINS_NTX_DATA_PATH, 'r') as file:
                 return json.load(file)
         else:
             data = self.get_coins_data()
@@ -51,14 +51,14 @@ class Notary():
             return data
         
     def get_utxo_threshold(self, coin: str) -> int:
-        coins_ntx_data = self.get_coins_ntx_data(True)
+        coins_ntx_data = self.get_coins_ntx_data()
         if coin in coins_ntx_data:
             return coins_ntx_data[coin]["min_utxo_count"]
         else:
             return coins_ntx_data["KMD"]["min_utxo_count"]
     
     def get_split_amount(self, coin: str) -> int:
-        coins_ntx_data = self.get_coins_ntx_data(True)
+        coins_ntx_data = self.get_coins_ntx_data()
         if coin in coins_ntx_data:
             return coins_ntx_data[coin]["split_count"]
         else:
@@ -81,6 +81,7 @@ class Notary():
         if helper.is_configured(config):
             for server in const.CONF_PATHS:
                 for coin in const.CONF_PATHS[server]:
+                    fee = helper.get_tx_fee(coin)
                     coins_data.update({
                         coin: {
                             "conf": const.CONF_PATHS[server][coin],
@@ -91,7 +92,7 @@ class Notary():
                             "split_count": 20,
                             "server": server,
                             "address": config["addresses"][coin],
-                            "txfee": helper.get_tx_fee(coin),
+                            "txfee": f'{fee:.5f}',
                             "pubkey": config[f"pubkey_{server}"]
                         }
                     })
@@ -251,7 +252,7 @@ class Notary():
         if helper.is_configured(config):
             print()
             daemon = DaemonRPC(coin)
-            coins_data = self.get_coins_ntx_data(True)
+            coins_data = self.get_coins_ntx_data()
             address = coins_data[coin]["address"]
             pubkey = coins_data[coin]["pubkey"]
             utxos = self.get_utxos(coin, pubkey, api)
@@ -381,7 +382,7 @@ class Notary():
     def start_container(self, coin):
         config = self.cfg.load()
         if helper.is_configured(config):
-            coins_data = self.get_coins_ntx_data(True)
+            coins_data = self.get_coins_ntx_data()
             server = coins_data[coin]["server"]
             if server == "main":
                 compose = const.COMPOSE_PATH_MAIN

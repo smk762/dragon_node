@@ -42,7 +42,8 @@ class Config():
         for i in list(data.keys()):
             if i in [
                 "address_main_kmd", "config_path", "address_main",
-                "address_main_ltc", "addresses_3p"
+                "address_main_ltc", "addresses_3p", "split amount",
+                "split_threshold"
             ]:
                 del data[i]
         with open(const.APP_CONFIG_PATH, "w") as f:
@@ -60,10 +61,10 @@ class Config():
                 for i in options:
                     idx = options.index(i)
                     opt = i.replace("_", " ").title()
-                    if i == "Return to Config Menu":
+                    if i in ["Return to Config Menu", "Add Whitelist Address"]:
                         self.msg.option(f"  [{idx}] {i}")
                     elif i not in config:
-                        self.msg.warning(f"  [{idx}] Update {opt}")
+                        self.msg.warning(f"  [{idx}] Invalid Option! {opt}")
                     elif config[i] is None:
                         self.msg.warning(f"  [{idx}] Update {opt}")
                     elif isinstance(config[i], (int, float)):
@@ -225,9 +226,7 @@ class Config():
             "addnode": const.ADDNODES,
             "whitelist": const.ADDRESS_WHITELIST,
             "addnotary": const.NOTARY_PEERS,
-            "addresses": {},
-            "split amount": 25,
-            "split_threshold": 25
+            "addresses": {}
         }
         config = self.calculate_addresses(config)
         return config
