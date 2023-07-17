@@ -439,8 +439,9 @@ def input_int(q, min=0, max=1000000000):
     while True:
         try:
             msg = ColorMsg()
-            if int(msg.input(q)) in range(min, max):
-                return int(msg.input(q))
+            val = msg.input(q)
+            if int(val) in range(min, max):
+                return int(val)
             else:
                 print(f"Invalid input, must be between {min} - {max}. Try again")
         except ValueError:
