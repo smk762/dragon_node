@@ -8,7 +8,6 @@ from typing import List
 from logger import logger
 import helper
 from daemon import DaemonRPC
-from notary import Notary
 # Run this to configure your dragon node
 # It will create a config.json file and a .env file,
 # to store the node configuration and environment variables
