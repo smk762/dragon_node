@@ -58,7 +58,7 @@ def show_menu(menu, menu_name):
 
 class MainMenu():
     def __init__(self):
-        self.config = Config()
+        self.cfg = Config()
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
             
@@ -94,7 +94,7 @@ class MainMenu():
 
 class NotaryMenu():
     def __init__(self):
-        self.config = Config()
+        self.cfg = Config()
         self.msg = ColorMsg()
         self.nn = Notary()
         self.servers = const.DPOW_SERVERS
@@ -149,7 +149,7 @@ class NotaryMenu():
         pubkey_main = self.msg.input("Enter pubkey to migrate Main funds to: ")
         pubkey_3p = self.msg.input("Enter pubkey to migrate 3P funds to: ")
         nn = Notary()
-        coins_ntx_data = nn.get_coins_ntx_data()
+        coins_ntx_data = self.cfg.get_coins_ntx_data()
         coins = list(coins_ntx_data.keys())
         coins.sort()
         print()
@@ -189,11 +189,12 @@ class NotaryMenu():
 
 class WalletMenu():
     def __init__(self):
-        self.config = Config()
+        self.cfg = Config()
         self.msg = ColorMsg()
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
+            {"sweep_kmd": self.sweep_kmd},
             {"consolidate (from API)": self.consolidate_api},
             {"consolidate (from daemon)": self.consolidate_daemon},
             {"reset_wallet": self.reset_wallet},
@@ -205,10 +206,14 @@ class WalletMenu():
 
     def show(self):
         show_menu(self.menu, "Wallet Menu")
-    
+
+    def sweep_kmd(self):
+        nn = Notary()
+        nn.sweep_kmd()
+
     def consolidate_api(self):
         self.consolidate(True)
-    
+
     def consolidate_daemon(self):
         self.consolidate(False)
     
@@ -288,8 +293,7 @@ class WalletMenu():
                 self.msg.error(f"Invalid coin '{coin}', try again.")
 
     def list_addresses(self):
-        nn = Notary()
-        coins_ntx_data = nn.get_coins_ntx_data()
+        coins_ntx_data = self.cfg.get_coins_ntx_data()
         coins = list(coins_ntx_data.keys())
         coins.sort()
         print()
@@ -300,7 +304,7 @@ class WalletMenu():
 
     def import_privkey(self):
         nn = Notary()
-        config = self.config.load()
+        config = self.cfg.load()
         server = self.msg.input(f"Select server {self.servers}: ")
         notary_name = nn.get_notary_from_pubkey(config[f"pubkey_{server}"])
         wif = self.msg.input(f"Enter {notary_name} {server} private key: ")
@@ -344,22 +348,30 @@ class WalletMenu():
 
 class ConfigMenu():
     def __init__(self):
-        self.config = Config()
+        self.cfg = Config()
         self.msg = ColorMsg()
         self.menu = [
             {"main_menu": self.exit},
             {"show_config": self.show_config},
-            {"update_config": self.update_config}
+            {"update_config": self.update_config},
+            {"show_split_config": self.show_split_config},
+            {"update_split_config": self.update_split_config}
         ]
 
     def show(self):
         show_menu(self.menu, "Configuration Menu")
 
+    def show_split_config(self):
+        self.cfg.show_split_config()
+
     def show_config(self):
-        self.config.show()
+        self.cfg.show()
 
     def update_config(self):
-        self.config.menu()
+        self.cfg.menu()
+        
+    def update_split_config(self):
+        self.cfg.update("update_split_config")
 
     def exit(self):
         raise KeyboardInterrupt
@@ -367,7 +379,7 @@ class ConfigMenu():
 
 class IguanaMenu():
     def __init__(self):
-        self.config = Config()
+        self.cfg = Config()
         self.msg = ColorMsg()
         self.nn = Notary()
         self.dpow_main = Iguana("main")
@@ -393,7 +405,7 @@ class IguanaMenu():
             self.msg.darkgrey(f"{self.dpow_3p.addcoin(coin)}")
 
     def add_peers(self):
-        config = self.config.load()
+        config = self.cfg.load()
         for k, v in config["addnotary"].items():
             self.msg.info(f"Adding {k}")
             self.msg.darkgrey(f"{self.dpow_main.addnotary(v)}")
@@ -410,7 +422,7 @@ class IguanaMenu():
         self.dpow_3p.stop()
 
     def dpow_coins(self):
-        config = self.config.load()
+        config = self.cfg.load()
         # KMD needs to go first
         self.msg.darkgrey(f"{self.dpow_main.dpow('KMD')}")
         for coin in const.COINS_MAIN:

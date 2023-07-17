@@ -91,10 +91,23 @@ User config can be edited via the TUI, or by manually editing the `config.json` 
         "THC": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
         "KMD": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
         "NINJA": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE"
-    },
-    "split amount": "22",
-    "split_threshold": "15"
+    }
 }
 ```
 
 Note: Addresses (except for the sweep address) are automatically calculated from pubkeys, so these are considered `readonly` in the app. If you want to change an address, you should change the pubkey.
+
+Additionally, coins config (such as split amount and threshold) can be changed by manually editing the `coins_ntx_data.json` file. For example:
+```json
+    "DOC": {
+        "conf": "/home/smk762/.komodo/DOC/DOC.conf",
+        "wallet": "/home/smk762/.komodo/DOC/wallet.dat",
+        "utxo_value": 0.0001,
+        "split_threshold": 20,
+        "split_amount": 20,
+        "server": "main",
+        "address": "RGBEt22GeFXRvZjfZpvzo68aaxEUtAFZg8",
+        "txfee": 0.00001,
+        "pubkey": "030a72f1a15f67624aea55743c5b777bdd55362596add77b544ee2e582bdebf0c7"
+    }
+```

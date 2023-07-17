@@ -4,10 +4,10 @@ import json
 import const
 import color
 import based_58
+from typing import List
 from logger import logger
 import helper
 from daemon import DaemonRPC
-
 # Run this to configure your dragon node
 # It will create a config.json file and a .env file,
 # to store the node configuration and environment variables
@@ -20,6 +20,7 @@ class Config():
         self.readonly = [
             "userhome", "addresses", "addresses_3p", "address_main_kmd",
             "address_main_ltc", "whitelist", "addnotary", "addnode",
+            "split_threshold"
         ]
         self.required = ["sweep_address", "pubkey_main", "pubkey_3p"]
 
@@ -40,10 +41,7 @@ class Config():
     def save(self, data):
         logger.debug(f"Saving config to {const.APP_CONFIG_PATH}")
         for i in list(data.keys()):
-            if i in [
-                "address_main_kmd", "config_path", "address_main",
-                "address_main_ltc", "addresses_3p"
-            ]:
+            if i in const.OLD_CONFIG_KEYS:
                 del data[i]
         with open(const.APP_CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=4)
@@ -52,7 +50,7 @@ class Config():
         while True:
             try:
                 config = self.load()
-                options = list(set(list(config.keys())) - set(self.readonly))
+                options = list(set(list(config.keys())) - set(self.readonly) - set(const.OLD_CONFIG_KEYS))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 options.append("Add Whitelist Address")
@@ -60,8 +58,10 @@ class Config():
                 for i in options:
                     idx = options.index(i)
                     opt = i.replace("_", " ").title()
-                    if i == "Return to Config Menu":
+                    if i in ["Return to Config Menu", "Add Whitelist Address"]:
                         self.msg.option(f"  [{idx}] {i}")
+                    elif i not in config:
+                        self.msg.warning(f"  [{idx}] Invalid Option! {opt}")
                     elif config[i] is None:
                         self.msg.warning(f"  [{idx}] Update {opt}")
                     elif isinstance(config[i], (int, float)):
@@ -108,6 +108,16 @@ class Config():
         return config
 
     ### Menu Options ###
+    
+    def show_split_config(self) -> None:
+        data = self.get_coins_ntx_data()
+        for coin in data:
+            self.msg.ltblue(f"{coin}: ")
+            if 'split_amount' in data[coin]:
+                self.msg.ltcyan(f"    split_amount: {data[coin]['split_amount']}")
+            if 'split_threshold' in data[coin]:
+                self.msg.ltcyan(f"    split_threshold: {data[coin]['split_threshold']}")
+
     def show(self) -> None:
         self.msg.status(f"\n==== Existing Config ====")
         config = self.load()
@@ -148,15 +158,37 @@ class Config():
                 for k, v in new_whitelist:
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
+    def update_coin_split_config(self, coins: List[str], split_amount: int, split_threshold: int) -> None:
+        data = self.get_coins_ntx_data()
+        for coin in coins:
+            if coin in data:
+                data[coin]["split_amount"] = split_amount
+                data[coin]["split_threshold"] = split_threshold
+            else:
+                data.update({coin: {"split_amount": split_amount, "split_threshold": split_threshold}})
+        with open(const.COINS_NTX_DATA_PATH, "w") as f:
+            json.dump(data, f, indent=4)
+
     def update(self, option):
         config = self.load()
         options = list(config.keys())
-        if option not in options:
-            self.msg.error("Invalid option, will not update.")
-            return
-        self.msg.option(f"Current value for {option}: {config[option]}")
+        if option in options:
+            self.msg.option(f"Current value for {option}: {config[option]}")
         
-        if option == "Add Whitelist Address":
+        if option == "update_split_config":
+            coin = helper.input_coin("Enter coin to update (or ALL): ")
+            split_amount = helper.input_int("Enter amount of utxos for split: ", 1, 100)
+            split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
+            if coin.upper() == "ALL":
+                self.update_coin_split_config(const.DPOW_COINS, split_amount, split_threshold)
+                return
+            elif coin.upper() in const.DPOW_COINS:
+                self.update_coin_split_config([coin.upper()], split_amount, split_threshold)
+                return
+            else:
+                self.msg.error(f"Invalid coin '{coin}', try again.")
+            
+        elif option == "Add Whitelist Address":
             v = self.msg.input(f"Enter KMD address for whitelist: ")
             daemon = DaemonRPC("KMD")
             r = daemon.validateaddress(v)
@@ -171,10 +203,12 @@ class Config():
                     
                     self.save(config)
                     self.msg.success(f"Added {v} to whitelist.")
-                self.msg.error(f"{v} is not a valid KMD address.")
-            self.msg.error(f"KMD daemon is not responding.")
+                else:
+                    self.msg.error(f"{v} is not a valid KMD address.")
+            else:
+                self.msg.error(f"KMD daemon is not responding. {r}")
             
-        if option == "pubkey_main":
+        elif option == "pubkey_main":
             pubkey = helper.get_dpow_pubkey("main")
             if pubkey != "":
                 fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
@@ -215,6 +249,41 @@ class Config():
             config[option] = q
         self.save(config)
 
+    def get_coins_ntx_data(self) -> dict:
+        if os.path.exists(const.COINS_NTX_DATA_PATH):
+            with open(const.COINS_NTX_DATA_PATH, 'r') as file:
+                try:
+                    return json.load(file)
+                except Exception as e:
+                    pass
+        data = self.get_coins_data()
+        with open(const.COINS_NTX_DATA_PATH, "w") as file:
+            json.dump(data, file, indent=4)
+        return data
+    
+    def get_coins_data(self) -> dict:
+        coins_data = {}
+        config = self.load()
+        if helper.is_configured(config):
+            for server in const.CONF_PATHS:
+                for coin in const.CONF_PATHS[server]:
+                    fee = helper.get_tx_fee(coin)
+                    coins_data.update({
+                        coin: {
+                            "conf": const.CONF_PATHS[server][coin],
+                            "wallet": helper.get_wallet_path(coin),
+                            "utxo_value": helper.get_utxo_value(coin),
+                            "utxo_value_sats": helper.get_utxo_value(coin, True),
+                            "split_threshold": 20,
+                            "split_amount": 20,
+                            "server": server,
+                            "address": config["addresses"][coin],
+                            "txfee": f'{fee:.5f}',
+                            "pubkey": config[f"pubkey_{server}"]
+                        }
+                    })
+        return coins_data
+
     ### Templates ###
     def get_config_template(self):
         config = {
@@ -225,9 +294,7 @@ class Config():
             "addnode": const.ADDNODES,
             "whitelist": const.ADDRESS_WHITELIST,
             "addnotary": const.NOTARY_PEERS,
-            "addresses": {},
-            "split amount": 25,
-            "split_threshold": 25
+            "addresses": {}
         }
         config = self.calculate_addresses(config)
         return config

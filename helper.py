@@ -103,12 +103,14 @@ def private_key_to_public_key(private_key):
     private_key_bytes = codecs.decode(private_key[:-2], 'hex')
     # Generating a public key in bytes using SECP256k1 & ecdsa library
     public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
-    public_key_bytes = public_key_raw.to_string()
-    # Hex encoding the public key from bytes
-    public_key_hex = codecs.encode(public_key_bytes, 'hex')
-    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
-    public_key = (b'04' + public_key_hex).decode("utf-8")
-    return public_key
+    if public_key_raw is not None:
+        public_key_bytes = public_key_raw.to_string()
+        # Hex encoding the public key from bytes
+        public_key_hex = codecs.encode(public_key_bytes, 'hex')
+        # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
+        public_key = (b'04' + public_key_hex).decode("utf-8")
+        return public_key
+    return ""
 
 def compress_public_key(public_key):
 # Checking if the last byte is odd or even
@@ -137,12 +139,14 @@ def uncompressed_public_key_from_private_key(private_key, byte=b'04'):
     private_key_bytes = codecs.decode(private_key, 'hex')
     # Generating a public key in bytes using SECP256k1 & ecdsa library
     public_key_raw = ecdsa.SigningKey.from_string(private_key_bytes, curve=ecdsa.SECP256k1).verifying_key
-    public_key_bytes = public_key_raw.to_string()
-    # Hex encoding the public key from bytes
-    public_key_hex = codecs.encode(public_key_bytes, 'hex')
-    # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
-    public_key = (byte + public_key_hex).decode("utf-8")
-    return public_key
+    if public_key_raw is not None:
+        public_key_bytes = public_key_raw.to_string()
+        # Hex encoding the public key from bytes
+        public_key_hex = codecs.encode(public_key_bytes, 'hex')
+        # Bitcoin public key begins with bytes 0x04 so we have to add the bytes at the start
+        public_key = (byte + public_key_hex).decode("utf-8")
+        return public_key
+    return ""
 
 def WIF_uncompressed(byte, raw_privkey):
     extended_key = byte+raw_privkey
@@ -430,6 +434,28 @@ def get_dpow_pubkey(server: str) -> str:
 def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
+
+def input_int(q, min=0, max=1000000000):
+    while True:
+        try:
+            msg = ColorMsg()
+            val = msg.input(q)
+            if int(val) in range(min, max):
+                return int(val)
+            else:
+                print(f"Invalid input, must be between {min} - {max}. Try again")
+        except ValueError:
+            print("Invalid input, must be integer. Try again")
+
+def input_coin(q):
+    while True:
+        msg = ColorMsg()
+        valid = const.DPOW_COINS + ["ALL"]
+        coin = msg.input(q)
+        if coin.upper() in valid:
+            return coin
+        else:
+            print(f"Invalid coin, must be one of {valid}. Try again")
 
 
 def chunkify(data: list, chunk_size: int):
