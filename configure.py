@@ -171,8 +171,10 @@ class Config():
             split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
             if coin.upper() == "ALL":
                 self.update_coin_split_config(const.DPOW_COINS, split_count, split_threshold)
+                return
             elif coin.upper() in const.DPOW_COINS:
                 self.update_coin_split_config([coin.upper()], split_count, split_threshold)
+                return
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
             
