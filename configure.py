@@ -108,6 +108,14 @@ class Config():
         return config
 
     ### Menu Options ###
+    
+    def show_split_config(self) -> None:
+        data = self.get_coins_ntx_data()
+        for coin in data:
+            self.msg.ltblue(f"{coin}: ")
+            self.msg.ltcyan(f"    split_count: {data[coin]['split_count']}")
+            self.msg.ltcyan(f"    split_threshold: {data[coin]['split_threshold']}")
+
     def show(self) -> None:
         self.msg.status(f"\n==== Existing Config ====")
         config = self.load()

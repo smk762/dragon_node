@@ -354,11 +354,15 @@ class ConfigMenu():
             {"main_menu": self.exit},
             {"show_config": self.show_config},
             {"update_config": self.update_config},
+            {"show_split_config": self.show_split_config},
             {"update_split_config": self.update_split_config}
         ]
 
     def show(self):
         show_menu(self.menu, "Configuration Menu")
+
+    def show_split_config(self):
+        self.cfg.show_split_config()
 
     def show_config(self):
         self.cfg.show()
