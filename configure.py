@@ -150,7 +150,7 @@ class Config():
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
     def update_coin_split_config(self, coins: List[str], split_count: int, split_threshold: int) -> None:
-        with open(const.COINS_NTX_DATA_PATH, "w") as f:
+        with open(const.COINS_NTX_DATA_PATH, "r") as f:
             data = json.load(f)
             for coin in coins:
                 if coin in data:
