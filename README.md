@@ -103,11 +103,11 @@ Additionally, coins config (such as split amount and threshold) can be changed b
         "conf": "/home/smk762/.komodo/DOC/DOC.conf",
         "wallet": "/home/smk762/.komodo/DOC/wallet.dat",
         "utxo_value": 0.0001,
-        "min_utxo_count": 20,
+        "split_threshold": 20,
         "split_count": 20,
         "server": "main",
         "address": "RGBEt22GeFXRvZjfZpvzo68aaxEUtAFZg8",
-        "txfee": 1e-05,
+        "txfee": 0.00001,
         "pubkey": "030a72f1a15f67624aea55743c5b777bdd55362596add77b544ee2e582bdebf0c7"
     }
 ```

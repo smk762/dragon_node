@@ -20,6 +20,7 @@ class Config():
         self.readonly = [
             "userhome", "addresses", "addresses_3p", "address_main_kmd",
             "address_main_ltc", "whitelist", "addnotary", "addnode",
+            "split_threshold"
         ]
         self.required = ["sweep_address", "pubkey_main", "pubkey_3p"]
 
@@ -260,7 +261,7 @@ class Config():
                             "wallet": helper.get_wallet_path(coin),
                             "utxo_value": helper.get_utxo_value(coin),
                             "utxo_value_sats": helper.get_utxo_value(coin, True),
-                            "min_utxo_count": 20,
+                            "split_threshold": 20,
                             "split_count": 20,
                             "server": server,
                             "address": config["addresses"][coin],
