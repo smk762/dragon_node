@@ -113,8 +113,8 @@ class Config():
         data = self.get_coins_ntx_data()
         for coin in data:
             self.msg.ltblue(f"{coin}: ")
-            if 'split_count' in data[coin]:
-                self.msg.ltcyan(f"    split_count: {data[coin]['split_count']}")
+            if 'split_amount' in data[coin]:
+                self.msg.ltcyan(f"    split_amount: {data[coin]['split_amount']}")
             if 'split_threshold' in data[coin]:
                 self.msg.ltcyan(f"    split_threshold: {data[coin]['split_threshold']}")
 
@@ -158,14 +158,14 @@ class Config():
                 for k, v in new_whitelist:
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
-    def update_coin_split_config(self, coins: List[str], split_count: int, split_threshold: int) -> None:
+    def update_coin_split_config(self, coins: List[str], split_amount: int, split_threshold: int) -> None:
         data = self.get_coins_ntx_data()
         for coin in coins:
             if coin in data:
-                data[coin]["split_count"] = split_count
+                data[coin]["split_amount"] = split_amount
                 data[coin]["split_threshold"] = split_threshold
             else:
-                data.update({coin: {"split_count": split_count, "split_threshold": split_threshold}})
+                data.update({coin: {"split_amount": split_amount, "split_threshold": split_threshold}})
         with open(const.COINS_NTX_DATA_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
@@ -177,13 +177,13 @@ class Config():
         
         if option == "update_split_config":
             coin = helper.input_coin("Enter coin to update (or ALL): ")
-            split_count = helper.input_int("Enter amount of utxos for split: ", 1, 100)
+            split_amount = helper.input_int("Enter amount of utxos for split: ", 1, 100)
             split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
             if coin.upper() == "ALL":
-                self.update_coin_split_config(const.DPOW_COINS, split_count, split_threshold)
+                self.update_coin_split_config(const.DPOW_COINS, split_amount, split_threshold)
                 return
             elif coin.upper() in const.DPOW_COINS:
-                self.update_coin_split_config([coin.upper()], split_count, split_threshold)
+                self.update_coin_split_config([coin.upper()], split_amount, split_threshold)
                 return
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
@@ -273,7 +273,7 @@ class Config():
                             "utxo_value": helper.get_utxo_value(coin),
                             "utxo_value_sats": helper.get_utxo_value(coin, True),
                             "split_threshold": 20,
-                            "split_count": 20,
+                            "split_amount": 20,
                             "server": server,
                             "address": config["addresses"][coin],
                             "txfee": f'{fee:.5f}',

@@ -151,7 +151,7 @@ WHITELIST_COMPATIBLE = list(set(COINS_MAIN) - set(["LTC"])) + ["KMD_3P", "MCL", 
 OLD_CONFIG_KEYS = [
     "address_main_kmd", "config_path", "address_main",
     "address_main_ltc", "addresses_3p", "split amount",
-    "split_threshold"
+    "split_threshold", "split_count"
 ]
 
 # https://chainz.cryptoid.info/emc2/api.dws?q=unspent&key=f01f30f935a8&active=EeVxpgmmbjLosvkHpmgSjqMFwgvUFCRmeL

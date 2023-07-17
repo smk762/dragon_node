@@ -51,9 +51,9 @@ class Notary():
     def get_split_amount(self, coin: str) -> int:
         coins_ntx_data = self.cfg.get_coins_ntx_data()
         if coin in coins_ntx_data:
-            return coins_ntx_data[coin]["split_count"]
+            return coins_ntx_data[coin]["split_amount"]
         else:
-            return coins_ntx_data["KMD"]["split_count"]
+            return coins_ntx_data["KMD"]["split_amount"]
         
     def get_utxo_value(self, coin: str, sats=False) -> float:
         coins_ntx_data = self.cfg.get_coins_ntx_data()
