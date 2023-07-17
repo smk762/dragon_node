@@ -40,11 +40,7 @@ class Config():
     def save(self, data):
         logger.debug(f"Saving config to {const.APP_CONFIG_PATH}")
         for i in list(data.keys()):
-            if i in [
-                "address_main_kmd", "config_path", "address_main",
-                "address_main_ltc", "addresses_3p", "split amount",
-                "split_threshold"
-            ]:
+            if i in const.OLD_CONFIG_KEYS:
                 del data[i]
         with open(const.APP_CONFIG_PATH, "w") as f:
             json.dump(data, f, indent=4)
@@ -53,7 +49,7 @@ class Config():
         while True:
             try:
                 config = self.load()
-                options = list(set(list(config.keys())) - set(self.readonly))
+                options = list(set(list(config.keys())) - set(self.readonly) - set(const.OLD_CONFIG_KEYS))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 options.append("Add Whitelist Address")
