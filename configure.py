@@ -169,8 +169,8 @@ class Config():
         
         if option == "Update Coin Split Configs":
             coin = helper.input_coin("Enter coin to update (or ALL): ")
-            split_count = helper.input_int("Enter amount of utxos for split: ")
-            split_threshold = helper.input_int("Enter minimum utxo threshold: ")
+            split_count = helper.input_int("Enter amount of utxos for split: ", 1, 100)
+            split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
             if coin.upper() == "ALL":
                 self.update_coin_split_config(const.DPOW_COINS, split_count, split_threshold)
             elif coin.upper() in const.DPOW_COINS:

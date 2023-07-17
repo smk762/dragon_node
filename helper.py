@@ -435,11 +435,14 @@ def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
 
-def input_int(q):
+def input_int(q, min=0, max=1000000000):
     while True:
         try:
             msg = ColorMsg()
-            return int(msg.input(q))
+            if int(msg.input(q)) in range(min, max):
+                return int(msg.input(q))
+            else:
+                print(f"Invalid input, must be between {min} - {max}. Try again")
         except ValueError:
             print("Invalid input, must be integer. Try again")
 
