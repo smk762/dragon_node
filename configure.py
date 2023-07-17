@@ -150,7 +150,7 @@ class Config():
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
     def update_coin_split_config(self, coins: List[str], split_count: int, split_threshold: int) -> None:
-        data = Notary().get_coins_ntx_data()
+        data = self.get_coins_ntx_data()
         for coin in coins:
             if coin in data:
                 data[coin]["split_count"] = split_count
@@ -235,6 +235,41 @@ class Config():
         else:
             config[option] = q
         self.save(config)
+
+    def get_coins_ntx_data(self) -> dict:
+        if os.path.exists(const.COINS_NTX_DATA_PATH):
+            with open(const.COINS_NTX_DATA_PATH, 'r') as file:
+                try:
+                    return json.load(file)
+                except Exception as e:
+                    pass
+        data = self.get_coins_data()
+        with open(const.COINS_NTX_DATA_PATH, "w") as file:
+            json.dump(data, file, indent=4)
+        return data
+    
+    def get_coins_data(self) -> dict:
+        coins_data = {}
+        config = self.load()
+        if helper.is_configured(config):
+            for server in const.CONF_PATHS:
+                for coin in const.CONF_PATHS[server]:
+                    fee = helper.get_tx_fee(coin)
+                    coins_data.update({
+                        coin: {
+                            "conf": const.CONF_PATHS[server][coin],
+                            "wallet": helper.get_wallet_path(coin),
+                            "utxo_value": helper.get_utxo_value(coin),
+                            "utxo_value_sats": helper.get_utxo_value(coin, True),
+                            "min_utxo_count": 20,
+                            "split_count": 20,
+                            "server": server,
+                            "address": config["addresses"][coin],
+                            "txfee": f'{fee:.5f}',
+                            "pubkey": config[f"pubkey_{server}"]
+                        }
+                    })
+        return coins_data
 
     ### Templates ###
     def get_config_template(self):
