@@ -435,6 +435,24 @@ def get_assetchains():
     with open(f"{const.HOME}/dPoW/iguana/assetchains.json") as file:
         return json.load(file)
 
+def input_int(q):
+    while True:
+        try:
+            msg = ColorMsg()
+            return int(msg.input(q))
+        except ValueError:
+            print("Invalid input, must be integer. Try again")
+
+def input_coin(q):
+    while True:
+        msg = ColorMsg()
+        valid = const.DPOW_COINS + ["ALL"]
+        coin = msg.input(q)
+        if coin.upper() in valid:
+            return coin
+        else:
+            print(f"Invalid coin, must be one of {valid}. Try again")
+
 
 def chunkify(data: list, chunk_size: int):
     return [data[x:x+chunk_size] for x in range(0, len(data), chunk_size)]

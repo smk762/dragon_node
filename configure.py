@@ -53,11 +53,12 @@ class Config():
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 options.append("Add Whitelist Address")
+                options.append("Update Coin Split Configs")
                 self.msg.status(f"\n  ==== Config Options ====")
                 for i in options:
                     idx = options.index(i)
                     opt = i.replace("_", " ").title()
-                    if i in ["Return to Config Menu", "Add Whitelist Address"]:
+                    if i in ["Return to Config Menu", "Add Whitelist Address", "Update Coin Split Configs"]:
                         self.msg.option(f"  [{idx}] {i}")
                     elif i not in config:
                         self.msg.warning(f"  [{idx}] Invalid Option! {opt}")
@@ -147,13 +148,36 @@ class Config():
                 for k, v in new_whitelist:
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
+    def update_coin_split_config(self, coins: list[str], split_count: int, split_threshold: int) -> None:
+        with open(const.COINS_NTX_DATA_PATH, "w") as f:
+            data = json.load(f)
+            for coin in coins:
+                if coin in data:
+                    data[coin]["split_count"] = split_count
+                    data[coin]["split_threshold"] = split_threshold
+                else:
+                    data.update({coin: {"split_count": split_count, "split_threshold": split_threshold}})
+        with open(const.COINS_NTX_DATA_PATH, "w") as f:
+            json.dump(data, f, indent=4)
+
     def update(self, option):
         config = self.load()
         options = list(config.keys())
         if option in options:
             self.msg.option(f"Current value for {option}: {config[option]}")
         
-        if option == "Add Whitelist Address":
+        if option == "Update Coin Split Configs":
+            coin = helper.input_coin("Enter coin to update (or ALL): ")
+            split_count = helper.input_int("Enter amount of utxos for split: ")
+            split_threshold = helper.input_int("Enter minimum utxo threshold: ")
+            if coin.upper() == "ALL":
+                self.update_coin_split_config(const.DPOW_COINS, split_count, split_threshold)
+            elif coin.upper() in const.DPOW_COINS:
+                self.update_coin_split_config([coin.upper()], split_count, split_threshold)
+            else:
+                self.msg.error(f"Invalid coin '{coin}', try again.")
+            
+        elif option == "Add Whitelist Address":
             v = self.msg.input(f"Enter KMD address for whitelist: ")
             daemon = DaemonRPC("KMD")
             r = daemon.validateaddress(v)
