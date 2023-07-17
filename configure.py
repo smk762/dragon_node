@@ -113,8 +113,10 @@ class Config():
         data = self.get_coins_ntx_data()
         for coin in data:
             self.msg.ltblue(f"{coin}: ")
-            self.msg.ltcyan(f"    split_count: {data[coin]['split_count']}")
-            self.msg.ltcyan(f"    split_threshold: {data[coin]['split_threshold']}")
+            if 'split_count' in data[coin]:
+                self.msg.ltcyan(f"    split_count: {data[coin]['split_count']}")
+            if 'split_threshold' in data[coin]:
+                self.msg.ltcyan(f"    split_threshold: {data[coin]['split_threshold']}")
 
     def show(self) -> None:
         self.msg.status(f"\n==== Existing Config ====")
