@@ -62,6 +62,8 @@ class Config():
                     opt = i.replace("_", " ").title()
                     if i == "Return to Config Menu":
                         self.msg.option(f"  [{idx}] {i}")
+                    elif i not in config:
+                        self.msg.warning(f"  [{idx}] Update {opt}")
                     elif config[i] is None:
                         self.msg.warning(f"  [{idx}] Update {opt}")
                     elif isinstance(config[i], (int, float)):
@@ -151,10 +153,8 @@ class Config():
     def update(self, option):
         config = self.load()
         options = list(config.keys())
-        if option not in options:
-            self.msg.error("Invalid option, will not update.")
-            return
-        self.msg.option(f"Current value for {option}: {config[option]}")
+        if option in options:
+            self.msg.option(f"Current value for {option}: {config[option]}")
         
         if option == "Add Whitelist Address":
             v = self.msg.input(f"Enter KMD address for whitelist: ")
@@ -174,7 +174,7 @@ class Config():
                 self.msg.error(f"{v} is not a valid KMD address.")
             self.msg.error(f"KMD daemon is not responding.")
             
-        if option == "pubkey_main":
+        elif option == "pubkey_main":
             pubkey = helper.get_dpow_pubkey("main")
             if pubkey != "":
                 fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
