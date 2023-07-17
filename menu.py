@@ -353,7 +353,8 @@ class ConfigMenu():
         self.menu = [
             {"main_menu": self.exit},
             {"show_config": self.show_config},
-            {"update_config": self.update_config}
+            {"update_config": self.update_config},
+            {"update_split_config": self.update_split_config}
         ]
 
     def show(self):
@@ -364,6 +365,9 @@ class ConfigMenu():
 
     def update_config(self):
         self.cfg.menu()
+        
+    def update_split_config(self):
+        self.cfg.update("update_split_config")
 
     def exit(self):
         raise KeyboardInterrupt

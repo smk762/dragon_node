@@ -54,12 +54,11 @@ class Config():
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 options.append("Add Whitelist Address")
-                options.append("Update Coin Split Configs")
                 self.msg.status(f"\n  ==== Config Options ====")
                 for i in options:
                     idx = options.index(i)
                     opt = i.replace("_", " ").title()
-                    if i in ["Return to Config Menu", "Add Whitelist Address", "Update Coin Split Configs"]:
+                    if i in ["Return to Config Menu", "Add Whitelist Address"]:
                         self.msg.option(f"  [{idx}] {i}")
                     elif i not in config:
                         self.msg.warning(f"  [{idx}] Invalid Option! {opt}")
@@ -166,7 +165,7 @@ class Config():
         if option in options:
             self.msg.option(f"Current value for {option}: {config[option]}")
         
-        if option == "Update Coin Split Configs":
+        if option == "update_split_config":
             coin = helper.input_coin("Enter coin to update (or ALL): ")
             split_count = helper.input_int("Enter amount of utxos for split: ", 1, 100)
             split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
