@@ -43,12 +43,14 @@ class Notary():
     def get_coins_ntx_data(self) -> dict:
         if os.path.exists(const.COINS_NTX_DATA_PATH):
             with open(const.COINS_NTX_DATA_PATH, 'r') as file:
-                return json.load(file)
-        else:
-            data = self.get_coins_data()
-            with open(const.COINS_NTX_DATA_PATH, "w") as file:
-                json.dump(data, file, indent=4)
-            return data
+                try:
+                    return json.load(file)
+                except Exception as e:
+                    pass
+        data = self.get_coins_data()
+        with open(const.COINS_NTX_DATA_PATH, "w") as file:
+            json.dump(data, file, indent=4)
+        return data
         
     def get_utxo_threshold(self, coin: str) -> int:
         coins_ntx_data = self.get_coins_ntx_data()

@@ -8,7 +8,7 @@ from typing import List
 from logger import logger
 import helper
 from daemon import DaemonRPC
-
+from notary import Notary
 # Run this to configure your dragon node
 # It will create a config.json file and a .env file,
 # to store the node configuration and environment variables
@@ -150,14 +150,13 @@ class Config():
                     conf.write(f'whitelistaddress={v} # {k}\n')
 
     def update_coin_split_config(self, coins: List[str], split_count: int, split_threshold: int) -> None:
-        with open(const.COINS_NTX_DATA_PATH, "r") as f:
-            data = json.load(f)
-            for coin in coins:
-                if coin in data:
-                    data[coin]["split_count"] = split_count
-                    data[coin]["split_threshold"] = split_threshold
-                else:
-                    data.update({coin: {"split_count": split_count, "split_threshold": split_threshold}})
+        data = Notary().get_coins_ntx_data()
+        for coin in coins:
+            if coin in data:
+                data[coin]["split_count"] = split_count
+                data[coin]["split_threshold"] = split_threshold
+            else:
+                data.update({coin: {"split_count": split_count, "split_threshold": split_threshold}})
         with open(const.COINS_NTX_DATA_PATH, "w") as f:
             json.dump(data, f, indent=4)
 
