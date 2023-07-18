@@ -8,6 +8,7 @@ A node management tool for Komodo Platform Notary Node Operations
 ## Setup
 1. Clone this repository: `git clone https://github.com/smk762/dragon_node`. Use the `season-seven` branch, or `season-sever-dev` if you want to test the latest features.
 2. Run `./setup` to install dependencies
+3. Run `./configure` to setup the config.json files
 
 ---
 ## Usage
@@ -33,8 +34,8 @@ A node management tool for Komodo Platform Notary Node Operations
 - [ ] Wallet reset (work in progress - use at own risk; some 3P coins not supported)
 - [ ] Automated KMD funds sweeping
 - [ ] Automated Mining activation/deactivation
-- [ ] Add whitelist addresses to conf files
-- [ ] Add peer IPs for addnode to conf files
+- [x] Add whitelist addresses to conf files
+- [x] Add peer IPs for addnode to conf files
 
 ---
 ## Configuration
@@ -95,7 +96,9 @@ User config can be edited via the TUI, or by manually editing the `config.json` 
 }
 ```
 
-Note: Addresses (except for the sweep address) are automatically calculated from pubkeys, so these are considered `readonly` in the app. If you want to change an address, you should change the pubkey.
+Note:
+- Addresses (except for the sweep address) are automatically calculated from pubkeys, so these are considered `readonly` in the app. If you want to change an address, you should change the pubkey. 
+- Added whitelist addresses will not take effect until daemons are restarted.
 
 Additionally, coins config (such as split amount and threshold) can be changed by manually editing the `coins_ntx_data.json` file. For example:
 ```json
