@@ -190,7 +190,11 @@ def get_server_coins(server: str) -> list:
 
 def get_server_pubkey(server):
     with open(const.APP_CONFIG_PATH, "r") as f:
-        return json.load(f)[f"pubkey_{server}"]
+        data = json.load(f)
+        if f"pubkey_{server}" in data:
+            return data[f"pubkey_{server}"]
+        return ""
+    
 
 
 def get_ntx_address(coin):

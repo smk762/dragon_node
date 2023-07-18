@@ -8,7 +8,6 @@ A node management tool for Komodo Platform Notary Node Operations
 ## Setup
 1. Clone this repository: `git clone https://github.com/smk762/dragon_node`. Use the `season-seven` branch, or `season-sever-dev` if you want to test the latest features.
 2. Run `./setup` to install dependencies
-3. Run `./configure` to setup the config.json files
 
 ---
 ## Usage
