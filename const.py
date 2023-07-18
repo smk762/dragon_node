@@ -6,6 +6,14 @@ from os.path import expanduser, dirname, realpath
 from dotenv import load_dotenv
 load_dotenv()
 
+
+def get_cache_data(file):
+    if not os.path.exists(file):
+        print(f"Failed to get {file} from cache")
+        return {}
+    with open(file, "r") as f:
+        return json.load(f)
+
 # Path constants
 HOME = expanduser('~')
 DPOW_PATH = f'{HOME}/dPoW'
@@ -160,25 +168,26 @@ OLD_CONFIG_KEYS = [
 # MM2 constants
 MM2_JSON_PATH = f"{HOME}/notary_docker_3p/mm2/MM2.json"
 
-with open(f"{SCRIPT_PATH}/config.json", "r") as f:
-    config = json.load(f)
-    for i in ["whitelist", "addnode", "addnotary"]:
-        if i not in config:
-            config.update({i: {}})
-        if i == "whitelist":
-            for k, v in ADDRESS_WHITELIST.items():
-                if k not in config[i]:
-                    config[i].update({k: v})
-        if i == "addnode":
-            for k, v in ADDNODES.items():
-                if k not in config[i]:
-                    config[i].update({k: v})
-        if i == "addnotary":
-            for k, v in NOTARY_PEERS.items():
-                if k not in config[i]:
-                    config[i].update({k: v})
 
-with open(f"{SCRIPT_PATH}/config.json", "w") as f:
+
+config = get_cache_data(APP_CONFIG_PATH)
+for i in ["whitelist", "addnode", "addnotary"]:
+    if i not in config:
+        config.update({i: {}})
+    if i == "whitelist":
+        for k, v in ADDRESS_WHITELIST.items():
+            if k not in config[i]:
+                config[i].update({k: v})
+    if i == "addnode":
+        for k, v in ADDNODES.items():
+            if k not in config[i]:
+                config[i].update({k: v})
+    if i == "addnotary":
+        for k, v in NOTARY_PEERS.items():
+            if k not in config[i]:
+                config[i].update({k: v})
+
+with open(APP_CONFIG_PATH, "w") as f:
     json.dump(config, f, indent=4)
 
 for server in CONF_PATHS:
