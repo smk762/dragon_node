@@ -44,16 +44,30 @@ class Notary():
     def get_utxo_threshold(self, coin: str) -> int:
         coins_ntx_data = self.cfg.get_coins_ntx_data()
         if coin in coins_ntx_data:
-            return coins_ntx_data[coin]["split_threshold"]
+            if "split_threshold" in coins_ntx_data[coin]:
+                return coins_ntx_data[coin]["split_threshold"]
         else:
-            return coins_ntx_data["KMD"]["split_threshold"]
+            if "split_threshold" in coins_ntx_data["KMD"]:
+                return coins_ntx_data["KMD"]["split_threshold"]
+        return 20
     
     def get_split_amount(self, coin: str) -> int:
         coins_ntx_data = self.cfg.get_coins_ntx_data()
         if coin in coins_ntx_data:
-            return coins_ntx_data[coin]["split_amount"]
+            # Temporary fix for coins that have split_count instead of split_amount
+            # TODO: remove later
+            if "split_count" in coins_ntx_data[coin]:
+                return coins_ntx_data[coin]["split_count"]
+            if "split_amount" in coins_ntx_data[coin]:
+                return coins_ntx_data[coin]["split_amount"]
+            return 20
         else:
-            return coins_ntx_data["KMD"]["split_amount"]
+            coin = "KMD"
+            if "split_count" in coins_ntx_data[coin]:
+                return coins_ntx_data[coin]["split_count"]
+            if "split_amount" in coins_ntx_data[coin]:
+                return coins_ntx_data[coin]["split_amount"]
+            return 20
         
     def get_utxo_value(self, coin: str, sats=False) -> float:
         coins_ntx_data = self.cfg.get_coins_ntx_data()

@@ -251,6 +251,10 @@ def get_utxos_from_api(coin: str, pubkey: str) -> list:
         url += f"{address}?unspentOnly=true"
         r = requests.get(url).json()
         utxos = []
+        if "txrefs" not in r:
+            logger.warning(f"{url} returned no txrefs")            
+            logger.warning(r)
+            return utxos
         for i in r["txrefs"]:
             utxos.append({
                 "txid": i["tx_hash"],
