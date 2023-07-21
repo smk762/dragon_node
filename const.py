@@ -169,7 +169,6 @@ OLD_CONFIG_KEYS = [
 MM2_JSON_PATH = f"{HOME}/notary_docker_3p/mm2/MM2.json"
 
 
-
 config = get_cache_data(APP_CONFIG_PATH)
 for i in ["whitelist", "addnode", "addnotary"]:
     if i not in config:
