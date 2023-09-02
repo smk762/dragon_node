@@ -16,8 +16,9 @@ class StatsLine:
         # Todo: last mined KMD since
         self.msg = ColorMsg()
         self.coin = coin
-        self.col_widths = column_widths
         self.daemon = DaemonRPC(self.coin)
+        self.notary = Notary()
+        self.col_widths = column_widths
         self.replenish_utxos = replenish_utxos
     
     # To check if daemon pubkey matches config
@@ -89,9 +90,12 @@ class StatsLine:
             # Since NTX
             last_ntx_time = ntx_stats[1]
             if last_ntx_time == 0:
-                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m' 
+                dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m'
             else:
                 sec_since = helper.sec_since(last_ntx_time)
+                # If no KMD notas for > hour, might be split issue so we consolidate
+                if self.coin in ["KMD", "KMD_3P"] and sec_since > 3600:
+                    self.notary.consolidate(self.coin, True, True)
                 dhms_since_ntx = helper.sec_to_dhms(sec_since)
             row.append(dhms_since_ntx)
             

@@ -10,6 +10,7 @@ from daemon import DaemonRPC
 from notary import Notary
 from stats_table import Stats
 from iguana import Iguana
+from faucet import Faucet
 from logger import logger
 import based_58
 
@@ -97,9 +98,11 @@ class NotaryMenu():
         self.cfg = Config()
         self.msg = ColorMsg()
         self.nn = Notary()
+        self.faucet = Faucet()
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
+            {"notary_faucet": self.drip},
             {"start_mining": self.start_mining},
             {"stop_mining": self.stop_mining},
             {"start_coin": self.start_coin},
@@ -110,6 +113,14 @@ class NotaryMenu():
     def show(self):
         show_menu(self.menu, "Wallet Menu")
 
+    def drip(self):
+        balances = self.faucet.balances()
+        coin = self.msg.input("Enter coin to drip: ")
+        if coin.upper() in const.DPOW_COINS:
+            pubkey = self.cfg.load()[f"pubkey_{helper.get_coin_server(coin)}"]
+            self.msg.status(self.faucet.drip(coin, pubkey))
+        else:
+            self.msg.error(f"Invalid coin '{coin}', try again.")
 
     def start_coin(self):
         coin = self.msg.input("Enter coin to start (or ALL): ")
