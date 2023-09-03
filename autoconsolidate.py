@@ -9,5 +9,7 @@ for coin in ["KMD", "KMD_3P"]:
     wallet_tx = rpc.listtransactions()
     stats = get_ntx_stats(wallet_tx, coin)
     sec_since = sec_since(stats[1])
-    if sec_since > 3600:
+    if coin in ["KMD"] and sec_since > 3600:
+        notary.consolidate(coin, True, True)
+    elif coin in ["KMD_3P"] and sec_since > 3600 * 6:
         notary.consolidate(coin, True, True)
