@@ -96,7 +96,9 @@ class StatsLine:
                 # If no KMD notas for > hour, might be split issue so we consolidate
                 if self.coin in ["KMD"] and sec_since > 3600:
                     self.notary.consolidate(self.coin, True, True)
-                if self.coin in ["KMD_3P"] and sec_since > 3600 * 4:
+                elif self.coin in ["KMD_3P"] and sec_since > 3600 * 6:
+                    self.notary.consolidate(self.coin, True, True)
+                elif sec_since > 3600 * 6 and ntx_count == 0:
                     self.notary.consolidate(self.coin, True, True)
                 dhms_since_ntx = helper.sec_to_dhms(sec_since)
             row.append(dhms_since_ntx)
