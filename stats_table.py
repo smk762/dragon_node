@@ -9,7 +9,8 @@ from logger import logger
 from color import ColorMsg
 from notary import Notary
 from iguana import Iguana
-from atomicdex import AtomicDEX
+from pykomodefi import KomoDeFi_API
+
 
 class StatsLine:
     def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
@@ -188,16 +189,16 @@ class Stats:
         daemon = DaemonRPC("KMD")
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
-        dex = AtomicDEX()
+        dex = KomoDeFi_API(const.MM2_JSON_PATH)
         dex_version = dex.version().split("_")[-1]
         if dex_version != "Error":
             active_versions = helper.get_active_seednode_versions()
             if dex_version in active_versions:
-                dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version} ]", "lightgreen")
+                dex_status = self.msg.colorize(f"[ DeFi API \N{check mark} {dex_version} ]", "lightgreen")
             else:
-                dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "purple")
+                dex_status = self.msg.colorize(f"[ DeFi API \N{runic cross punctuation} {dex_version} ]", "purple")
         else:
-            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            dex_status = self.msg.colorize(f"[ DeFi API \N{runic cross punctuation} {dex_version} ]", "darkgrey")
         if daemon.is_mining():
             mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:
