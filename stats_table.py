@@ -190,7 +190,7 @@ class Stats:
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
         dex = KomoDeFi_API(const.MM2_JSON_PATH)
-        dex_version = dex.version().split("_")[-1]
+        dex_version = dex.version.split("_")[-1]
         if dex_version != "Error":
             active_versions = helper.get_active_seednode_versions()
             if dex_version in active_versions:
