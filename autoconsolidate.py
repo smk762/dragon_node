@@ -10,7 +10,7 @@ coins = [coin for coin in coins if coin not in IMPORT_PRUNED_COINS]
 
 for coin in coins:
     rpc = DaemonRPC(coin)
-    last_tx = rpc.listtransactions(1)["time"]
+    last_tx = rpc.listtransactions(1)[0]["time"]
     since = sec_since(last_tx)
 
     # If no KMD notas for > 4 hours, consolidate
