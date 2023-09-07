@@ -9,7 +9,8 @@ from logger import logger
 from color import ColorMsg
 from notary import Notary
 from iguana import Iguana
-from atomicdex import AtomicDEX
+from pykomodefi import KomoDeFi_API
+
 
 class StatsLine:
     def __init__(self, column_widths, coin="KMD", replenish_utxos=True):
@@ -93,13 +94,6 @@ class StatsLine:
                 dhms_since_ntx = '\033[31m' + "   Never" + '\033[0m'
             else:
                 sec_since = helper.sec_since(last_ntx_time)
-                # If no KMD notas for > hour, might be split issue so we consolidate
-                if self.coin in ["KMD"] and sec_since > 3600:
-                    self.notary.consolidate(self.coin, True, True)
-                elif self.coin in ["KMD_3P"] and sec_since > 3600 * 6:
-                    self.notary.consolidate(self.coin, True, True)
-                elif sec_since > 3600 * 6 and ntx_utxo_count == 0:
-                    self.notary.consolidate(self.coin, True, True)
                 dhms_since_ntx = helper.sec_to_dhms(sec_since)
             row.append(dhms_since_ntx)
             
@@ -188,16 +182,16 @@ class Stats:
         daemon = DaemonRPC("KMD")
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
-        dex = AtomicDEX()
-        dex_version = dex.version().split("_")[-1]
+        dex = KomoDeFi_API(const.MM2_JSON_PATH)
+        dex_version = dex.version.split("_")[-1]
         if dex_version != "Error":
             active_versions = helper.get_active_seednode_versions()
             if dex_version in active_versions:
-                dex_status = self.msg.colorize(f"[ AtomicDEX \N{check mark} {dex_version} ]", "lightgreen")
+                dex_status = self.msg.colorize(f"[ DeFi API \N{check mark} {dex_version} ]", "lightgreen")
             else:
-                dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "purple")
+                dex_status = self.msg.colorize(f"[ DeFi API \N{runic cross punctuation} {dex_version} ]", "purple")
         else:
-            dex_status = self.msg.colorize(f"[ AtomicDEX \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            dex_status = self.msg.colorize(f"[ DeFi API \N{runic cross punctuation} {dex_version} ]", "darkgrey")
         if daemon.is_mining():
             mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
         else:

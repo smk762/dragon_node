@@ -53,7 +53,6 @@ class Config():
                 options = list(set(list(config.keys())) - set(self.readonly) - set(const.OLD_CONFIG_KEYS))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
-                options.append("Add Whitelist Address")
                 self.msg.status(f"\n  ==== Config Options ====")
                 for i in options:
                     idx = options.index(i)
@@ -181,12 +180,11 @@ class Config():
             split_threshold = helper.input_int("Enter minimum utxo threshold: ", 1, 100)
             if coin.upper() == "ALL":
                 self.update_coin_split_config(const.DPOW_COINS, split_amount, split_threshold)
-                return
             elif coin.upper() in const.DPOW_COINS:
                 self.update_coin_split_config([coin.upper()], split_amount, split_threshold)
-                return
             else:
                 self.msg.error(f"Invalid coin '{coin}', try again.")
+            return
             
         elif option == "Add Whitelist Address":
             v = self.msg.input(f"Enter KMD address for whitelist: ")
@@ -200,13 +198,13 @@ class Config():
                     config["whitelist"].update({k: v})
                     # Update daemon confs
                     self.update_daemon_whitelists(config)
-                    
                     self.save(config)
                     self.msg.success(f"Added {v} to whitelist.")
                 else:
                     self.msg.error(f"{v} is not a valid KMD address.")
             else:
                 self.msg.error(f"KMD daemon is not responding. {r}")
+            return
             
         elif option == "pubkey_main":
             pubkey = helper.get_dpow_pubkey("main")

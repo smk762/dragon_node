@@ -6,7 +6,6 @@ import const
 import helper
 import requests
 import subprocess
-import based_58
 from color import ColorMsg
 from daemon import DaemonRPC
 from iguana import Iguana
