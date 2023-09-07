@@ -40,10 +40,14 @@ A node management tool for Komodo Platform Notary Node Operations
 ## Configuration
 
 To use the `consolidate` feature for EMC2 and MIL, you will need an API key from https://chainz.cryptoid.info/api.dws
-This API key should be stored in a `.env` file in the root directory of the project. For example:
+This API key should be stored in a `.env` file in the root directory of the project.
+If you are using a different path for your MM2.json file, you can also set the `MM2_JSON_PATH` variable in the `.env` file.
+
+For example:
 
 ```bash
 CRYPTOID_API_KEY=xxNotARealKeyxx
+MM2_JSON_PATH="/path/to/MM2.json"    # Defaults to ~/notary_docker_3p/mm2/MM2.json
 ```
 
 User config can be edited via the TUI, or by manually editing the `config.json` file. For example:
