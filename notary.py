@@ -341,7 +341,11 @@ class Notary():
                     balance += utxo["amount"]
             if balance > 500:
                 self.msg.info(f"{balance} KMD in non-split UTXOs")
-                self.msg.info(daemon.sendtoaddress(config["sweep_address"], round(balance-5, 4)))
+                q = input(f"Confirm sending {round(balance-5, 4)} KMD to {config['sweep_address']}? (y/n): ")
+                if q.lower() == "y":
+                    self.msg.info(daemon.sendtoaddress(config["sweep_address"], round(balance-5, 4)))
+                else:
+                    self.msg.info("Sweep cancelled")
             else:
                 self.msg.info(f"Only {balance} KMD in non-split UTXOs, skipping sweep.")
             

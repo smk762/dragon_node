@@ -35,7 +35,7 @@ SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/d
 SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
 
 # Coins constants
-COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "THC", "KMD", "NINJA"]
+COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "KMD", "NINJA"]
 CONF_PATHS = {
     "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
@@ -139,7 +139,6 @@ INSIGHT_EXPLORERS = {
     'NINJA': 'https://ninja.explorer.dexstats.info/',
     'PIRATE': 'https://explorer.pirate.black/',
     'SUPERNET': 'https://supernet.explorer.dexstats.info/',
-    'THC': 'https://thc.explorer.dexstats.info/',
     'TOKEL': 'https://tokel.explorer.dexstats.info/',
     'VRSC': 'https://vrsc.explorer.dexstats.info/'
 }
