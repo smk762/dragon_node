@@ -92,7 +92,6 @@ User config can be edited via the TUI, or by manually editing the `config.json` 
         "LTC": "Lga1bKF6FSHx9RqbC4gE1iS4PFncyaQ7W9",
         "GLEEC": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
         "KOIN": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
-        "THC": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
         "KMD": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE",
         "NINJA": "RWdFQcpYmbrTxdWdV6g3qDhVwJswVQCGWE"
     }
