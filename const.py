@@ -146,7 +146,7 @@ INSIGHT_EXPLORERS = {
         "https://explorer.gleec.com/",
         "https://gleec.explorer.dexstats.info/"
     ],
-    "GLEEC-OLD": [
+    "GLEEC_OLD": [
         "https://gleec.komodo.earth/",
         "https://gleec.explorer.dragonhound.info/",
         "https://old.gleec.xyz/"
