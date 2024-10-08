@@ -126,23 +126,100 @@ ADDNODES = {
 
 
 INSIGHT_EXPLORERS = {
-    'CCL': ['https://ccl.explorer.dexstats.info/'],
-    'CHIPS': ['https://chips.explorer.dexstats.info/'],
-    'CLC': ['https://clc.explorer.dexstats.info/'],
-    'DOC': ['https://doc.explorer.dexstats.info/'],
-    'GLEEC': ["https://explorer.gleec.com/"],
-    'GLEEC_OLD': ['https://gleec.explorer.dexstats.info/'],
-    'THC': ['https://thc.explorer.dexstats.info/'],
-    'ILN': ['https://iln.explorer.dexstats.info/'],
-    'KMD': ['https://kmd.explorer.dexstats.info/'],
-    'KMD_3P': ['https://kmd.explorer.dexstats.info/'],
-    'KOIN': ['https://koin.explorer.dexstats.info/'],
-    'MARTY': ['https://marty.explorer.dexstats.info/'],
-    'MCL': ['https://explorer.marmara.io/', 'https://mcl.explorer.dexstats.info/'],
-    'NINJA': ['https://ninja.explorer.dexstats.info/'],
-    'PIRATE': ['https://explorer.pirate.black/'],
-    'SUPERNET': ['https://supernet.explorer.dexstats.info/'],
-    'TOKEL': ['https://tokel.explorer.dexstats.info/']
+    "CCL": [
+        "https://ccl.komodo.earth/",
+        "https://ccl.explorer.dragonhound.info/",
+        "https://ccl.kmdexplorer.io/",
+        "https://ccl.explorer.dexstats.info/"
+    ],
+    "CLC": [
+        "https://clc.komodo.earth/",
+        "https://clc.explorer.dragonhound.info/",
+        "https://clc.explorer.dexstats.info/"
+    ],
+    "DOC": [
+        "https://doc.explorer.dexstats.info/",
+        "https://doc.komodo.earth/",
+        "https://doc.explorer.dragonhound.info/"
+    ],
+    "GLEEC": [
+        "https://explorer.gleec.com/",
+        "https://gleec.explorer.dexstats.info/"
+    ],
+    "GLEEC-OLD": [
+        "https://gleec.komodo.earth/",
+        "https://gleec.explorer.dragonhound.info/",
+        "https://old.gleec.xyz/"
+    ],
+    "THC": [
+        "https://thc.komodo.earth/",
+        "https://thc.explorer.dragonhound.info/",
+        "https://thc.explorer.dexstats.info/"
+    ],
+    "ILN": [
+        "https://iln.komodo.earth/",
+        "https://iln.explorer.dragonhound.info/",
+        "https://explorer.ilien.io/",
+        "https://iln.explorer.dexstats.info/"
+    ],
+    "KMD": [
+        "https://explorer.komodoplatform.com/",
+        "https://explorer.kmd.dev/",
+        "https://explorer.kmd.io/",
+        "https://kmd.explorer.dexstats.info/",
+        "https://kmdexplorer.io/",
+        "https://www.kmdexplorer.ru/"
+    ],
+    "KMD_3P": [
+        "https://explorer.komodoplatform.com/",
+        "https://explorer.kmd.dev/",
+        "https://explorer.kmd.io/",
+        "https://kmd.explorer.dexstats.info/",
+        "https://kmdexplorer.io/",
+        "https://www.kmdexplorer.ru/"
+    ],
+    "KOIN": [
+        "https://koin.komodo.earth/",
+        "https://koin.explorer.dragonhound.info/",
+        "https://block.koinon.cloud/",
+        "https://koin.explorer.dexstats.info/"
+    ],
+    "MARTY": [
+        "https://marty.komodo.earth/",
+        "https://marty.explorer.dragonhound.info/",
+        "https://marty.explorer.dexstats.info/"
+    ],
+    "MCL": [
+        "https://mcl.komodo.earth/",
+        "https://explorer.marmara.io/",
+        "https://mcl.explorer.dexstats.info/",
+        "https://mcl.explorer.dragonhound.info/"
+    ],
+    "NINJA": [
+        "https://ninja.komodo.earth/",
+        "https://ninja.explorer.dragonhound.info/",
+        "https://ninja.explorer.dexstats.info/",
+        "https://ninja.kmdexplorer.io/"
+    ],
+    "PIRATE": [
+        "https://pirate.komodo.earth/",
+        "https://pirate.explorer.dragonhound.info/",
+        "https://explorer.pirate.black/",
+        "https://pirate.explorer.dexstats.info/",
+        "https://pirate.kmdexplorer.io/"
+    ],
+    "SUPERNET": [
+        "https://supernet.komodo.earth/",
+        "https://supernet.explorer.dragonhound.info/",
+        "https://supernet.explorer.dexstats.info/",
+        "https://supernet.kmdexplorer.io/"
+    ],
+    "TOKEL": [
+        "https://tokel.komodo.earth/",
+        "https://tokel.explorer.dragonhound.info/",
+        "https://explorer.tokel.io/",
+        "https://tokel.explorer.dexstats.info/"
+    ]
 }
 
 CRYPTOID_API_KEY = os.getenv('CRYPTOID_API_KEY')
