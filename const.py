@@ -39,7 +39,7 @@ SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/d
 SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
 
 # Coins constants
-COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "SUPERNET", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "KMD", "NINJA", "THC", "GLEEC_OLD"]
+COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "KMD", "THC", "GLEEC_OLD"]
 CONF_PATHS = {
     "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
