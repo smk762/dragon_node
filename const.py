@@ -29,6 +29,9 @@ SCRIPT_PATH = dirname(realpath(sys.argv[0]))
 COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
 APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
 
+VERSION_PATH = f"{SCRIPT_PATH}/version.json"
+VERSION = json.load(open(VERSION_PATH))['version']
+
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
