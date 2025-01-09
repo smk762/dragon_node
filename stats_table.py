@@ -9,7 +9,7 @@ from logger import logger
 from color import ColorMsg
 from notary import Notary
 from iguana import Iguana
-from pykomodefi import KomoDeFi_API
+# from pykomodefi import KomoDeFi_API
 
 
 class StatsLine:
@@ -183,16 +183,19 @@ class Stats:
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
         try:
-            dex = KomoDeFi_API(const.MM2_JSON_PATH)
-            dex_version = dex.version.split("_")[-1]
-            if dex_version != "Error":
-                active_versions = helper.get_active_seednode_versions()
-                if dex_version in active_versions:
-                    dex_status = self.msg.colorize(f"[ KDF \N{check mark} {dex_version} ]", "lightgreen")
-                else:
-                    dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "purple")
-            else:
-                dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            # dex = KomoDeFi_API(const.MM2_JSON_PATH)
+            # dex_version = dex.version.split("_")[-1]
+            dex_version = "disabled"
+            dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            # if dex_version != "Error":
+            #     active_versions = helper.get_active_seednode_versions()
+            #     if dex_version in active_versions:
+            #         dex_status = self.msg.colorize(f"[ KDF \N{check mark} {dex_version} ]", "lightgreen")
+            #     else:
+            #         dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "purple")
+            # else:
+            #     dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            
         except FileNotFoundError:
             dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} Err:404 ]", "darkgrey")
         
