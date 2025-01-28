@@ -266,10 +266,9 @@ class Config():
         else:
             for coin in const.COINS_MAIN:
                 if coin not in data:
-                    coins_data.update({
+                    data.update({
                         coin: self.get_coin_data("main", coin)
                     })
-
 
         with open(const.COINS_NTX_DATA_PATH, "w") as file:
             json.dump(data, file, indent=4)
