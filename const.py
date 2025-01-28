@@ -92,13 +92,18 @@ NTX_ADDR = {
     "MIL": "MVx1hSH9WqwQurgqR7HBDRCu3ESkuhQC8r"
 }
 
-PUBKEYS_MAIN = json.load(open(f"{SCRIPT_PATH}/notary_pubkeys.json", "r"))
-PUBKEYS_3P = json.load(open(f"{SCRIPT_PATH}/notary_pubkeys_3p.json", "r"))
 
 IGUANA_CONFIGS = {
     "main": f"{DPOW_PATH}/iguana/elected",
     "3p": f"{DPOW_PATH}/iguana/3rd_party"
 }
+
+with open(IGUANA_CONFIGS["main"]) as j:
+    _notaries = json.load(j)['notaries']
+    PUBKEYS_MAIN = {k: v for d in _notaries for k, v in d.items()}
+with open(IGUANA_CONFIGS["3p"]) as j:
+    _notaries = json.load(j)['notaries']
+    PUBKEYS_3P = {k: v for d in _notaries for k, v in d.items()}
 
 LOG_PATH = f"{HOME}/logs"
 if not os.path.exists(LOG_PATH):
