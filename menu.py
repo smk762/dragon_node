@@ -26,7 +26,9 @@ def show_logo():
       /_____/ /_/    `__,_/  `__, / `____//_/ /_/      /_/ |_/  `____/`__,_/  `___/  
                             /____/                                                   
     ''')
-    msg.ltcyan('{:^80}'.format('Dragon Node menu v' + const.VERSION + ' by Dragonhound'))
+    msg.ltcyan('{:^80}'.format('Dragon Node v' + const.VERSION + ' by Dragonhound'))
+    if const.VERSION != const.CURRENT_VERSION:
+        msg.info('{:^80}'.format('Update to v' + const.CURRENT_VERSION + ' available!'))
     print()
     notary.welcome()
 

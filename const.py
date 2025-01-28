@@ -32,6 +32,13 @@ APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
 
 VERSION_PATH = f"{SCRIPT_PATH}/version.json"
 VERSION = json.load(open(VERSION_PATH))['version']
+CURRENT_VERSION_URL = "https://raw.githubusercontent.com/smk762/dragon_node/refs/heads/season-8-dev/version.json"
+try:
+    x = requests.get(CURRENT_VERSION_URL).json()
+    CURRENT_VERSION = x['version']
+except Exception as e:
+    CURRENT_VERSION = VERSION
+    logger.debug(e)
 
 DPOW_VERSION_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/refs/heads/master/iguana/version"
 
