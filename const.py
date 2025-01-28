@@ -75,7 +75,7 @@ CONF_PATHS = {
 [CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC", "GLEEC_OLD"]]
 DPOW_SERVERS = list(CONF_PATHS.keys())
 COINS_3P = list(CONF_PATHS["3p"].keys())
-DPOW_COINS = COINS_3P + COINS_MAIN
+DPOW_COINS = COINS_3P + COINS_MAIN + ["KMD", "LTC"]
 IMPORT_PRUNED_COINS = ["AYA", "EMC2", "MIL", "CHIPS", "LTC"]
                       
 LARGE_UTXO_COINS = ["EMC2", "AYA", "MIL"]
