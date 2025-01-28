@@ -459,6 +459,8 @@ def get_seednode_versions():
         const.SEEDNODE_VERSIONS_PATH, const.SEEDNODE_VERSIONS_URL
     )
 
+def get_current_dpow_version():
+    return requests.get(const.DPOW_VERSION_URL).text.strip()
 
 def get_active_seednode_versions():
     now = int(time.time())
@@ -469,7 +471,7 @@ def get_active_seednode_versions():
             active_versions.append(v)
     return active_versions
 
-def get_dpow_version():
+def get_local_dpow_version():
     fn = f"{const.HOME}/dPoW/iguana/version"
     if not os.path.exists(fn):
         return "?"

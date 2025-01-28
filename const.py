@@ -2,6 +2,7 @@
 import os
 import sys
 import json
+import requests
 from os.path import expanduser, dirname, realpath
 from dotenv import load_dotenv
 load_dotenv()
@@ -32,10 +33,12 @@ APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
 VERSION_PATH = f"{SCRIPT_PATH}/version.json"
 VERSION = json.load(open(VERSION_PATH))['version']
 
+DPOW_VERSION_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/refs/heads/master/iguana/version"
+
+
 ASSETCHAINS_PATH = f"{HOME}/dPoW/iguana/assetchains.json"
 with open(ASSETCHAINS_PATH, "r") as f:
     ASSETCHAINS = json.load(f)
-    
 
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
@@ -145,11 +148,6 @@ INSIGHT_EXPLORERS = {
         "https://clc.explorer.dragonhound.info/",
         "https://clc.explorer.dexstats.info/"
     ],
-    "DOC": [
-        "https://doc.explorer.dexstats.info/",
-        "https://doc.komodo.earth/",
-        "https://doc.explorer.dragonhound.info/"
-    ],
     "GLEEC": [
         "https://explorer.gleec.com/",
         "https://gleec.explorer.dexstats.info/"
@@ -192,10 +190,14 @@ INSIGHT_EXPLORERS = {
         "https://block.koinon.cloud/",
         "https://koin.explorer.dexstats.info/"
     ],
-    "MARTY": [
-        "https://marty.komodo.earth/",
-        "https://marty.explorer.dragonhound.info/",
-        "https://marty.explorer.dexstats.info/"
+    "MDX": [
+        "https://mdx.xpl.monster/"
+    ],
+    "RAPH": [
+        "https://raph.xpl.monster/"
+    ],
+    "BCZERO": [
+        "https://bczero.xpl.monster/"
     ],
     "MCL": [
         "https://mcl.komodo.earth/",

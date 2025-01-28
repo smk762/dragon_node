@@ -182,6 +182,7 @@ class Stats:
         daemon = DaemonRPC("KMD")
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
+        centerwidth = 158
         try:
             # dex = KomoDeFi_API(const.MM2_JSON_PATH)
             # dex_version = dex.version.split("_")[-1]
@@ -211,11 +212,20 @@ class Stats:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{check mark} ]", "lightgreen")
         else:
             status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
-        status_dpow_version = self.msg.colorize(f"[ dPoW v{helper.get_dpow_version()} ]", "lightcyan")
+        
+        current_dpow_version = helper.get_current_dpow_version()
+        current_dpow_version = int(current_dpow_version.replace(".", ""))
+        local_dpow_version = helper.get_local_dpow_version()
+        local_dpow_version = int(local_dpow_version.replace(".", ""))
+        if current_dpow_version > local_dpow_version:
+            status_dpow_version = self.msg.colorize(f"[ DPOW UPDATE AVAILABLE! ]", "purple")
+        else:
+            status_dpow_version = self.msg.colorize(f"[ dPoW v{helper.get_local_dpow_version()} ]", "lightgreen")
+            
 
         status_data = f" \N{position indicator} ".join([status_main, status_3p, status_dpow_version, mining, dex_status]) 
         footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
-        return footer_row.center(173)
+        return footer_row.center(centerwidth)
     
     def spacer(self) -> str:
         return " " + "-" * (self.table_width - 1)
@@ -237,4 +247,3 @@ class Stats:
                 print(self.format_line(row))
         print(self.spacer())
         print(self.footer(mined_str))
-       
