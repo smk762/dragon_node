@@ -19,8 +19,7 @@ class Notary():
         self.msg = ColorMsg()
   
     def welcome(self) -> None:
-        config = self.cfg.load()
-        notary_name = self.get_notary_from_pubkey(config["pubkey_main"])
+        notary_name = self.get_notary_from_pubkey(self.cfg.config["pubkey_main"])
         if notary_name != "":
             msg = self.msg.colorize(f"-[{notary_name}]-", "lightgreen")
         else:
@@ -69,8 +68,7 @@ class Notary():
             return 20
     
     def move_wallet(self, coin: str) -> None:
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             try:
                 coins_data = self.cfg.get_coins_ntx_data()
                 now = int(time.time())
@@ -81,8 +79,7 @@ class Notary():
                 logger.error(e)
 
     def rm_komodoevents(self, coin) -> None:
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             coins_data = self.cfg.get_coins_ntx_data()
             data_dir = os.path.split(coins_data[coin]["wallet"])
             for filename in ["komodoevents", "komodoevents.ind"]:
@@ -229,8 +226,7 @@ class Notary():
                 
     def consolidate(self, coin: str, force: bool=False, api: bool=False, address: str="") -> None:
         logger.warning(f"Consolidating {coin}...")
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             try:
                 daemon = DaemonRPC(coin)
                 coins_data = self.cfg.get_coins_ntx_data()
@@ -341,8 +337,7 @@ class Notary():
         return ""
                     
     def sweep_kmd(self) -> None:
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             daemon = DaemonRPC("KMD")
             unspent = daemon.listunspent()
             self.msg.info(f"{len(unspent)} unspent utxos detected")
@@ -353,9 +348,9 @@ class Notary():
             if balance > 10:
                 self.msg.info(f"{balance} KMD in non-split UTXOs")
                 amount = round(balance-5, 4)
-                q = input(f"Send {amount} KMD to sweep address [{config['sweep_address']}]? (y/n): ")
+                q = input(f"Send {amount} KMD to sweep address [{self.cfg.config['sweep_address']}]? (y/n): ")
                 if q.lower() == "y":
-                    self.msg.info(daemon.sendtoaddress(config["sweep_address"], amount))
+                    self.msg.info(daemon.sendtoaddress(self.cfg.config["sweep_address"], amount))
                 else:
                     addr = input(f"Enter address to send {amount} KMD: ")
                     self.msg.info(daemon.sendtoaddress(addr, amount))
@@ -379,8 +374,7 @@ class Notary():
         self.stop_container(coin)
         
     def start_container(self, coin):
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             coins_data = self.cfg.get_coins_ntx_data()
             server = coins_data[coin]["server"]
             if server == "main":
@@ -393,8 +387,7 @@ class Notary():
                 logger.error(e)
 
     def stop_container(self, coin):
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             coins_data = self.cfg.get_coins_ntx_data()
             server = coins_data[coin]["server"]
             if server == "main":
@@ -407,8 +400,7 @@ class Notary():
                 logger.error(e)
 
     def wait_for_stop(self, coin: str):
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             daemon = DaemonRPC(coin)
             i = 0
             while True:
@@ -431,8 +423,7 @@ class Notary():
             logger.debug(f"App not configured, skipping...")
 
     def wait_for_start(self, coin: str):
-        config = self.cfg.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             time.sleep(5)
             daemon = DaemonRPC(coin)
             i = 0

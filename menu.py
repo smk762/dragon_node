@@ -126,7 +126,7 @@ class NotaryMenu():
                 if server == "":
                     self.msg.error(f"Coin '{coin}' not found in config.")
                 else:
-                    pubkey = self.cfg.load()[f"pubkey_{server}"]
+                    pubkey = self.cfg.config[f"pubkey_{server}"]
                     if coin == "TOKEL":
                         coin = "TKL"
                     self.msg.status(self.faucet.drip(coin, pubkey))
@@ -223,6 +223,7 @@ class WalletMenu():
     def __init__(self):
         self.cfg = Config()
         self.msg = ColorMsg()
+        self.notary = Notary()
         self.servers = const.DPOW_SERVERS
         self.menu = [
             {"main_menu": self.exit},
@@ -240,8 +241,7 @@ class WalletMenu():
         show_menu(self.menu, "Wallet Menu")
 
     def sweep_kmd(self):
-        nn = Notary()
-        nn.sweep_kmd()
+        self.notary.sweep_kmd()
 
     def consolidate_api(self):
         self.consolidate(True)
@@ -250,9 +250,8 @@ class WalletMenu():
         self.consolidate(False)
     
     def consolidate(self, api=True):
-        config = Config().load()
-        if helper.is_configured(config):
-            self.notary = Notary()
+        
+        if helper.is_configured(self.cfg.config):
             if not const.CRYPTOID_API_KEY and api:
                 # self.msg.status("AYA not yet supported...")
                 # self.msg.status("EMC2 & MIL need an API key from https://chainz.cryptoid.info/api.dws in your .env file...")
@@ -283,16 +282,15 @@ class WalletMenu():
 
     def list_private_keys(self):
         '''Gets KMD pk for each server, then converts and prints for each coin'''
-        config = Config().load()
         daemon_main = DaemonRPC("KMD")
-        address_main = config["addresses"]["KMD"]
+        address_main = self.cfg.config["addresses"]["KMD"]
         wif_main = daemon_main.dumpprivkey(address_main)
         for coin in const.COINS_MAIN:
             k = self.msg.colorize(f"{coin:>12}", "lightblue")
             v = self.msg.colorize(f"{helper.wif_convert(coin, wif_main)}", "lightcyan")
             print(f"{k}: {v}")
         daemon_3p = DaemonRPC("KMD_3P")
-        address_3p = config["addresses"]["KMD_3P"]
+        address_3p = self.cfg.config["addresses"]["KMD_3P"]
         wif_3p = daemon_3p.dumpprivkey(address_3p)
         for coin in const.COINS_3P:
             k = self.msg.colorize(f"{coin:>12}", "lightblue")
@@ -306,8 +304,7 @@ class WalletMenu():
         self.msg.warning("WARNING: This will delete your wallet.dat, then restart daemons and import your private keys without a rescan.")
         self.msg.warning("Afterwards, a consolidation will be attempted - but not all coins have a supporting API.")
         self.msg.warning("For some third party coins, alternative methods like `importprunefunds` may be required.")
-        config = Config().load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.cfg.config):
             notary = Notary()
             coin = self.msg.input("Enter coin to reset wallet (or ALL): ")
             if coin.lower() == "all":
@@ -333,15 +330,14 @@ class WalletMenu():
 
     def import_privkey(self):
         nn = Notary()
-        config = self.cfg.load()
         while True:
             server = self.msg.input(f"Select server {self.servers}: ")
             if server in self.servers:
                 break
-        notary_name = nn.get_notary_from_pubkey(config[f"pubkey_{server}"])
+        notary_name = nn.get_notary_from_pubkey(self.cfg.config[f"pubkey_{server}"])
         wif = self.msg.input(f"Enter {notary_name} {server} private key: ")
         # Does it match the pubkey for this server?
-        pubkey = config[f"pubkey_{server}"]
+        pubkey = self.cfg.config[f"pubkey_{server}"]
         if not helper.validate_wif(pubkey, wif):
             logger.error("Private key does not match public key for this server!")
         else:
@@ -438,8 +434,7 @@ class IguanaMenu():
             self.msg.darkgrey(f"{self.dpow_3p.addcoin(coin)}")
 
     def add_peers(self):
-        config = self.cfg.load()
-        for k, v in config["addnotary"].items():
+        for k, v in self.cfg.config["addnotary"].items():
             self.msg.info(f"Adding {k}")
             self.msg.darkgrey(f"{self.dpow_main.addnotary(v)}")
             self.msg.darkgrey(f"{self.dpow_3p.addnotary(v)}")
@@ -455,7 +450,6 @@ class IguanaMenu():
         self.dpow_3p.stop()
 
     def dpow_coins(self):
-        config = self.cfg.load()
         # KMD needs to go first
         self.msg.darkgrey(f"{self.dpow_main.dpow('KMD')}")
         for coin in const.COINS_MAIN:
