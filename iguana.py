@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import os
+import re
 import json
 import socket
 import requests
@@ -120,12 +121,38 @@ class Iguana():
         config = self.get_config()
         coin = coin.split("_")[0]
         filename = f"{coin.lower()}_{config['rpcport']}"
-        path = f"iguana_coins/{filename}"
+        path = f"{const.SCRIPT_PATH}/iguana_coins/{filename}"
         if os.path.exists(path):
             with open(path, "r") as f:
                 data = json.load(f)
                 data["path"] = f'{os.environ["HOME"]}/{data["path"]}'
             return data
+        else:
+            # check dpow repo for 7776/7779 files
+            coins = os.listdir(f"{const.DPOW_PATH}/iguana/coins")
+            for fn in coins:
+                if fn.split("_")[0].lower() == coin.lower():
+                    with open(f"{const.DPOW_PATH}/iguana/coins/{fn}", "r") as f:
+                        info = f.read()
+                        match = re.search(r'--data\s+"({.*})"', info)
+                        if match:
+                            json_string = match.group(1)
+                            json_string = json_string.replace('${HOME#"/"}/', "")
+                            # Replace escaped double quotes and parse the JSON
+                            json_string = json_string.replace('\\"', '"')
+                            try:
+                                json_data = json.loads(json_string)
+                                file = f"{const.SCRIPT_PATH}/iguana_coins/{fn}"
+                                with open(file, "w") as j:
+                                    json.dump(json_data, j, indent=4)
+                                json_data["path"] = f'{os.environ["HOME"]}/{json_data["path"]}'
+                                return json_data
+                            except json.JSONDecodeError as e:
+                                print(f"Failed to decode JSON in {fn}: {e}")
+                                logger.debug(json_string)
+                        else:
+                            print(f"No JSON found in the {fn}.")
+                            logger.debug(json_string)
         return False
 
     def addcoin(self, coin):
