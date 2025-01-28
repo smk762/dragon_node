@@ -16,7 +16,8 @@ from daemon import DaemonRPC
 class Config():
     def __init__(self):
         self.msg = color.ColorMsg()
-        config = self.load()
+        self.config = self.load()
+        self.calculate_addresses()
         self.readonly = [
             "userhome", "addresses", "addresses_3p", "address_main_kmd",
             "address_main_ltc", "whitelist", "addnotary", "addnode",
@@ -49,8 +50,7 @@ class Config():
     def menu(self):
         while True:
             try:
-                config = self.load()
-                options = list(set(list(config.keys())) - set(self.readonly) - set(const.OLD_CONFIG_KEYS))
+                options = list(set(list(self.config.keys())) - set(self.readonly) - set(const.OLD_CONFIG_KEYS))
                 options.sort()
                 options.insert(0, "Return to Config Menu")
                 self.msg.status(f"\n  ==== Config Options ====")
@@ -59,15 +59,15 @@ class Config():
                     opt = i.replace("_", " ").title()
                     if i in ["Return to Config Menu", "Add Whitelist Address"]:
                         self.msg.option(f"  [{idx}] {i}")
-                    elif i not in config:
+                    elif i not in self.config:
                         self.msg.warning(f"  [{idx}] Invalid Option! {opt}")
-                    elif config[i] is None:
+                    elif self.config[i] is None:
                         self.msg.warning(f"  [{idx}] Update {opt}")
-                    elif isinstance(config[i], (int, float)):
+                    elif isinstance(self.config[i], (int, float)):
                         self.msg.option(f"  [{idx}] Update {opt}")
-                    elif len(config[i]) == 0:
+                    elif len(self.config[i]) == 0:
                         self.msg.warning(f"  [{idx}] Update {opt}")
-                    elif len(config[i]) == "":
+                    elif len(self.config[i]) == "":
                         self.msg.warning(f"  [{idx}] Update {opt}")
                     else:
                         self.msg.option(f"  [{idx}] Update {opt}")
@@ -86,9 +86,9 @@ class Config():
             except KeyboardInterrupt:
                 break
 
-    def calculate_addresses(self, config: dict) -> dict:
+    def calculate_addresses(self) -> dict:
         for i in ["pubkey_main", "pubkey_3p"]:
-            pubkey = config[i]
+            pubkey = self.config[i]
             if i == "pubkey_main":
                 coins = const.COINS_MAIN
             else:
@@ -101,10 +101,9 @@ class Config():
                         self.msg.warning("Unable to calculate {coin} address from pubkey {pubkey}.")
                         break
                     else:
-                        if "addresses" not in config:
-                            config["addresses"] = {}
-                        config["addresses"].update({f"{coin}": address})
-        return config
+                        if "addresses" not in self.config:
+                            self.config["addresses"] = {}
+                        self.config["addresses"].update({f"{coin}": address})
 
     ### Menu Options ###
     
@@ -119,40 +118,39 @@ class Config():
 
     def show(self) -> None:
         self.msg.status(f"\n==== Existing Config ====")
-        config = self.load()
-        for i in config:
+        for i in self.config:
             mk = i.title().replace("_", " ")
-            if isinstance(config[i], dict):
+            if isinstance(self.config[i], dict):
                 # All dict options are readonly, and one level deep
                 self.msg.ltblue(f"{mk}: ")
-                for j in config[i]:
+                for j in self.config[i]:
                     k = self.msg.colorize(j, "lightblue")
-                    v = self.msg.colorize(config[i][j], "lightcyan")
+                    v = self.msg.colorize(self.config[i][j], "lightcyan")
                     print(f"    {k}: {v}")
-            elif isinstance(config[i], list):
+            elif isinstance(self.config[i], list):
                 self.msg.ltblue(f"{mk}: ")
-                for j in config[i]:
+                for j in self.config[i]:
                     self.msg.ltcyan(f"    {j}")
             elif i in self.readonly:
                 k = self.msg.colorize(mk, "lightblue")
-                v = self.msg.colorize(config[i], "lightcyan")
+                v = self.msg.colorize(self.config[i], "lightcyan")
                 print(f"{k}: {v}")
-            elif config[i] in [None, ""]:
+            elif self.config[i] in [None, ""]:
                 k = self.msg.colorize(mk, "lightred")
-                v = self.msg.colorize(config[i], "lightcyan")
+                v = self.msg.colorize(self.config[i], "lightcyan")
                 print(f"{k}: {v}")
             else:
                 k = self.msg.colorize(mk, "lightblue")
-                v = self.msg.colorize(config[i], "lightcyan")
+                v = self.msg.colorize(self.config[i], "lightcyan")
                 print(f"{k}: {v}")
 
-    def update_daemon_whitelists(self, config: dict) -> None:
+    def update_daemon_whitelists(self) -> None:
         for coin in const.WHITELIST_COMPATIBLE:
             conf_file = helper.get_conf_path(coin)
             with open(conf_file, 'r') as conf:
                 conf_lines = conf.readlines()
             existing_whitelist = [i.split("=")[1].strip() for i in conf_lines if "whitelistaddress" in i]
-            new_whitelist = [i for i in config["whitelist"].items() if i[1] not in existing_whitelist]
+            new_whitelist = [i for i in self.config["whitelist"].items() if i[1] not in existing_whitelist]
             with open(conf_file, 'a') as conf:
                 for k, v in new_whitelist:
                     conf.write(f'whitelistaddress={v} # {k}\n')
@@ -169,10 +167,9 @@ class Config():
             json.dump(data, f, indent=4)
 
     def update(self, option):
-        config = self.load()
-        options = list(config.keys())
+        options = list(self.config.keys())
         if option in options:
-            self.msg.option(f"Current value for {option}: {config[option]}")
+            self.msg.option(f"Current value for {option}: {self.config[option]}")
         
         if option == "update_split_config":
             coin = helper.input_coin("Enter coin to update (or ALL): ")
@@ -193,13 +190,13 @@ class Config():
                 r = daemon.validateaddress(v)
                 if "isvalid" in r:
                     if r["isvalid"]:
-                        if "whitelist" not in config:
-                            config["whitelist"] = const.ADDRESS_WHITELIST
+                        if "whitelist" not in self.config:
+                            self.config["whitelist"] = const.ADDRESS_WHITELIST
                         k = self.msg.input(f"Enter label for {v}: ")
-                        config["whitelist"].update({k: v})
+                        self.config["whitelist"].update({k: v})
                         # Update daemon confs
-                        self.update_daemon_whitelists(config)
-                        self.save(config)
+                        self.update_daemon_whitelists()
+                        self.save()
                         self.msg.success(f"Added {v} to whitelist.")
                         break
                     else:
@@ -214,8 +211,8 @@ class Config():
                 fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
                 q = self.msg.input(f"Use {pubkey} from {fn}? [y/n]: ")
                 if q.lower() == "y":
-                    config[option] = pubkey
-                    self.save(config)
+                    self.config[option] = pubkey
+                    self.save()
                     return
         elif option == "pubkey_3p":
             pubkey = helper.get_dpow_pubkey("3p")
@@ -223,16 +220,16 @@ class Config():
                 fn = f"{const.HOME}/dPoW/iguana/pubkey.txt"
                 q = self.msg.input(f"Use {pubkey} from {fn}? [y/n]: ")
                 if q.lower() == "y":
-                    config[option] = pubkey
-                    self.save(config)
+                    self.config[option] = pubkey
+                    self.save()
                     return
 
         while True:
             q = self.msg.input(f"Enter {option} value: ")
             if option in ["pubkey_main", "pubkey_3p"]:
                 if helper.validate_pubkey(q):
-                    config[option] = q
-                    config = self.calculate_addresses(config)
+                    self.config[option] = q
+                    self.calculate_addresses()
                     break
                 else:
                     self.msg.error(f"{q} is not a valid pubkey.")
@@ -241,8 +238,8 @@ class Config():
                 while True:
                     if "isvalid" in daemon.validateaddress(q):
                         if daemon.validateaddress(q)["isvalid"]:
-                            config[option] = q
-                            self.save(config)
+                            self.config[option] = q
+                            self.save()
                             return
                         else:
                             self.msg.error(f"{q} is not a valid KMD address.")
@@ -250,8 +247,8 @@ class Config():
                         self.msg.error(f"Unable to validate KMD address. Is daemon running?")
                         return
             else:
-                config[option] = q
-        self.save(config)
+                self.config[option] = q
+        self.save()
 
     def get_coins_ntx_data(self) -> dict:
         data = {}
@@ -276,8 +273,7 @@ class Config():
     
     def get_coins_data(self) -> dict:
         coins_data = {}
-        config = self.load()
-        if helper.is_configured(config):
+        if helper.is_configured(self.config):
             for server in const.CONF_PATHS:
                 for coin in const.CONF_PATHS[server]:
                     coins_data.update({
@@ -295,14 +291,14 @@ class Config():
             "split_threshold": 20,
             "split_amount": 20,
             "server": server,
-            "address": config["addresses"][coin],
+            "address": self.config["addresses"][coin],
             "txfee": f'{fee:.5f}',
-            "pubkey": config[f"pubkey_{server}"]
+            "pubkey": self.config[f"pubkey_{server}"]
         }
 
     ### Templates ###
     def get_config_template(self):
-        config = {
+        return {
             "userhome": const.HOME,
             "sweep_address": "",
             "pubkey_main": helper.get_dpow_pubkey("main"),
@@ -312,6 +308,4 @@ class Config():
             "addnotary": const.NOTARY_PEERS,
             "addresses": {}
         }
-        config = self.calculate_addresses(config)
-        return config
     
