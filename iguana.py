@@ -16,7 +16,12 @@ class Iguana():
         if self.server not in ["main", "3p"]:
             raise Exception("Error! Invalid server type")
         self.pubkey = helper.get_server_pubkey(self.server)
+        self.log_path = const.IGUANA_LOGS[self.server]
         self.server_coins = helper.get_server_coins(self.server)
+        if self.server == "main":
+            self.binary = const.IGUANA_BIN_MAIN
+        else:
+            self.binary = const.IGUANA_BIN_3P
         
     def test_connection(self):
         r = self.help()
@@ -24,19 +29,22 @@ class Iguana():
             return False
         return True
 
-    # This is blocking the app. Leaving here to change later
     def start(self) -> None:
-        if self.server == "main":
-            bin = const.IGUANA_BIN_MAIN
-        else:
-            bin = const.IGUANA_BIN_3P
         try:
-            subprocess.Popen(
-                [bin],
-                cwd=f"{const.DPOW_PATH}/iguana",
-                start_new_session=True
-            )
-        except subprocess.CalledProcessError as e:
+            # Open a file for logging process output
+            with open(self.log_path, "a+") as log_file, open(os.devnull, "r") as devnull:
+                # Start the process and pipe logs to the file
+                subprocess.Popen(
+                    [self.binary],
+                    cwd=f"{const.DPOW_PATH}/iguana",
+                    stdin=devnull,              # Pipe stdin to devnull to avoid blocking tui
+                    stdout=log_file,            # Pipe stdout to log file
+                    stderr=log_file,            # Pipe stderr to log file
+                    start_new_session=True,     # Detach
+                    close_fds=True              # Close all file descriptors except stdin/stdout/stderr 
+                )
+                logger.info(f"Iguana for {self.server} started, logs available at {self.log_path}")
+        except Exception as e:
             logger.error(e)
 
     def stop(self) -> None:
