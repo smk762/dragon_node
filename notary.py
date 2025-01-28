@@ -235,8 +235,12 @@ class Notary():
                 daemon = DaemonRPC(coin)
                 coins_data = self.cfg.get_coins_ntx_data()
                 if coin not in coins_data.keys():
-                    logger.error(f"{coin} is not configured in your coins_ntx_data.json file!")
-                    return
+                    if coin in const.COINS_MAIN:
+                        logger.warning(f"{coin} is not configured in your coins_ntx_data.json file, but on main server so using KMD configs as fallback.")
+                        coins_data.update({coin: coins_data["KMD"]})
+                    else:
+                        logger.error(f"{coin} is not configured in your coins_ntx_data.json file!")
+                        return
                 if address == "":
                     address = coins_data[coin]["address"]
                 pubkey = coins_data[coin]["pubkey"]

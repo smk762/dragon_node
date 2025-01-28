@@ -254,13 +254,23 @@ class Config():
         self.save(config)
 
     def get_coins_ntx_data(self) -> dict:
+        data = {}
         if os.path.exists(const.COINS_NTX_DATA_PATH):
             with open(const.COINS_NTX_DATA_PATH, 'r') as file:
                 try:
-                    return json.load(file)
+                    data = json.load(file)
                 except Exception as e:
                     pass
-        data = self.get_coins_data()
+        if data == {}:
+            data = self.get_coins_data()
+        else:
+            for coin in const.COINS_MAIN:
+                if coin not in data:
+                    coins_data.update({
+                        coin: self.get_coin_data("main", coin)
+                    })
+
+
         with open(const.COINS_NTX_DATA_PATH, "w") as file:
             json.dump(data, file, indent=4)
         return data
@@ -271,22 +281,25 @@ class Config():
         if helper.is_configured(config):
             for server in const.CONF_PATHS:
                 for coin in const.CONF_PATHS[server]:
-                    fee = helper.get_tx_fee(coin)
                     coins_data.update({
-                        coin: {
-                            "conf": const.CONF_PATHS[server][coin],
-                            "wallet": helper.get_wallet_path(coin),
-                            "utxo_value": helper.get_utxo_value(coin),
-                            "utxo_value_sats": helper.get_utxo_value(coin, True),
-                            "split_threshold": 20,
-                            "split_amount": 20,
-                            "server": server,
-                            "address": config["addresses"][coin],
-                            "txfee": f'{fee:.5f}',
-                            "pubkey": config[f"pubkey_{server}"]
-                        }
+                        coin: self.get_coin_data(server, coin)
                     })
         return coins_data
+
+    def get_coin_data(self, server, coin):
+        fee = helper.get_tx_fee(coin)
+        return {
+            "conf": const.CONF_PATHS[server][coin],
+            "wallet": helper.get_wallet_path(coin),
+            "utxo_value": helper.get_utxo_value(coin),
+            "utxo_value_sats": helper.get_utxo_value(coin, True),
+            "split_threshold": 20,
+            "split_amount": 20,
+            "server": server,
+            "address": config["addresses"][coin],
+            "txfee": f'{fee:.5f}',
+            "pubkey": config[f"pubkey_{server}"]
+        }
 
     ### Templates ###
     def get_config_template(self):
