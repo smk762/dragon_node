@@ -32,6 +32,11 @@ APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
 VERSION_PATH = f"{SCRIPT_PATH}/version.json"
 VERSION = json.load(open(VERSION_PATH))['version']
 
+ASSETCHAINS_PATH = f"{HOME}/dPoW/iguana/assetchains.json"
+with open(ASSETCHAINS_PATH, "r") as f:
+    ASSETCHAINS = json.load(f)
+    
+
 COINS_CONFIG_URL = "https://raw.githubusercontent.com/KomodoPlatform/coins/master/utils/coins_config.json"
 COINS_CONFIG_PATH = f"{SCRIPT_PATH}/coins_config.json"
 
@@ -42,7 +47,7 @@ SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/d
 SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
 
 # Coins constants
-COINS_MAIN = ["PIRATE", "CCL", "CLC", "ILN", "DOC", "MARTY", "LTC", "GLEEC", "KOIN", "KMD", "THC", "GLEEC_OLD"]
+COINS_MAIN = [i['ac_name'] for i in ASSETCHAINS]
 CONF_PATHS = {
     "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
