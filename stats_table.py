@@ -171,9 +171,7 @@ class Stats:
             return line
 
     def datetime_str(self) -> str:
-        date_str = self.msg.colorize(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', "darkgrey")
-        date_str = f"{date_str:>119}"
-        return date_str
+        return self.msg.colorize(f'{datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")}', "lightcyan")
     
     def header(self) -> str:
         return self.format_line(self.columns)
@@ -183,11 +181,10 @@ class Stats:
         iguana_main = Iguana('main')
         iguana_3p = Iguana('3p')
         centerwidth = 158
-        try:
+        # try:
             # dex = KomoDeFi_API(const.MM2_JSON_PATH)
             # dex_version = dex.version.split("_")[-1]
-            dex_version = "disabled"
-            dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
+            # dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
             # if dex_version != "Error":
             #     active_versions = helper.get_active_seednode_versions()
             #     if dex_version in active_versions:
@@ -197,21 +194,21 @@ class Stats:
             # else:
             #     dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} {dex_version} ]", "darkgrey")
             
-        except FileNotFoundError:
-            dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} Err:404 ]", "darkgrey")
+        # except FileNotFoundError:
+            # dex_status = self.msg.colorize(f"[ KDF \N{runic cross punctuation} Err:404 ]", "darkgrey")
         
         if daemon.is_mining():
-            mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str}]", "lightgreen")
+            mining = self.msg.colorize(f"[ Mining \N{check mark} {mined_str} ]", "lightgreen")
         else:
             mining = self.msg.colorize(f"[ Mining \N{runic cross punctuation} ]", "darkgrey")
         if iguana_main.test_connection():
-            status_main = self.msg.colorize(f"[ dPoW Main \N{check mark} ]", "lightgreen")
+            status_main = self.msg.colorize(f"[ Main \N{check mark} ]", "lightgreen")
         else:
-            status_main = self.msg.colorize(f"[ dPoW Main \N{runic cross punctuation} ]", "darkgrey")
+            status_main = self.msg.colorize(f"[ Main \N{runic cross punctuation} ]", "darkgrey")
         if iguana_3p.test_connection():
-            status_3p = self.msg.colorize(f"[ dPoW 3P \N{check mark} ]", "lightgreen")
+            status_3p = self.msg.colorize(f"[ 3P \N{check mark} ]", "lightgreen")
         else:
-            status_3p = self.msg.colorize(f"[ dPoW 3P \N{runic cross punctuation} ]", "darkgrey")
+            status_3p = self.msg.colorize(f"[ 3P \N{runic cross punctuation} ]", "darkgrey")
         
         current_dpow_version = helper.get_current_dpow_version()
         current_dpow_version = int(current_dpow_version.replace(".", ""))
@@ -221,9 +218,10 @@ class Stats:
             status_dpow_version = self.msg.colorize(f"[ DPOW UPDATE AVAILABLE! ]", "purple")
         else:
             status_dpow_version = self.msg.colorize(f"[ dPoW v{helper.get_local_dpow_version()} ]", "lightgreen")
-            
 
-        status_data = f" \N{position indicator} ".join([status_main, status_3p, status_dpow_version, mining, dex_status]) 
+        dt = f"[ {self.datetime_str()} ]"
+
+        status_data = f" \N{position indicator} ".join([status_dpow_version, status_main, status_3p, mining, dt])
         footer_row = f"\N{position indicator} {status_data} \N{position indicator}"
         return footer_row.center(centerwidth)
     
@@ -232,7 +230,6 @@ class Stats:
 
     def show(self, replenish_utxos=True) -> None:
         print()
-        print(self.datetime_str())
         print(self.header())
         print(self.spacer())
         mined_str = ""
