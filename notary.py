@@ -167,11 +167,14 @@ class Notary():
         utxos = sorted(utxos_data, key=lambda d: d['amount'], reverse=True)
         return utxos
 
-    def get_inputs(self, utxos: list, exclude_utxos: list, force: bool=False) -> list:
+    def get_inputs(self, utxos: list, exclude_utxos: list) -> list:
         value = 0
         inputs = []
         for utxo in utxos:
             try:
+                if "confirmations" in utxo:
+                    if utxo["confirmations"] <= 100:
+                        continue
                 if {"txid": utxo["txid"], "vout": utxo["vout"]} not in exclude_utxos:
                     inputs.append({"txid": utxo["txid"], "vout": utxo["vout"]})
                     if 'satoshis' in utxo:
@@ -249,9 +252,9 @@ class Notary():
                         logger.debug(f"{coin} < 5 UTXOs to consolidate, skipping")
                         return
 
-                utxo_chunks = helper.chunkify(utxos, 800)
+                utxo_chunks = helper.chunkify(utxos, 600)
                 for utxos in utxo_chunks:
-                    inputs_data = self.get_inputs(utxos, [], force)
+                    inputs_data = self.get_inputs(utxos, [])
                     inputs = inputs_data[0]
                     # Assuming 100 bytes per input
                     tx_size = len(inputs) * 100
@@ -311,7 +314,7 @@ class Notary():
                     logger.debug(f"All utxos errored, wont send.")
                 elif len(error_utxos) > 0:
                     logger.debug(f"Removing {len(error_utxos)} Error UTXOs to try again...")
-                    inputs_data = self.get_inputs(utxos, error_utxos, force)
+                    inputs_data = self.get_inputs(utxos, error_utxos)
                     inputs = inputs_data[0]
                     value = inputs_data[1]
                     tx_size = len(inputs) * 100
