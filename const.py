@@ -40,7 +40,7 @@ except Exception as e:
     CURRENT_VERSION = VERSION
     logger.debug(e)
 
-DPOW_VERSION_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/refs/heads/master/iguana/version"
+DPOW_VERSION_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/refs/heads/dev/iguana/version"
 
 
 ASSETCHAINS_PATH = f"{HOME}/dPoW/iguana/assetchains.json"

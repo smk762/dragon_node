@@ -28,7 +28,10 @@ def show_logo():
     ''')
     msg.ltcyan('{:^80}'.format('Dragon Node v' + const.VERSION + ' by Dragonhound'))
     if const.VERSION != const.CURRENT_VERSION:
-        msg.info('{:^80}'.format('Update to v' + const.CURRENT_VERSION + ' available!'))
+        for index, i in enumerate(const.CURRENT_VERSION.split('.')):
+            if int(i) > int(const.VERSION.split('.')[index]):
+                msg.info('{:^80}'.format('Update to v' + const.CURRENT_VERSION + ' available!'))
+                break
     print()
     notary.welcome()
 
