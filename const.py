@@ -57,12 +57,11 @@ SEEDNODE_VERSIONS_URL = "https://raw.githubusercontent.com/KomodoPlatform/dPoW/d
 SEEDNODE_VERSIONS_PATH = f"{SCRIPT_PATH}/seed_versions.json"
 
 # Coins constants
-COINS_MAIN = list(set([i['ac_name'] for i in ASSETCHAINS])) + ['GLEEC_OLD']
+COINS_MAIN = list(set([i['ac_name'] for i in ASSETCHAINS]))
 CONF_PATHS = {
     "main": {
         "KMD": f"{HOME}/.komodo/komodo.conf",
-        "LTC": f"{HOME}/.litecoin/litecoin.conf",
-        'GLEEC_OLD': f"{HOME}/.komodo/GLEEC_OLD/GLEEC.conf"
+        "LTC": f"{HOME}/.litecoin/litecoin.conf"
     },
     "3p": {
         "KMD_3P": f"{HOME}/.komodo_3p/komodo.conf",
@@ -72,7 +71,7 @@ CONF_PATHS = {
 }
 
 # Autopopulate conf paths for all main coins
-[CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC", "GLEEC_OLD"]]
+[CONF_PATHS["main"].update({coin: f"{HOME}/.komodo/{coin}/{coin}.conf"}) for coin in COINS_MAIN if coin not in ["KMD", "LTC"]]
 DPOW_SERVERS = list(CONF_PATHS.keys())
 COINS_3P = list(CONF_PATHS["3p"].keys())
 DPOW_COINS = COINS_3P + COINS_MAIN + ["KMD", "LTC"]
@@ -163,11 +162,6 @@ INSIGHT_EXPLORERS = {
     "GLEEC": [
         "https://explorer.gleec.com/",
         "https://gleec.explorer.dexstats.info/"
-    ],
-    "GLEEC_OLD": [
-        "https://gleec.komodo.earth/",
-        "https://gleec.explorer.dragonhound.info/",
-        "https://old.gleec.xyz/"
     ],
     "THC": [
         "https://thc.komodo.earth/",
