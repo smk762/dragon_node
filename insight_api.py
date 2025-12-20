@@ -33,7 +33,6 @@ class InsightAPI:
         url = f'{self.api_url}/addr/{address}/utxo'
         response = requests.get(url)
         return response.json()
-            
 
     def addresses_transactions(self, addresses, from_=None, to_=None, no_asm=None, no_script_sig=None, no_spent=None):
         '''Get the transactions for multiple addresses'''

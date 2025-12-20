@@ -27,8 +27,8 @@ COMPOSE_PATH_MAIN = f'{HOME}/notary_docker_main/docker-compose.yml'
 COMPOSE_PATH_3P = f'{HOME}/notary_docker_3p/docker-compose.yml'
 
 SCRIPT_PATH = dirname(realpath(sys.argv[0]))
-COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
-APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
+
+
 
 VERSION_PATH = f"{SCRIPT_PATH}/version.json"
 VERSION = json.load(open(VERSION_PATH))['version']
@@ -262,6 +262,14 @@ OLD_CONFIG_KEYS = [
 
 # https://chainz.cryptoid.info/emc2/api.dws?q=unspent&key=f01f30f935a8&active=EeVxpgmmbjLosvkHpmgSjqMFwgvUFCRmeL
 # https://api.blockcypher.com/v1/ltc/main/addrs/LS814iSp85xv7N4dGnwAyas92u9AMVr9KV?unspentOnly=true
+
+
+APP_CONFIG_PATH = f"{SCRIPT_PATH}/config.json"
+COINS_NTX_DATA_PATH = f'{SCRIPT_PATH}/coins_ntx_data.json'
+# TODO: detect and repair if misconfigured
+# use dPoW pubkeys list to populate config for pk and addr etc.
+
+
 
 # MM2 constants
 MM2_JSON_PATH = os.getenv("MM2_JSON_PATH") or f"{HOME}/notary_docker_3p/mm2/MM2.json"

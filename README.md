@@ -54,6 +54,7 @@ User config can be edited via the TUI, or by manually editing the `config.json` 
 
 ```json
 {
+    "node_name": "dragonhound_DEV",
     "userhome": "/home/dragonhound",
     "sweep_address": "RQBvgJ3D6HesSfJ1ZdQwAn9XfdXGWsxTSL",
     "pubkey_main": "039bb16266b0216264e7d3ccae12633105e1c14bd5d0e144e8b9c2b6d298a6c545",
